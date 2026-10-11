@@ -20,7 +20,8 @@ export async function analyzeLenses(
   const lanes: LensLane[] = [];
   const metas: RunMeta[] = [];
   for (const lens of order) {
-    const laneSources = sources.filter((s) => s.lens.rating === lens);
+    // Primary documents are evidence, not coverage: they never form a lens lane.
+    const laneSources = sources.filter((s) => s.lens.rating === lens && s.sourceType !== "primary");
     if (!laneSources.length) continue;
     const ids = new Set(laneSources.map((s) => s.id));
     const laneClaims = claims.filter((c) => c.evidence.some((e) => ids.has(e.sourceId)));

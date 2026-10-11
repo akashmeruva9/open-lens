@@ -3,8 +3,8 @@ import {
   type PipelineState, type Stage,
 } from "@openlens/agents";
 import { YT_TIERS, type LangCode, type PresenterId } from "@openlens/config";
-import { renderScriptMedia } from "@openlens/media-worker";
-import type { OutputRecord, ScriptPayload, Tier } from "@openlens/schemas";
+import { renderCarouselSlides, renderScriptMedia } from "@openlens/media-worker";
+import type { CarouselPayload, OutputRecord, ScriptPayload, Tier } from "@openlens/schemas";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { AssetStore } from "./assets.js";
@@ -113,6 +113,14 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
         const audioUrl = await deps.assets.put(r.audio.path, `${base}/narration.m4a`, "audio/mp4");
         made.push({ ...common, id: `audio-${sfx}`, kind: "audio", channel: "app",
           payload: { audioUrl, transcript: r.audio.transcript, durationSeconds: r.audio.durationSeconds, scriptOutputId: s.id } });
+      }
+      // Instagram carousels need rendered slide images.
+      const car = rec.outputs.find((o) => o.id === `carousel-${sfx}`);
+      if (car) {
+        const payload = car.payload as unknown as CarouselPayload;
+        const files = await renderCarouselSlides(payload.slides, s.lang, script.title, join(deps.workDir, storyId, sfx, "carousel"));
+        const urls = await Promise.all(files.map((f, i) => deps.assets.put(f, `${base}/carousel/slide-${i + 1}.png`, "image/png")));
+        made.push({ ...car, updatedAt: now(), payload: { ...payload, slides: payload.slides.map((sl, i) => ({ ...sl, imageUrl: urls[i] })) } });
       }
       emit(storyId, { type: "stage", stage: "media", status: "started", detail: `rendered ${sfx}` });
     }

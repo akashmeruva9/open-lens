@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import type { Claim, SourceRecord } from "@openlens/schemas";
 import { assignStates } from "./corroborate.js";
 import { unknownNumbers } from "./qa.js";
-import { xLength } from "./channels.js";
+import { xLength, _fitThread } from "./channels.js";
 
 const src = (id: string, extra: Partial<SourceRecord> = {}): SourceRecord => ({
   id, storyId: "t", url: `https://example.com/${id}`, publisher: id, title: id, publishedAt: "2026-01-01",
@@ -48,4 +48,11 @@ test("unknownNumbers flags numbers absent from the ledger", () => {
 
 test("xLength counts URLs as 23 characters", () => {
   assert.equal(xLength(`hi https://openlens.app/story/${"x".repeat(80)}`), 3 + 23);
+});
+
+test("thread ends with link + AI disclosure and stays within 8 posts", () => {
+  const t = _fitThread(Array.from({ length: 10 }, (_, i) => `post ${i}`), "https://openlens.app/story/x");
+  assert.equal(t.length, 8);
+  assert.match(t.at(-1)!, /openlens\.app\/story\/x/);
+  assert.match(t.at(-1)!, /AI-assisted/);
 });

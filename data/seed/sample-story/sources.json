@@ -1,29 +1,78 @@
 [
   {
-    "id": "s1", "storyId": "sample-metro-fare",
+    "id": "p1",
+    "storyId": "sample-metro-fare",
+    "url": "https://example.com/fictional/metro-authority-board-resolution-2026-41",
+    "publisher": "FICTIONAL Metro Authority",
+    "title": "Board Resolution No. 41/2026: Revision of passenger fares",
+    "publishedAt": "2026-09-29T12:00:00Z",
+    "language": "en",
+    "sourceType": "primary",
+    "lens": {
+      "rating": "unrated",
+      "ratingBasis": "primary document"
+    },
+    "rights": {
+      "license": "synthetic",
+      "usage": "dev-only"
+    },
+    "text": "Resolution No. 41/2026. The Board of the Metro Authority, at its meeting held on 29 September 2026, resolved by a vote of 7 in favour and 2 against to revise passenger fares by 20 percent with effect from 1 January 2027. The fares were last revised in 2020. The revision is adopted in view of an increase of 35 percent in traction electricity costs over the period 2020 to 2026, as recorded in the Authority's annual report."
+  },
+  {
+    "id": "s1",
+    "storyId": "sample-metro-fare",
     "url": "https://example.com/fictional/city-gazette-metro-fare",
-    "publisher": "FICTIONAL City Gazette", "title": "Metro fare to rise 20% from January",
-    "publishedAt": "2026-10-01T08:00:00Z", "language": "en", "sourceType": "reporting",
-    "lens": { "rating": "center", "ratingBasis": "fictional dev fixture" },
-    "rights": { "license": "synthetic", "usage": "dev-only" },
+    "publisher": "FICTIONAL City Gazette",
+    "title": "Metro fare to rise 20% from January",
+    "publishedAt": "2026-10-01T08:00:00Z",
+    "language": "en",
+    "sourceType": "reporting",
+    "lens": {
+      "rating": "center",
+      "ratingBasis": "fictional dev fixture"
+    },
+    "rights": {
+      "license": "synthetic",
+      "usage": "dev-only"
+    },
     "text": "The Metro Authority announced on Monday that fares will rise by 20 percent from 1 January. Chairperson Anil Rao said the increase is needed to cover rising electricity costs. The Authority's board approved the proposal in a 7-2 vote. Ridership grew 8 percent last year, according to the Authority's annual report."
   },
   {
-    "id": "s2", "storyId": "sample-metro-fare",
+    "id": "s2",
+    "storyId": "sample-metro-fare",
     "url": "https://example.com/fictional/commuter-voice-fare-hike",
-    "publisher": "FICTIONAL Commuter Voice", "title": "Commuters hit by steep metro fare hike",
-    "publishedAt": "2026-10-01T10:30:00Z", "language": "en", "sourceType": "commentary",
-    "lens": { "rating": "left", "ratingBasis": "fictional dev fixture" },
-    "rights": { "license": "synthetic", "usage": "dev-only" },
+    "publisher": "FICTIONAL Commuter Voice",
+    "title": "Commuters hit by steep metro fare hike",
+    "publishedAt": "2026-10-01T10:30:00Z",
+    "language": "en",
+    "sourceType": "commentary",
+    "lens": {
+      "rating": "left",
+      "ratingBasis": "fictional dev fixture"
+    },
+    "rights": {
+      "license": "synthetic",
+      "usage": "dev-only"
+    },
     "text": "A 20 percent fare increase will hurt low-income commuters the most, said transport activist Meera Das. She argued that the Authority should seek a government subsidy instead of raising fares. Daily riders told us the new fares could add 600 rupees to their monthly costs."
   },
   {
-    "id": "s3", "storyId": "sample-metro-fare",
+    "id": "s3",
+    "storyId": "sample-metro-fare",
     "url": "https://example.com/fictional/business-daily-metro-finances",
-    "publisher": "FICTIONAL Business Daily", "title": "Metro fare hike reflects fiscal reality, analysts say",
-    "publishedAt": "2026-10-02T06:00:00Z", "language": "en", "sourceType": "analysis",
-    "lens": { "rating": "right", "ratingBasis": "fictional dev fixture" },
-    "rights": { "license": "synthetic", "usage": "dev-only" },
+    "publisher": "FICTIONAL Business Daily",
+    "title": "Metro fare hike reflects fiscal reality, analysts say",
+    "publishedAt": "2026-10-02T06:00:00Z",
+    "language": "en",
+    "sourceType": "analysis",
+    "lens": {
+      "rating": "right",
+      "ratingBasis": "fictional dev fixture"
+    },
+    "rights": {
+      "license": "synthetic",
+      "usage": "dev-only"
+    },
     "text": "Analysts say the 20 percent hike is overdue because the Metro Authority has not revised fares in six years. Economist Ravi Menon said that without the increase the Authority would face an operating deficit. The Authority's annual report shows electricity costs rose 35 percent over the period."
   }
 ]

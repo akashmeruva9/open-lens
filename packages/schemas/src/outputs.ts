@@ -48,6 +48,8 @@ export type AudioPayload = z.infer<typeof AudioPayload>;
 // ---------- Channel packages ----------
 export const YtMetaPayload = z.object({
   tier: Tier,
+  /** Extra-language title/description (YouTube localizations). */
+  localizations: z.record(z.string(), z.object({ title: z.string(), description: z.string() })).optional(),
   title: z.string().max(100),
   description: z.string().max(5000),
   tags: z.array(z.string()),
@@ -56,7 +58,8 @@ export const YtMetaPayload = z.object({
   videoOutputId: z.string().optional(),
 });
 export const XThreadPayload = z.object({
-  posts: z.array(z.string().max(280)).min(1).max(8),
+  /** X weighs URLs as 23 chars and CJK/emoji as 2; length is validated with weighted counting, not raw length. */
+  posts: z.array(z.string()).min(1).max(8),
   videoOutputId: z.string().optional(),
 });
 export const IgReelPayload = z.object({
@@ -65,7 +68,10 @@ export const IgReelPayload = z.object({
   videoOutputId: z.string().optional(),
 });
 export const CarouselPayload = z.object({
-  slides: z.array(z.object({ heading: z.string(), body: z.string(), claimIds: z.array(z.string()) })).min(3).max(10),
+  slides: z
+    .array(z.object({ heading: z.string(), body: z.string(), claimIds: z.array(z.string()), imageUrl: z.string().optional() }))
+    .min(3)
+    .max(10),
   caption: z.string().max(2200),
 });
 export const FbPostPayload = z.object({
@@ -111,10 +117,18 @@ export const Publication = z.object({
   mode: z.enum(["live", "dry_run"]),
   externalId: z.string().optional(),
   url: z.string().optional(),
-  status: z.enum(["published", "failed", "needs_correction", "corrected", "retracted"]),
+  status: z.enum(["scheduled", "published", "failed", "needs_correction", "corrected", "retracted"]),
+  scheduledAt: z.string().optional(),
   publishedAt: z.string(),
   approvedBy: z.string(),
   response: z.record(z.string(), z.unknown()).optional(),
   error: z.string().optional(),
 });
 export type Publication = z.infer<typeof Publication>;
+
+export type YtMetaPayload = z.infer<typeof YtMetaPayload>;
+export type XThreadPayload = z.infer<typeof XThreadPayload>;
+export type IgReelPayload = z.infer<typeof IgReelPayload>;
+export type CarouselPayload = z.infer<typeof CarouselPayload>;
+export type FbPostPayload = z.infer<typeof FbPostPayload>;
+export type WaDigestPayload = z.infer<typeof WaDigestPayload>;

@@ -31,11 +31,16 @@ export function xLength(s: string): number {
   return s.replace(/https?:\/\/\S+/g, "x".repeat(23)).length;
 }
 
+const X_DISCLOSURE = "AI-assisted summary, reviewed by OpenLens editors.";
+
 function fitThread(posts: string[], link: string): string[] {
   const max = CHANNEL_LIMITS.x.maxChars;
-  const out = posts.map((p) => (xLength(p) <= max ? p : `${p.slice(0, max - 1)}…`));
-  if (!out.some((p) => p.includes(link))) out.push(`Evidence, sources and what's still unknown: ${link}`);
-  return out.slice(0, CHANNEL_LIMITS.x.maxThreadPosts);
+  const out = posts
+    .map((p) => (xLength(p) <= max ? p : `${p.slice(0, max - 1)}…`))
+    .slice(0, CHANNEL_LIMITS.x.maxThreadPosts - 1);
+  // Closing post always carries the evidence link and the AI disclosure.
+  const closing = `Evidence, sources and what's still unknown: ${link}\n${X_DISCLOSURE}`;
+  return [...out.filter((p) => !p.includes(link)), closing];
 }
 
 export async function buildChannelPackage(
@@ -92,3 +97,5 @@ export async function buildChannelPackage(
   };
   return { pkg, metas };
 }
+
+export const _fitThread = fitThread;

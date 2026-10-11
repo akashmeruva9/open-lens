@@ -32,3 +32,14 @@ test("renders 9:16 + 16:9 from a script without TTS", async () => {
   assert.ok(r.videos[0]!.hls);
   assert.match(await readFile(r.captionsVtt, "utf8"), /^WEBVTT/);
 });
+
+test("renders carousel slides as 4:5 PNGs", async () => {
+  const { renderCarouselSlides } = await import("./carousel.js");
+  const outDir = await mkdtemp(join(tmpdir(), "ol-car-"));
+  const files = await renderCarouselSlides(
+    [1, 2, 3].map((i) => ({ heading: `Slide ${i}`, body: "Body text for the slide.", claimIds: ["c1"] })), "te", "T", outDir);
+  assert.equal(files.length, 3);
+  const png = await readFile(files[0]!);
+  assert.equal(png.readUInt32BE(16), 1080);
+  assert.equal(png.readUInt32BE(20), 1350);
+});

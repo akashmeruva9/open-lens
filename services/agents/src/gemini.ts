@@ -34,7 +34,7 @@ async function withResilience<T>(model: string, call: (model: string) => Promise
   const chain = [model, ...(process.env.MODEL_FALLBACK ?? "").split(",").map((m) => m.trim()).filter(Boolean)];
   let lastErr: unknown;
   for (const m of chain) {
-    for (let attempt = 0; attempt < 4; attempt++) {
+    for (let attempt = 0; attempt < 3; attempt++) {
       try {
         return await call(m);
       } catch (err) {
@@ -43,9 +43,15 @@ async function withResilience<T>(model: string, call: (model: string) => Promise
         if (!status || !RETRYABLE.has(status)) throw err;
         // 429 on a model usually means no quota: skip straight to the fallback.
         if (status === 429 && attempt > 0) break;
-        await sleep(1000 * 2 ** attempt + Math.random() * 500);
+        // 503 = model overloaded: back off briefly, then move down the fallback chain.
+        await sleep(1500 * 2 ** attempt + Math.random() * 1000);
       }
     }
+  }
+  // Whole chain overloaded: one long pause, then a final pass on the primary model.
+  if ((lastErr as { status?: number }).status === 503) {
+    await sleep(20000);
+    return call(model);
   }
   throw lastErr;
 }

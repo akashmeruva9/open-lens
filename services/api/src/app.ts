@@ -1,3 +1,4 @@
+import { validateAssessment } from "@openlens/agents";
 import { PUBLIC_WEB_URL } from "@openlens/config";
 import { SourceRecord, type FeedItem, type OutputRecord, type Story, type StoryBundle } from "@openlens/schemas";
 import { createHash } from "node:crypto";
@@ -180,6 +181,17 @@ export function createApp(deps: Deps) {
     const r = await load(c.req.param("id"));
     const b = z.object({ text: z.string().optional(), state: z.enum(["supported", "contested", "attributed", "unverified", "superseded"]).optional(), reason: z.string().min(3) }).parse(await c.req.json());
     const res = applyClaimPatch(r, c.req.param("claimId"), b, userOf(c));
+    // Re-run deterministic assessment checks against the corrected ledger.
+    const ASSESSMENT_KINDS = new Set(["unknown_claim_id", "uncited_section", "unsupported_established"]);
+    res.rec.qaFlags = [
+      ...res.rec.qaFlags.filter((f) => !ASSESSMENT_KINDS.has(f.kind)),
+      ...(res.rec.assessment
+        ? validateAssessment(res.rec.assessment, res.rec.claims).map((v) => ({
+            severity: v.kind === "unsupported_established" ? ("block" as const) : ("warn" as const),
+            kind: v.kind, detail: v.detail, target: "assessment",
+          }))
+        : []),
+    ];
     await deps.store.put(res.rec);
     emit(r.story.id, { type: "correction", correctionId: res.event.id });
     for (const oid of res.event.impactedOutputIds) emit(r.story.id, { type: "output", outputId: oid, status: "needs_review" });

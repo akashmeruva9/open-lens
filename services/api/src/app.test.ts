@@ -63,3 +63,12 @@ test("subscriber can opt out", async () => {
   assert.equal((await req("DELETE", "/v1/subscribers", { phone: "+919999999999" })).status, 204);
   assert.equal((await store.listSubscribers()).length, 0);
 });
+
+test("contesting a claim cited as established blocks approval until resynthesis", async () => {
+  const { req, id } = await setup();
+  // fixture: established cites c3 and c11 (both supported)
+  assert.equal((await req("PATCH", `/v1/studio/stories/${id}/claims/c3`, { state: "contested", reason: "auditor dispute" })).status, 200);
+  const res = await req("POST", `/v1/studio/stories/${id}/approve`, {});
+  assert.equal(res.status, 409);
+  assert.match(JSON.stringify(await res.json()), /unsupported_established/);
+});

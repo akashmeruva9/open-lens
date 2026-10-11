@@ -46,6 +46,8 @@ export function createFixtureClient(store: FixtureStore, opts: { baseUrl: string
     story: (id) => wrap(() => store.get(id), 0),
     subscribe: () => wrap(() => ({ id: `sub-${Date.now()}` })),
     registerDevice: () => wrap(() => ({ id: `dev-${Date.now()}` })),
+    unsubscribe: () => wrap(() => undefined),
+    unregisterDevice: () => wrap(() => undefined),
 
     studio: {
       stories: () => wrap(() => store.all().map((b) => b.story)),

@@ -10,3 +10,4 @@ dist
 .cache
 out
 .data
+.claude/worktrees

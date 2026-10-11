@@ -1,0 +1,21 @@
+{
+  "name": "@openlens/publisher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "scripts": {
+    "build": "tsc -p .",
+    "typecheck": "tsc -p . --noEmit",
+    "test": "node --import tsx --test \"src/**/*.test.ts\"",
+    "youtube-auth": "tsx src/youtube-auth.ts"
+  },
+  "dependencies": {
+    "@openlens/config": "*",
+    "@openlens/schemas": "*",
+    "google-auth-library": "^10.0.0",
+    "zod": "*"
+  }
+}

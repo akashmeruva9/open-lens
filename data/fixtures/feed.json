@@ -1,0 +1,33 @@
+[
+  {
+    "id": "sample-metro-fare",
+    "title": "Metro fares to rise 20% from January (FICTIONAL SAMPLE)",
+    "summary": "The Metro Authority board has approved a 20 percent fare increase scheduled for 1 January following six years of unchanged rates. Leadership and financial analysts justify the decision by pointing to soaring electricity costs and potential deficits, while commuter advocates argue the hike disproportionately affects low-income riders and recommend pursuing government subsidies instead.",
+    "region": "IN-TG",
+    "topics": [
+      "transport",
+      "civic"
+    ],
+    "languages": [
+      "en",
+      "hi",
+      "te",
+      "es"
+    ],
+    "status": "published",
+    "updatedAt": "2026-10-12T10:00:00Z",
+    "sourceCount": 3,
+    "lensesCovered": [
+      "left",
+      "center",
+      "right"
+    ],
+    "evidence": {
+      "supported": 2,
+      "contested": 0,
+      "unverified": 1
+    },
+    "videoUrl": "/assets/sample-metro-fare/video-en-916.mp4",
+    "corrected": false
+  }
+]

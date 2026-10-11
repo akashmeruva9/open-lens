@@ -1,0 +1,13 @@
+{
+  "name": "@openlens/media-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p .",
+    "typecheck": "tsc -p . --noEmit",
+    "test": "node --import tsx --test src/**/*.test.ts",
+    "spike": "tsx src/spike.ts"
+  },
+  "dependencies": { "@napi-rs/canvas": "*" }
+}

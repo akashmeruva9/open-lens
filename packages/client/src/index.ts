@@ -59,6 +59,8 @@ export function createClient(opts: ClientOptions) {
     story: (id: string) => req<StoryBundle>("GET", `/v1/stories/${id}`),
     subscribe: (b: { phone: string; lang: string; region: string; topics: string[]; consent: true }) =>
       req<{ id: string }>("POST", "/v1/subscribers", b),
+    unsubscribe: (phone: string) => req<void>("DELETE", "/v1/subscribers", { phone }),
+    unregisterDevice: (token: string) => req<void>("DELETE", "/v1/devices", { token }),
     registerDevice: (b: { token: string; platform: "ios" | "android" | "web"; lang: string; region?: string; topics?: string[] }) =>
       req<{ id: string }>("POST", "/v1/devices", b),
 

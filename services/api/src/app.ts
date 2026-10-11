@@ -31,6 +31,7 @@ export function toFeedItem(r: StoryRecord): FeedItem {
     heroImage: (video?.payload as { thumbnailUrl?: string } | undefined)?.thumbnailUrl ?? r.story.heroImage,
     videoUrl: (video?.payload as { mp4Url?: string } | undefined)?.mp4Url,
     corrected: r.corrections.length > 0,
+    lastCorrection: r.corrections.length ? { at: r.corrections.at(-1)!.at, reason: r.corrections.at(-1)!.reason } : undefined,
   };
 }
 
@@ -117,6 +118,17 @@ export function createApp(deps: Deps) {
     const id = createHash("sha256").update(b.phone).digest("hex").slice(0, 16);
     await deps.store.addSubscriber({ id, phone: b.phone, lang: b.lang, region: b.region, topics: b.topics, consentAt: new Date().toISOString() });
     return c.json({ id }, 201);
+  });
+  // Opt-out is always available and needs no auth beyond knowing the number/token.
+  app.delete("/v1/subscribers", async (c) => {
+    const { phone } = z.object({ phone: z.string() }).parse(await c.req.json());
+    await deps.store.removeSubscriber(phone);
+    return c.body(null, 204);
+  });
+  app.delete("/v1/devices", async (c) => {
+    const { token } = z.object({ token: z.string() }).parse(await c.req.json());
+    await deps.store.removeDevice(token);
+    return c.body(null, 204);
   });
   app.post("/v1/devices", async (c) => {
     const b = z.object({ token: z.string().min(10), platform: z.enum(["ios", "android", "web"]), lang: z.string(), region: z.string().optional(), topics: z.array(z.string()).optional() }).parse(await c.req.json());

@@ -77,6 +77,7 @@ export const FeedItem = z.object({
   heroImage: z.string().optional(),
   videoUrl: z.string().optional(),
   corrected: z.boolean(),
+  lastCorrection: z.object({ at: z.string(), reason: z.string() }).optional(),
 });
 export type FeedItem = z.infer<typeof FeedItem>;
 

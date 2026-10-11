@@ -22,6 +22,8 @@ export interface Store {
   addSubscriber(s: Subscriber): Promise<void>;
   listSubscribers(): Promise<Subscriber[]>;
   addDevice(d: Device): Promise<void>;
+  removeSubscriber(phone: string): Promise<void>;
+  removeDevice(token: string): Promise<void>;
 }
 
 export function emptyRecord(story: Story): StoryRecord {
@@ -68,6 +70,13 @@ export class FileStore implements Store {
   }
   listSubscribers() {
     return this.readJson<Subscriber[]>(join(this.dir, "subscribers.json"), []);
+  }
+  async removeSubscriber(phone: string) {
+    await this.writeJson(join(this.dir, "subscribers.json"), (await this.listSubscribers()).filter((x) => x.phone !== phone));
+  }
+  async removeDevice(token: string) {
+    const all = await this.readJson<Device[]>(join(this.dir, "devices.json"), []);
+    await this.writeJson(join(this.dir, "devices.json"), all.filter((x) => x.token !== token));
   }
   async addDevice(d: Device) {
     const all = await this.readJson<Device[]>(join(this.dir, "devices.json"), []);
@@ -135,6 +144,14 @@ export class FirestoreStore implements Store {
   }
   async addDevice(d: Device) {
     await this.db.collection("devices").doc(d.id).set(d);
+  }
+  async removeSubscriber(phone: string) {
+    const snap = await this.db.collection("subscribers").where("phone", "==", phone).get();
+    await Promise.all(snap.docs.map((d) => d.ref.delete()));
+  }
+  async removeDevice(token: string) {
+    const snap = await this.db.collection("devices").where("token", "==", token).get();
+    await Promise.all(snap.docs.map((d) => d.ref.delete()));
   }
 }
 

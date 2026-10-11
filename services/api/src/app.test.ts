@@ -56,3 +56,10 @@ test("subscriber opt-in requires consent", async () => {
   assert.equal((await req("POST", "/v1/subscribers", { phone: "+919999999999", lang: "te", region: "IN-TG", topics: [] })).status, 400);
   assert.equal((await req("POST", "/v1/subscribers", { phone: "+919999999999", lang: "te", region: "IN-TG", topics: [], consent: true })).status, 201);
 });
+
+test("subscriber can opt out", async () => {
+  const { req, store } = await setup();
+  await req("POST", "/v1/subscribers", { phone: "+919999999999", lang: "te", region: "IN-TG", topics: [], consent: true });
+  assert.equal((await req("DELETE", "/v1/subscribers", { phone: "+919999999999" })).status, 204);
+  assert.equal((await store.listSubscribers()).length, 0);
+});

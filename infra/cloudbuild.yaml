@@ -1,0 +1,32 @@
+# Cloud Build: build the api image and deploy to Cloud Run.
+# Trigger on pushes to main, or run: gcloud builds submit --config infra/cloudbuild.yaml .
+substitutions:
+  _REGION: us-central1
+  _REPO: openlens
+  _SERVICE: openlens-api
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ["build", "-f", "services/api/Dockerfile", "-t", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:$SHORT_SHA", "."]
+  - name: gcr.io/cloud-builders/docker
+    args: ["push", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:$SHORT_SHA"]
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:$SHORT_SHA
+      - --region=${_REGION}
+      - --service-account=openlens-api@$PROJECT_ID.iam.gserviceaccount.com
+      - --cpu=4
+      - --memory=8Gi
+      - --timeout=3600
+      - --no-cpu-throttling
+      - --min-instances=1
+      - --max-instances=3
+      - --concurrency=40
+      - --allow-unauthenticated
+      - --set-env-vars=STORE=firestore,AUTH_MODE=firebase,ASSETS_BUCKET=$PROJECT_ID-openlens-media,GOOGLE_CLOUD_PROJECT=$PROJECT_ID
+      - --set-secrets=GEMINI_API_KEY=gemini-api-key:latest
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:$SHORT_SHA

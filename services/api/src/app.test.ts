@@ -1,0 +1,58 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { mkdtemp, readFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import type { StoryBundle } from "@openlens/schemas";
+import { LocalAssets } from "./assets.js";
+import { createApp } from "./app.js";
+import { FileStore } from "./store.js";
+
+async function setup() {
+  const dir = await mkdtemp(join(tmpdir(), "ol-api-"));
+  const store = new FileStore(dir);
+  const fixture = JSON.parse(await readFile(new URL("../../../data/fixtures/story-bundle.json", import.meta.url), "utf8")) as StoryBundle;
+  await store.put({ ...fixture, qaFlags: [], runs: [], grounded: false, claimsDropped: 0 });
+  const app = createApp({ store, assets: new LocalAssets(join(dir, "assets")), workDir: join(dir, "work") });
+  const req = (method: string, path: string, body?: unknown) =>
+    app.request(path, { method, headers: { "content-type": "application/json", "x-dev-user": "editor@test" }, body: body ? JSON.stringify(body) : undefined });
+  return { req, store, id: fixture.story.id };
+}
+
+test("reader feed + story hide drafts and ops data", async () => {
+  const { req, id } = await setup();
+  const feed = await (await req("GET", "/v1/feed")).json();
+  assert.equal(feed.length, 1);
+  assert.equal(feed[0].sourceCount, 3);
+  const b = await (await req("GET", `/v1/stories/${id}`)).json();
+  assert.ok(b.outputs.every((o: { status: string; kind: string }) => ["approved", "published"].includes(o.status) && ["script", "video", "audio"].includes(o.kind)));
+  assert.equal(b.qaFlags, undefined);
+});
+
+test("studio: correction -> needs_review -> approve -> dry-run publish", async () => {
+  const { req, id } = await setup();
+  const patch = await req("PATCH", `/v1/studio/stories/${id}/claims/c1`, { text: "Metro fares will rise by 18 percent from 1 January.", reason: "Authority corrected figure" });
+  assert.equal(patch.status, 200);
+  const { correction } = await patch.json();
+  assert.ok(correction.impactedOutputIds.includes("fb-en"));
+
+  const fb = await (await req("GET", `/v1/studio/stories/${id}`)).json();
+  assert.equal(fb.outputs.find((o: { id: string }) => o.id === "fb-en").status, "needs_review");
+
+  assert.equal((await req("POST", "/v1/studio/outputs/fb-en/publish", { mode: "dry_run" })).status, 409, "must approve first");
+  assert.equal((await req("POST", "/v1/studio/outputs/fb-en/approve", {})).status, 200);
+  // story is stale after a correction; re-approve it before channel publishing
+  assert.equal((await req("POST", `/v1/studio/stories/${id}/approve`, {})).status, 200);
+  const pub = await req("POST", "/v1/studio/outputs/fb-en/publish", { mode: "dry_run" });
+  assert.ok([200, 422].includes(pub.status), `publish status ${pub.status}`);
+  if (pub.status === 200) assert.equal((await pub.json()).mode, "dry_run");
+
+  const evals = await (await req("GET", `/v1/studio/stories/${id}/evals`)).json();
+  assert.equal(evals.ledgerVersion, 2);
+});
+
+test("subscriber opt-in requires consent", async () => {
+  const { req } = await setup();
+  assert.equal((await req("POST", "/v1/subscribers", { phone: "+919999999999", lang: "te", region: "IN-TG", topics: [] })).status, 400);
+  assert.equal((await req("POST", "/v1/subscribers", { phone: "+919999999999", lang: "te", region: "IN-TG", topics: [], consent: true })).status, 201);
+});

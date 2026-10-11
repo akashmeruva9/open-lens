@@ -1,0 +1,25 @@
+{
+  "name": "@openlens/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p .",
+    "typecheck": "tsc -p . --noEmit",
+    "test": "node --import tsx --test src/**/*.test.ts",
+    "dev": "node --env-file-if-exists=../../.env --import tsx --watch src/server.ts",
+    "start": "node dist/server.js",
+    "seed": "node --env-file-if-exists=../../.env --import tsx src/seed.ts"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^8.4.0",
+    "@hono/node-server": "^2.1.4",
+    "@openlens/agents": "*",
+    "@openlens/config": "*",
+    "@openlens/media-worker": "*",
+    "@openlens/schemas": "*",
+    "firebase-admin": "^14.5.0",
+    "hono": "^4.13.13",
+    "zod": "*"
+  }
+}

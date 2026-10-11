@@ -1,0 +1,18 @@
+rules_version = '2';
+// All writes go through the api (Admin SDK bypasses rules). Clients may only read published stories.
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function isPublic(storyId) {
+      return get(/databases/$(db)/documents/stories/$(storyId)).data.story.status in ['published', 'stale', 'corrected'];
+    }
+    match /stories/{storyId} {
+      allow read: if resource.data.story.status in ['published', 'stale', 'corrected'];
+      match /{sub}/{doc} {
+        allow read: if sub in ['sources', 'claims', 'lanes', 'context', 'timeline', 'corrections'] && isPublic(storyId);
+      }
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,4 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
+import { createHash } from "node:crypto";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { z } from "zod";
 
 let client: GoogleGenAI | undefined;
@@ -52,6 +55,25 @@ export interface RunMeta {
   latencyMs: number;
   promptTokens?: number;
   outputTokens?: number;
+  /** Web sources Gemini used when Search grounding was enabled. */
+  groundingUrls?: string[];
+  cached?: boolean;
+}
+
+// Dev-only response cache keyed by prompt hash (set GEMINI_CACHE_DIR). Saves quota while iterating.
+const CACHE_DIR = process.env.GEMINI_CACHE_DIR;
+async function cacheGet(key: string): Promise<{ text: string; meta: RunMeta } | undefined> {
+  if (!CACHE_DIR) return undefined;
+  try {
+    return JSON.parse(await readFile(join(CACHE_DIR, `${key}.json`), "utf8"));
+  } catch {
+    return undefined;
+  }
+}
+async function cachePut(key: string, value: { text: string; meta: RunMeta }) {
+  if (!CACHE_DIR) return;
+  await mkdir(CACHE_DIR, { recursive: true });
+  await writeFile(join(CACHE_DIR, `${key}.json`), JSON.stringify(value));
 }
 
 export interface StructuredResult<T> {
@@ -69,7 +91,8 @@ export async function generateStructured<S extends z.ZodType>(opts: {
   prompt: string;
   schema: S;
   temperature?: number;
-  tools?: unknown[];
+  /** e.g. [{ googleSearch: {} }] for Search grounding */
+  tools?: Record<string, unknown>[];
 }): Promise<StructuredResult<z.infer<S>>> {
   const ai = getClient();
   const jsonSchema = z.toJSONSchema(opts.schema, { target: "draft-7" });
@@ -77,30 +100,44 @@ export async function generateStructured<S extends z.ZodType>(opts: {
   let lastErr: unknown;
 
   for (let attempt = 0; attempt < 2; attempt++) {
-    const t0 = Date.now();
-    const res = await withResilience(opts.model, (model) =>
-      ai.models.generateContent({
-        model,
-        contents: prompt,
-        config: {
-          systemInstruction: opts.system,
-          temperature: opts.temperature ?? 0.2,
-          responseMimeType: "application/json",
-          responseJsonSchema: jsonSchema,
-        },
-      }),
-    );
-    try {
-      const data = opts.schema.parse(JSON.parse(res.text ?? ""));
-      return {
-        data,
-        meta: {
-          model: res.modelVersion ?? opts.model,
-          latencyMs: Date.now() - t0,
-          promptTokens: res.usageMetadata?.promptTokenCount,
-          outputTokens: res.usageMetadata?.candidatesTokenCount,
-        },
+    const key = createHash("sha256")
+      .update(JSON.stringify([opts.model, opts.system, prompt, jsonSchema, opts.tools ?? null, opts.temperature ?? 0.2]))
+      .digest("hex");
+    const hit = await cacheGet(key);
+    let text: string;
+    let meta: RunMeta;
+    if (hit) {
+      ({ text, meta } = hit);
+      meta = { ...meta, cached: true };
+    } else {
+      const t0 = Date.now();
+      const res = await withResilience(opts.model, (model) =>
+        ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: {
+            systemInstruction: opts.system,
+            temperature: opts.temperature ?? 0.2,
+            responseMimeType: "application/json",
+            responseJsonSchema: jsonSchema,
+            ...(opts.tools ? { tools: opts.tools } : {}),
+          },
+        }),
+      );
+      text = res.text ?? "";
+      const chunks = res.candidates?.[0]?.groundingMetadata?.groundingChunks ?? [];
+      meta = {
+        model: res.modelVersion ?? opts.model,
+        latencyMs: Date.now() - t0,
+        promptTokens: res.usageMetadata?.promptTokenCount,
+        outputTokens: res.usageMetadata?.candidatesTokenCount,
+        groundingUrls: chunks.map((c) => c.web?.uri).filter((u): u is string => Boolean(u)),
       };
+    }
+    try {
+      const data = opts.schema.parse(JSON.parse(text));
+      if (!hit) await cachePut(key, { text, meta });
+      return { data, meta };
     } catch (err) {
       lastErr = err;
       prompt = `${opts.prompt}\n\nYour previous reply failed validation: ${String(err).slice(0, 800)}\nReturn corrected JSON only.`;

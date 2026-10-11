@@ -1,0 +1,201 @@
+@import "tailwindcss";
+
+/* dark: follows the explicit toggle, else the OS preference */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
+
+/* ---------- Design tokens ---------- */
+:root {
+  --bg: #f7f5f0;
+  --surface: #ffffff;
+  --surface-2: #efece4;
+  --ink: #16181d;
+  --ink-2: #4a4f5a;
+  --ink-3: #6b707b;
+  --line: #dedad0;
+  --brand: #c2410c;
+  --brand-ink: #ffffff;
+  --focus: #2563eb;
+
+  --lens-left: #4f46e5;
+  --lens-center: #57606f;
+  --lens-right: #b45309;
+  --lens-unrated: #8a8f99;
+
+  --ev-supported: #047857;
+  --ev-contested: #be123c;
+  --ev-attributed: #0369a1;
+  --ev-unverified: #a16207;
+  --ev-superseded: #6b7280;
+
+  --st-ok: #047857;
+  --st-warn: #b45309;
+  --st-bad: #be123c;
+  --st-info: #0369a1;
+  --st-muted: #6b7280;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1014;
+    --surface: #161920;
+    --surface-2: #1e222b;
+    --ink: #eceae4;
+    --ink-2: #b4b8c2;
+    --ink-3: #8d929d;
+    --line: #2c313c;
+    --brand: #fb7a3c;
+    --brand-ink: #1a0c04;
+    --focus: #7aa2ff;
+    --lens-left: #8b85ff;
+    --lens-center: #a3acba;
+    --lens-right: #f0a14a;
+    --ev-supported: #34d399;
+    --ev-contested: #fb7185;
+    --ev-attributed: #38bdf8;
+    --ev-unverified: #facc15;
+    --ev-superseded: #9ca3af;
+    --st-ok: #34d399;
+    --st-warn: #f59e0b;
+    --st-bad: #fb7185;
+    --st-info: #38bdf8;
+    --st-muted: #9ca3af;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1014;
+  --surface: #161920;
+  --surface-2: #1e222b;
+  --ink: #eceae4;
+  --ink-2: #b4b8c2;
+  --ink-3: #8d929d;
+  --line: #2c313c;
+  --brand: #fb7a3c;
+  --brand-ink: #1a0c04;
+  --focus: #7aa2ff;
+  --lens-left: #8b85ff;
+  --lens-center: #a3acba;
+  --lens-right: #f0a14a;
+  --ev-supported: #34d399;
+  --ev-contested: #fb7185;
+  --ev-attributed: #38bdf8;
+  --ev-unverified: #facc15;
+  --ev-superseded: #9ca3af;
+  --st-ok: #34d399;
+  --st-warn: #f59e0b;
+  --st-bad: #fb7185;
+  --st-info: #38bdf8;
+  --st-muted: #9ca3af;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-focus: var(--focus);
+  --font-serif: var(--font-serif-face), ui-serif, Georgia, serif;
+  --font-sans: var(--font-sans-face), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ---------- Base ---------- */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+::selection {
+  background: color-mix(in oklab, var(--brand) 25%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Utilities ---------- */
+@utility tone {
+  /* Chip/pill coloured by --tone (set inline or via data attribute). */
+  color: var(--tone);
+  background: color-mix(in oklab, var(--tone) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--tone) 30%, transparent);
+}
+@utility tone-solid {
+  color: var(--surface);
+  background: var(--tone);
+}
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+@utility card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+@utility eyebrow {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+mark.passage {
+  background: color-mix(in oklab, var(--brand) 22%, transparent);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 2px;
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--brand) 40%, transparent);
+}
+
+@keyframes flash {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--brand) 60%, transparent); }
+  100% { box-shadow: 0 0 0 10px transparent; }
+}
+.flash {
+  animation: flash 900ms ease-out 2;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.pulse-dot {
+  animation: pulse-dot 1.2s ease-in-out infinite;
+}

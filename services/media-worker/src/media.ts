@@ -96,9 +96,11 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
     presenterName: persona?.name,
     presenterImage: await loadPresenter(job.presenterImagePath ?? defaultPortrait(presenter)),
   };
-  const scenes: Scene[] = timed.map((t) => ({
+  const scenes: Scene[] = timed.map((t, i) => ({
     label: t.label, text: t.text, claimIds: t.claimIds, seconds: t.seconds,
     sources: [...new Set(t.claimIds.flatMap((id) => job.sourceLabels?.[id] ?? []))].slice(0, 2),
+    // TV rhythm: anchor opens and closes; split-screen evidence cards in between.
+    layout: (i === 0 || i === timed.length - 1 || i % 2 === 0 ? "anchor" : "split") as Scene["layout"],
   }));
   const videos: MediaResult["videos"] = [];
   for (const aspect of job.aspects ?? (["9:16"] as Aspect[])) {

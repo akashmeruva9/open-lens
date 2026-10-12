@@ -18,6 +18,8 @@ export interface Scene {
   label?: string;
   /** Outlet names behind the claims (shown in the source chip instead of raw ids). */
   sources?: string[];
+  /** "anchor": presenter full-frame with a TV headline bar. "split": presenter beside a fact card. */
+  layout?: "anchor" | "split";
 }
 
 export interface Branding {
@@ -148,6 +150,144 @@ function background(ctx: SKRSContext2D, brand: Branding, W: number, H: number, v
 }
 
 export function renderSceneFrame(scene: Scene, brand: Branding, index: number, total: number, aspect: Aspect = "9:16"): Buffer {
+  return scene.layout === "anchor" ? renderAnchor(scene, brand, index, total, aspect) : renderSplit(scene, brand, index, total, aspect);
+}
+
+/** First sentence of a scene as a TV headline (works for । and 。 too). */
+export function headlineOf(text: string): string {
+  const m = /^(.+?[.!?।。！？])(\s|$)/u.exec(text.trim());
+  return (m?.[1] ?? text).trim();
+}
+
+/** Shared chrome: logo bug, AI tag, disclosure ticker with progress. */
+function chrome(ctx: SKRSContext2D, brand: Branding, W: number, H: number, vertical: boolean, index: number, total: number, tagRight: number) {
+  const ui = uiStrings(brand.lang ?? "en");
+  const pad = vertical ? 60 : 72;
+  const ff = brand.fontFamily;
+  ctx.fillStyle = C.accent;
+  ctx.beginPath();
+  ctx.arc(pad + 26, pad + 26, 26, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = C.navy;
+  ctx.beginPath();
+  ctx.arc(pad + 26, pad + 26, 11, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = C.text;
+  ctx.font = `800 44px ${ff}`;
+  ctx.fillText("OPENLENS", pad + 68, pad + 41);
+  ctx.font = `700 28px ${ff}`;
+  const tagW = ctx.measureText(ui.aiPresenter).width + 44;
+  pill(ctx, ui.aiPresenter, tagRight - tagW, pad, `700 28px ${ff}`, "rgba(251,191,36,0.95)", C.navy, 22, 52);
+  const tickY = vertical ? 1632 : H - 118;
+  ctx.fillStyle = "rgba(2,6,23,0.9)";
+  ctx.fillRect(0, tickY, W, H - tickY);
+  ctx.fillStyle = "#1e293b";
+  ctx.fillRect(0, tickY, W, 8);
+  ctx.fillStyle = C.accent;
+  ctx.fillRect(0, tickY, (W * (index + 1)) / total, 8);
+  ctx.fillStyle = "#e2e8f0";
+  let dSize = 28;
+  let dLines: string[] = [];
+  for (; dSize >= 18; dSize -= 2) {
+    ctx.font = `500 ${dSize}px ${ff}`;
+    dLines = wrap(ctx, brand.disclosure, W - pad * 2, brand.lang);
+    if (dLines.length <= 2) break;
+  }
+  const dTop = tickY + (vertical ? 58 : 46) - (dLines.length - 1) * dSize * 0.5;
+  dLines.forEach((l, i) => ctx.fillText(l, pad, dTop + i * dSize * 1.3));
+}
+
+/** TV look: presenter full-frame, white headline bar with a source box on the left. */
+function renderAnchor(scene: Scene, brand: Branding, index: number, total: number, aspect: Aspect): Buffer {
+  const { w: W, h: H } = SIZES[aspect];
+  const vertical = aspect === "9:16";
+  const canvas = createCanvas(W, H);
+  const ctx = canvas.getContext("2d");
+  const ui = uiStrings(brand.lang ?? "en");
+  const ff = brand.fontFamily;
+  const pad = vertical ? 60 : 72;
+
+  ctx.fillStyle = C.navy;
+  ctx.fillRect(0, 0, W, H);
+  const img = brand.presenterImage;
+  if (img) {
+    if (vertical) {
+      const ph = 1260;
+      drawCover(ctx, img, 0, 0, W, ph);
+      const f = ctx.createLinearGradient(0, ph - 220, 0, ph);
+      f.addColorStop(0, "rgba(11,18,32,0)");
+      f.addColorStop(1, C.navy);
+      ctx.fillStyle = f;
+      ctx.fillRect(0, ph - 220, W, 220);
+    } else {
+      const pw = 1100, px = (W - pw) / 2;
+      drawCover(ctx, img, px, 0, pw, H);
+      for (const [x0, x1, a, b] of [[px, px + 340, 1, 0], [px + pw - 340, px + pw, 0, 1]] as const) {
+        const f = ctx.createLinearGradient(x0, 0, x1, 0);
+        f.addColorStop(0, `rgba(11,18,32,${a})`);
+        f.addColorStop(1, `rgba(11,18,32,${b})`);
+        ctx.fillStyle = f;
+        ctx.fillRect(x0, 0, x1 - x0, H);
+      }
+    }
+  }
+  chrome(ctx, brand, W, H, vertical, index, total, W - pad);
+
+  // Presenter name pill above the bar
+  const barH = vertical ? 360 : 150;
+  const barY = vertical ? 1250 : H - 118 - 40 - barH;
+  const barX = pad;
+  const barW = W - pad * 2;
+  pill(ctx, brand.presenterName ?? "", barX, barY - 66, `800 32px ${ff}`, C.navy2, C.text, 22, 52);
+
+  // Headline bar: source box + white headline strip
+  const srcW = vertical ? barW : 560;
+  const srcH = vertical ? 104 : barH;
+  const name = scene.sources?.[0] ?? "OpenLens";
+  ctx.fillStyle = C.navy2;
+  roundRect(ctx, barX, barY, srcW, srcH, 10);
+  ctx.fill();
+  ctx.fillStyle = C.accent;
+  ctx.fillRect(barX, barY, 8, srcH);
+  ctx.fillStyle = C.muted;
+  ctx.font = `600 24px ${ff}`;
+  ctx.fillText(ui.evidence.toUpperCase(), barX + 28, barY + (vertical ? 36 : 52));
+  ctx.fillStyle = C.text;
+  ctx.font = `800 ${vertical ? 34 : 38}px ${ff}`;
+  ctx.fillText(fitWidth(ctx, name, srcW - 56), barX + 28, barY + (vertical ? 84 : 104));
+  const hx = vertical ? barX : barX + srcW;
+  const hy = vertical ? barY + srcH : barY;
+  const hw = vertical ? barW : barW - srcW;
+  const hh = vertical ? barH - srcH : barH;
+  ctx.fillStyle = "#f8fafc";
+  ctx.fillRect(hx, hy, hw, hh);
+  ctx.fillStyle = C.amber;
+  ctx.fillRect(hx, hy + hh - 8, hw, 8);
+  const head = headlineOf(scene.text);
+  const maxLines = vertical ? 4 : 2;
+  let size = vertical ? 60 : 52;
+  let lines: string[] = [];
+  for (; size >= 30; size -= 2) {
+    ctx.font = `800 ${size}px ${ff}`;
+    lines = wrap(ctx, head, hw - 56, brand.lang);
+    if (lines.length <= maxLines && lines.length * size * 1.25 <= hh - 30) break;
+  }
+  ctx.font = `800 ${size}px ${ff}`;
+  const blockH = lines.length * size * 1.25;
+  const y0 = hy + (hh - 8 - blockH) / 2 + size * 0.95;
+  lines.slice(0, maxLines).forEach((l, i) => {
+    let cx = hx + 28;
+    for (const part of l.split(/(\d[\d.,:/%]*)/)) {
+      if (!part) continue;
+      ctx.fillStyle = /^\d/.test(part) ? "#b45309" : C.navy;
+      ctx.fillText(part, cx, y0 + i * size * 1.25);
+      cx += ctx.measureText(part).width;
+    }
+  });
+  return canvas.toBuffer("image/png");
+}
+
+function renderSplit(scene: Scene, brand: Branding, index: number, total: number, aspect: Aspect): Buffer {
   const { w: W, h: H } = SIZES[aspect];
   const vertical = aspect === "9:16";
   const canvas = createCanvas(W, H);

@@ -16,8 +16,10 @@ for (const lang of ["en", "hi", "te", "ja"] as const) {
   const brand = { title: sc.payload.title, disclosure: AI_DISCLOSURE[lang]!, fontFamily: fontFor(lang), lang, presenterName: PRESENTERS[pid].name, presenterImage: await loadPresenter(`${ROOT}/data/presenters/${pid}.png`) };
   const lines = sc.payload.lines; const i = Math.min(1, lines.length - 1);
   for (const aspect of ["16:9", "9:16"] as const) {
-    const l = lines[i];
-    writeFileSync(`${out}/${lang}-${aspect === "16:9" ? "169" : "916"}.png`, renderSceneFrame({ label: l.label, text: l.text, claimIds: l.claimIds, seconds: 5, sources: src(l.claimIds) }, brand, i, lines.length, aspect));
+    for (const layout of ["anchor", "split"] as const) {
+      const l = lines[layout === "anchor" ? 0 : i];
+      writeFileSync(`${out}/${lang}-${aspect === "16:9" ? "169" : "916"}-${layout}.png`, renderSceneFrame({ label: l.label, text: l.text, claimIds: l.claimIds, seconds: 5, sources: src(l.claimIds), layout }, brand, layout === "anchor" ? 0 : i, lines.length, aspect));
+    }
   }
 }
 console.log("done");

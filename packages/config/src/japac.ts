@@ -66,11 +66,11 @@ export function languagesFor(regions: string[]): LangCode[] {
 // Fictional, disclosed synthetic presenters — never modelled on a real journalist.
 // Gemini TTS prebuilt voices are multilingual; the language comes from the text.
 export const PRESENTERS = {
-  "maya-apac": { name: "Maya", lang: "en", voice: "Aoede", style: "warm, clear Asia-Pacific news host" },
-  "kavya-hi": { name: "Kavya", lang: "hi", voice: "Kore", style: "crisp Hindi news anchor, measured pace" },
-  "priya-te": { name: "Priya", lang: "te", voice: "Leda", style: "friendly Telugu regional news presenter" },
+  "maya-apac": { name: "Maya", lang: "en", voice: "Kore", style: "warm, clear Asia-Pacific news host" },
+  "kavya-hi": { name: "Kavya", lang: "hi", voice: "Leda", style: "crisp Hindi news anchor, measured pace" },
+  "priya-te": { name: "Priya", lang: "te", voice: "Sulafat", style: "friendly Telugu regional news presenter" },
   "meena-ta": { name: "Meena", lang: "ta", voice: "Kore", style: "calm Tamil regional news presenter" },
-  "haruto-ja": { name: "Haruto", lang: "ja", voice: "Charon", style: "polite, measured Japanese news anchor" },
+  "haruto-ja": { name: "Haruto", lang: "ja", voice: "Kore", style: "polite, measured Japanese news anchor" },
   "jiwoo-ko": { name: "Ji-woo", lang: "ko", voice: "Leda", style: "clear, composed Korean news anchor" },
   "weiting-zhhant": { name: "Wei-Ting", lang: "zh-Hant", voice: "Aoede", style: "steady Taiwanese Mandarin news anchor" },
   "jiahui-zhhans": { name: "Jia Hui", lang: "zh-Hans", voice: "Kore", style: "clear Singaporean Mandarin news presenter" },

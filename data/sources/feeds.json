@@ -1,4 +1,155 @@
 {
   "_readme": "RSS/Atom feeds the wire polls. A feed is used only when enabled: true AND its domain is a verified entry in allowlist.json. Candidates researched for each JAPAC market are in feeds.candidates.json (review terms, then copy here).",
-  "feeds": []
+  "feeds": [
+    {
+      "id": "jp-kantei-news",
+      "market": "JP",
+      "url": "https://www.kantei.go.jp/index-jnews.rdf",
+      "domain": "kantei.go.jp",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": true,
+      "note": "Prime Minister's Office of Japan (Kantei). Reuse: yes."
+    },
+    {
+      "id": "jp-jma-eqvol",
+      "market": "JP",
+      "url": "https://www.data.jma.go.jp/developer/xml/feed/eqvol.xml",
+      "domain": "jma.go.jp",
+      "type": "atom",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Japan Meteorological Agency (XML feed, earthquakes/volcanoes). Reuse: yes."
+    },
+    {
+      "id": "jp-fsa-news",
+      "market": "JP",
+      "url": "https://www.fsa.go.jp/fsaNewsListAll_rss2.xml",
+      "domain": "fsa.go.jp",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": true,
+      "note": "Financial Services Agency. Reuse: yes."
+    },
+    {
+      "id": "jp-mhlw-news",
+      "market": "JP",
+      "url": "https://www.mhlw.go.jp/stf/news.rdf",
+      "domain": "mhlw.go.jp",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": true,
+      "note": "Ministry of Health, Labour and Welfare. Reuse: yes."
+    },
+    {
+      "id": "kr-bok-press",
+      "market": "KR",
+      "url": "https://www.bok.or.kr/portal/bbs/B0000501/news.rss?menuNo=201264",
+      "domain": "bok.or.kr",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": true,
+      "note": "Bank of Korea. Reuse: attribution-required."
+    },
+    {
+      "id": "kr-kma-press",
+      "market": "KR",
+      "url": "http://www.kma.go.kr/servlet/NeoboardProcess?mode=rss&bid=press&url=http%3A%2F%2Fwww.kma.go.kr%2Fnotify%2Fpress%2Fkma_list.jsp",
+      "domain": "kma.go.kr",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": true,
+      "note": "Korea Meteorological Administration (press releases). Reuse: yes."
+    },
+    {
+      "id": "tw-ey-news",
+      "market": "TW",
+      "url": "https://www.ey.gov.tw/RSS_Content.aspx?ModuleType=7",
+      "domain": "ey.gov.tw",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": true,
+      "note": "Executive Yuan. Reuse: yes."
+    },
+    {
+      "id": "tw-ey-news-en",
+      "market": "TW",
+      "url": "https://english.ey.gov.tw/RSS_Content.aspx?ModuleType=7",
+      "domain": "ey.gov.tw",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": true,
+      "note": "Executive Yuan (English). Reuse: yes."
+    },
+    {
+      "id": "tw-cwa-warnings",
+      "market": "TW",
+      "url": "https://www.cwa.gov.tw/rss/Data/cwa_warning.xml",
+      "domain": "cwa.gov.tw",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Central Weather Administration. Reuse: yes."
+    },
+    {
+      "id": "ph-pagasa-publicalert",
+      "market": "PH",
+      "url": "https://publicalert.pagasa.dost.gov.ph/feeds/",
+      "domain": "pagasa.dost.gov.ph",
+      "type": "atom",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "PAGASA (CAP public alerts). Reuse: attribution-required."
+    },
+    {
+      "id": "au-rba-media",
+      "market": "AU",
+      "url": "https://www.rba.gov.au/rss/rss-cb-media-releases.xml",
+      "domain": "rba.gov.au",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": true,
+      "note": "Reserve Bank of Australia. Reuse: yes."
+    },
+    {
+      "id": "au-pm-media",
+      "market": "AU",
+      "url": "https://www.pm.gov.au/rss.xml",
+      "domain": "pm.gov.au",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": true,
+      "note": "Prime Minister of Australia. Reuse: yes."
+    },
+    {
+      "id": "apac-gdacs",
+      "market": "APAC",
+      "url": "https://www.gdacs.org/xml/rss.xml",
+      "domain": "gdacs.org",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "GDACS (EC JRC / UN OCHA disaster alerts). Reuse: yes."
+    },
+    {
+      "id": "apac-usgs-quakes",
+      "market": "APAC",
+      "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.atom",
+      "domain": "usgs.gov",
+      "type": "atom",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "USGS Earthquake Hazards Program (M4.5+ week). Reuse: yes."
+    },
+    {
+      "id": "apac-adb-news",
+      "market": "APAC",
+      "url": "https://feeds.feedburner.com/adb_news",
+      "domain": "adb.org",
+      "type": "rss",
+      "enabled": false,
+      "seedsStory": true,
+      "note": "Asian Development Bank. Reuse: attribution-required. Disabled: ADB permits republishing only without alteration; OpenLens summarizes/translates."
+    }
+  ]
 }

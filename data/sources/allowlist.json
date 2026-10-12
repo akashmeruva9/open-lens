@@ -1,4 +1,229 @@
 {
   "_readme": "Only domains listed here can be ingested. Add an outlet only after confirming you may reuse its content (licence, syndication agreement, or public-domain/open-government terms). lens.ratingBasis must cite a documented source (e.g. a published media-bias or audience-positioning study); never invent ratings. Primary documents (government releases, court orders, regulators) use rating 'unrated' and ratingBasis 'primary document'.",
-  "entries": []
+  "entries": [
+    {
+      "domain": "kantei.go.jp",
+      "publisher": "Prime Minister's Office of Japan (Kantei)",
+      "market": "JP",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "Content licensed under Japan's Public Data License v1.0 (公共データ利用規約 第1.0版, PDL1.0; successor to Government Standard Terms v2.0): credit the source (出典を記載), mark edits, don't present edits as government",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://www.kantei.go.jp/jp/terms.html"
+    },
+    {
+      "domain": "jma.go.jp",
+      "publisher": "Japan Meteorological Agency (XML feed, earthquakes/volcanoes)",
+      "market": "JP",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "As JMA extra: PDL1.0 with attribution.",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://www.jma.go.jp/jma/kishou/info/coment.html"
+    },
+    {
+      "domain": "fsa.go.jp",
+      "publisher": "Financial Services Agency",
+      "market": "JP",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "Content licensed under Japan's Public Data License v1.0 (公共データ利用規約 第1.0版, PDL1.0; successor to Government Standard Terms v2.0): credit the source (出典を記載), mark edits, don't present edits as government",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://www.fsa.go.jp/rules/index.html"
+    },
+    {
+      "domain": "mhlw.go.jp",
+      "publisher": "Ministry of Health, Labour and Welfare",
+      "market": "JP",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "Content licensed under Japan's Public Data License v1.0 (公共データ利用規約 第1.0版, PDL1.0; successor to Government Standard Terms v2.0): credit the source (出典を記載), mark edits, don't present edits as government",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://www.mhlw.go.jp/chosakuken/index.html"
+    },
+    {
+      "domain": "bok.or.kr",
+      "publisher": "Bank of Korea",
+      "market": "KR",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "Copyright policy: content is BoK copyright; when using it 'must state the source is the Bank of Korea' and clearly mark modifications (출처 명시, 수정·가공 시 명시). Commercial terms not stated.",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://www.bok.or.kr/portal/main/contents.do?menuNo=200228"
+    },
+    {
+      "domain": "kma.go.kr",
+      "publisher": "Korea Meteorological Administration (press releases)",
+      "market": "KR",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "Copyright Act Art. 24-2: KMA-owned works free to use without permission, opened under KOGL Type 1 (공공누리 제1유형, attribution only); source must be cited; KOGL types 2–4 items carry extra limits. HTTP-onl",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://www.kma.go.kr/kma/guide/copyright.jsp"
+    },
+    {
+      "domain": "ey.gov.tw",
+      "publisher": "Executive Yuan",
+      "market": "TW",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "Open Government Data License v1 (政府資料開放授權條款-第1版): free, non-exclusive, sublicensable, irrevocable; reproduce/adapt/commercial use allowed; '使用時應註明出處' (must cite source); excludes items specially marke",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://www.ey.gov.tw/Page/2EADDBFEDDB6357E"
+    },
+    {
+      "domain": "cwa.gov.tw",
+      "publisher": "Central Weather Administration",
+      "market": "TW",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "Site data offered free, non-exclusive, sublicensable, irrevocable for reproduce/adapt/public transmission incl. products & services; '使用時應註明出處' (cite source); specially-marked works excluded.",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://www.cwa.gov.tw/V8/C/information.html"
+    },
+    {
+      "domain": "pagasa.dost.gov.ph",
+      "publisher": "PAGASA (CAP public alerts)",
+      "market": "PH",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "No site terms found. IP Code (RA 8293) s.176: no copyright subsists in Philippine Government works, but prior approval of the agency is needed for exploitation 'for profit'.",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://lawphil.net/statutes/repacts/ra1997/ra_8293_1997.html"
+    },
+    {
+      "domain": "rba.gov.au",
+      "publisher": "Reserve Bank of Australia",
+      "market": "AU",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "CC BY 4.0 for most material; attribute 'Source: Reserve Bank of Australia [year]'; no implied endorsement; logo, banknotes, multimedia, third-party excluded. Feed blocked to curl (Akamai 403) but veri",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://www.rba.gov.au/copyright/"
+    },
+    {
+      "domain": "pm.gov.au",
+      "publisher": "Prime Minister of Australia",
+      "market": "AU",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "CC BY 4.0 (except Coat of Arms, photos and graphics); preferred credit 'Licensed from the Commonwealth of Australia under a Creative Commons Attribution 4.0 International Licence'.",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://www.pm.gov.au/copyright"
+    },
+    {
+      "domain": "gdacs.org",
+      "publisher": "GDACS (EC JRC / UN OCHA disaster alerts)",
+      "market": "APAC",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "GDACS links to EC legal notice: EU-owned content under CC BY 4.0 'provided appropriate credit is given and changes are indicated'; third-party (partner) content may differ.",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://commission.europa.eu/legal-notice_en"
+    },
+    {
+      "domain": "usgs.gov",
+      "publisher": "USGS Earthquake Hazards Program (M4.5+ week)",
+      "market": "APAC",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "USGS-authored data is generally US public domain with credit requested (policy page blocked automated fetch — re-verify). Global feed; filter to APAC bbox.",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits"
+    },
+    {
+      "domain": "adb.org",
+      "publisher": "Asian Development Bank",
+      "market": "APAC",
+      "sourceType": "primary",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "primary document"
+      },
+      "rights": {
+        "license": "'Articles may be republished without alteration with the attribution statement' to ADB; other site materials personal/non-commercial only.",
+        "usage": "excerpt + summarize with attribution and link"
+      },
+      "verified": false,
+      "termsUrl": "https://www.adb.org/terms-use"
+    }
+  ]
 }

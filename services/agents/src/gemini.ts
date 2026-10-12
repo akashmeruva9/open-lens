@@ -158,7 +158,12 @@ export async function embedTexts(texts: string[], model: string, dims = 256): Pr
   const ai = getClient();
   // Small vectors (rounded) keep cluster state compact enough for a Firestore document.
   const res = await withResilience(model, (m) =>
-    ai.models.embedContent({ model: m, contents: texts, config: { taskType: "CLUSTERING", outputDimensionality: dims } }),
+    // One Content per text: a bare string[] is treated as a single multi-part input (one embedding).
+    ai.models.embedContent({
+      model: m,
+      contents: texts.map((text) => ({ role: "user", parts: [{ text }] })),
+      config: { taskType: "CLUSTERING", outputDimensionality: dims },
+    }),
   );
   const out = (res.embeddings ?? []).map((e) => (e.values ?? []).map((v) => Math.round(v * 1e4) / 1e4));
   if (out.length !== texts.length) throw new Error(`embedding count mismatch: ${out.length}/${texts.length}`);

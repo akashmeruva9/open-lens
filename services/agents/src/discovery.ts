@@ -23,6 +23,9 @@ export const FeedConfig = z.object({
   domain: z.string(),
   type: z.enum(["rss", "atom"]).default("rss"),
   enabled: z.boolean().default(false),
+  /** false for high-volume alert feeds (quakes, weather): they enrich stories but never start one alone. */
+  seedsStory: z.boolean().default(true),
+  note: z.string().optional(),
 });
 export type FeedConfig = z.infer<typeof FeedConfig>;
 export const FeedsFile = z.object({ feeds: z.array(FeedConfig) });
@@ -48,7 +51,43 @@ const strip = (s: unknown) =>
     .replace(/\s+/g, " ")
     .trim();
 const asArray = <T>(x: T | T[] | undefined): T[] => (x === undefined ? [] : Array.isArray(x) ? x : [x]);
-const textOf = (x: unknown): string => (typeof x === "object" && x !== null ? String((x as Record<string, unknown>)["#text"] ?? "") : String(x ?? ""));
+// Namespaced duplicates (title + dc:title) parse as arrays: take the first non-empty value.
+const textOf = (x: unknown): string => {
+  if (Array.isArray(x)) return x.map(textOf).find((v) => v.trim()) ?? "";
+  return typeof x === "object" && x !== null ? String((x as Record<string, unknown>)["#text"] ?? "") : String(x ?? "");
+};
+
+// Zone abbreviations seen in JAPAC government feeds (JS Date only knows GMT/UTC and US zones).
+const TZ: Record<string, string> = {
+  JST: "+09:00", KST: "+09:00", IST: "+05:30", SGT: "+08:00", MYT: "+08:00", PHT: "+08:00", HKT: "+08:00",
+  CST: "+08:00", AWST: "+08:00", WIB: "+07:00", ICT: "+07:00", AEST: "+10:00", AEDT: "+11:00", ACST: "+09:30",
+  ACDT: "+10:30", NZST: "+12:00", NZDT: "+13:00",
+};
+const MONTHS = "jan feb mar apr may jun jul aug sep oct nov dec".split(" ");
+
+/** Lenient feed date parsing; returns null when nothing sensible can be read. */
+export function parseFeedDate(raw: string): Date | null {
+  const s = raw.trim();
+  if (!s) return null;
+  // Zone-less numeric dates first, as UTC, so results don't depend on the server's timezone.
+  let m = /^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(s);
+  if (m) return new Date(Date.UTC(+m[1]!, +m[2]! - 1, +m[3]!, +(m[4] ?? 0), +(m[5] ?? 0), +(m[6] ?? 0)));
+  const direct = new Date(s);
+  if (!Number.isNaN(direct.getTime())) return direct;
+  // "Fri Oct 02 09:18:39 KST 2026" (Java Date.toString)
+  m = /^\w{3} (\w{3}) (\d{1,2}) (\d{2}:\d{2}:\d{2}) ([A-Z]{2,5}) (\d{4})$/.exec(s);
+  if (m && TZ[m[4]!] && MONTHS.includes(m[1]!.toLowerCase())) {
+    const mo = String(MONTHS.indexOf(m[1]!.toLowerCase()) + 1).padStart(2, "0");
+    return new Date(`${m[5]}-${mo}-${m[2]!.padStart(2, "0")}T${m[3]}${TZ[m[4]!]}`);
+  }
+  // "Fri, 09 Oct 2026 18:00:00 JST" or "2026-10-09 18:00:00 JST"
+  m = /^(.*\d{1,2}:\d{2}(?::\d{2})?)\s+([A-Z]{2,5})$/.exec(s);
+  if (m && TZ[m[2]!]) {
+    const d = new Date(`${m[1]} GMT${TZ[m[2]!]!.replace(":", "")}`);
+    if (!Number.isNaN(d.getTime())) return d;
+  }
+  return null;
+}
 
 /** Parse RSS 2.0, RSS 1.0 (RDF) or Atom into leads. */
 export function parseFeed(xml: string, feed: Pick<FeedConfig, "id" | "market" | "domain">): Lead[] {
@@ -71,10 +110,10 @@ export function parseFeed(xml: string, feed: Pick<FeedConfig, "id" | "market" | 
     .filter((r) => /^https?:\/\//.test(r.url.trim()) && r.title)
     .map((r) => {
       const url = canonicalUrl(r.url.trim());
-      const d = new Date(r.date);
+      const d = parseFeedDate(r.date);
       return {
         id: leadId(url), url, title: strip(r.title), summary: strip(r.summary).slice(0, 600) || undefined,
-        publishedAt: Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString(),
+        publishedAt: (d ?? new Date()).toISOString(),
         market: feed.market, domain: new URL(url).hostname.toLowerCase(), via: "rss" as const, feedId: feed.id,
       };
     });

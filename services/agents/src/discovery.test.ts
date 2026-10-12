@@ -52,3 +52,18 @@ test("fetchGdelt surfaces throttling instead of returning silently empty", async
   const f = (async () => new Response("Please limit requests to one every 5 seconds", { status: 200 })) as typeof fetch;
   await assert.rejects(fetchGdelt("JP", 30, f), /limit requests/);
 });
+
+test("lenient dates for JAPAC government feeds", async () => {
+  const { parseFeedDate } = await import("./discovery.js");
+  assert.equal(parseFeedDate("Fri, 09 Oct 2026 18:00:00 JST")!.toISOString(), "2026-10-09T09:00:00.000Z");
+  assert.equal(parseFeedDate("Fri Oct 02 09:18:39 KST 2026")!.toISOString(), "2026-10-02T00:18:39.000Z");
+  assert.equal(parseFeedDate("2026/10/09 18:00")!.toISOString(), "2026-10-09T18:00:00.000Z");
+  assert.equal(parseFeedDate("Sat, 10 Oct 2026 10:31:00 GMT")!.toISOString(), "2026-10-10T10:31:00.000Z");
+  assert.equal(parseFeedDate("nonsense"), null);
+});
+
+test("namespaced duplicate fields (title + dc:title) still parse", () => {
+  const xml = `<rss xmlns:dc="http://purl.org/dc/elements/1.1/"><channel><item><title><![CDATA[新聞]]></title><dc:title>新聞</dc:title><link>https://www.ey.gov.tw/x</link><pubDate>Sat, 10 Oct 2026 10:31:00 GMT</pubDate></item></channel></rss>`;
+  const [l] = parseFeed(xml, { id: "tw", market: "TW", domain: "ey.gov.tw" });
+  assert.equal(l!.title, "新聞");
+});

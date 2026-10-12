@@ -17,6 +17,10 @@ export interface IngestConfig {
   markets: string[];
   gdelt: boolean;
   lookbackMin: number;
+  /** Ignore leads published longer ago than this (first run would otherwise ingest whole feed backlogs). */
+  maxAgeHours: number;
+  /** Cap on full-text page fetches per cycle. */
+  maxFetchPerCycle: number;
   maxNewStoriesPerCycle: number;
   maxUpdatesPerCycle: number;
   dailyRunBudget: number;
@@ -61,6 +65,8 @@ export async function loadIngestConfig(root: string): Promise<IngestConfig> {
     markets: (env.INGEST_MARKETS ?? MARKET_CODES.filter((m) => m !== "APAC").join(",")).split(",").map((s) => s.trim()).filter(Boolean),
     gdelt: env.INGEST_GDELT !== "0",
     lookbackMin: Number(env.INGEST_LOOKBACK_MIN ?? 30),
+    maxAgeHours: Number(env.INGEST_MAX_AGE_HOURS ?? 48),
+    maxFetchPerCycle: Number(env.INGEST_MAX_FETCH ?? 40),
     maxNewStoriesPerCycle: Number(env.INGEST_MAX_NEW ?? 3),
     maxUpdatesPerCycle: Number(env.INGEST_MAX_UPDATES ?? 3),
     dailyRunBudget: Number(env.INGEST_DAILY_RUNS ?? 40),
@@ -76,7 +82,7 @@ export interface IngestEffects {
   discoverFeed(feed: FeedConfig): Promise<Lead[]>;
   discoverGdelt(market: string, minutes: number): Promise<Lead[]>;
   embed(texts: string[]): Promise<number[][]>;
-  intake(url: string, storyId: string, sourceId: string, allowlist: AllowlistEntry[]): ReturnType<typeof intakeUrl>;
+  intake(url: string, storyId: string, sourceId: string, allowlist: AllowlistEntry[], lead?: Lead): ReturnType<typeof intakeUrl>;
   /** Run the agent pipeline (+ policy steps) for a story. */
   process(storyId: string): Promise<void>;
   sleep(ms: number): Promise<void>;
@@ -103,7 +109,7 @@ export function defaultEffects(deps: Deps, cfg: IngestConfig): IngestEffects {
     discoverFeed: (f) => fetchFeed(f),
     discoverGdelt: (m, min) => fetchGdelt(m, min),
     embed: (t) => embedTexts(t, MODELS.embed),
-    intake: (u, s, id, a) => intakeUrl(u, s, id, a),
+    intake: (u, s, id, a, l) => intakeUrl(u, s, id, a, fetch, l && { title: l.title, summary: l.summary, publishedAt: l.publishedAt }),
     process: (id) => limited(cfg.maxConcurrentRuns, () => processStory(deps, cfg, id)),
     sleep,
   };
@@ -167,12 +173,14 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
       }
     }
     report.discovered = found.length;
+    const minTime = now.getTime() - cfg.maxAgeHours * 3600_000;
+    const recent = found.filter((l) => new Date(l.publishedAt).getTime() >= minTime);
 
     // 2) Dedupe against leads seen in the last 72 h.
     const leads = await store.getState<Record<string, StoredLead>>("leads", {});
     const cutoff = now.getTime() - 72 * 3600_000;
     for (const [id, l] of Object.entries(leads)) if (new Date(l.firstSeen).getTime() < cutoff) delete leads[id];
-    const fresh = [...new Map(found.filter((l) => !leads[l.id]).map((l) => [l.id, l])).values()];
+    const fresh = [...new Map(recent.filter((l) => !leads[l.id]).map((l) => [l.id, l])).values()];
     report.newLeads = fresh.length;
     for (const l of fresh) {
       leads[l.id] = { ...l, firstSeen: now.toISOString() };
@@ -195,12 +203,14 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     const { candidates, touched } = assignLeads(fresh, vectors, prior, { now });
     report.candidatesTouched = touched.size;
 
-    // 4) Ingest full text for permitted leads in touched candidates.
-    for (const c of candidates.filter((x) => touched.has(x.id))) {
+    // 4) Ingest full text for permitted leads in touched candidates (widest-covered events first, capped).
+    let fetches = 0;
+    for (const c of candidates.filter((x) => touched.has(x.id)).sort((a, b) => b.domains.length - a.domains.length)) {
       for (const id of c.leadIds) {
         const l = leads[id];
         if (!l || l.source || l.rejected || !allowlistEntryFor(l.url, cfg.allowlist)) continue;
-        const r = await fx.intake(l.url, c.storyId ?? c.id, `w-${l.id.slice(0, 8)}`, cfg.allowlist).catch((e) => ({ rejected: String(e).slice(0, 160) }));
+        if (fetches++ >= cfg.maxFetchPerCycle) break;
+        const r = await fx.intake(l.url, c.storyId ?? c.id, `w-${l.id.slice(0, 8)}`, cfg.allowlist, l).catch((e) => ({ rejected: String(e).slice(0, 160) }));
         if ("source" in r && r.source) {
           l.source = r.source;
           report.ingested++;
@@ -223,7 +233,12 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
       if (!pending.length) continue;
       const allSources = c.leadIds.map((id) => leads[id]?.source).filter((s): s is SourceRecord => Boolean(s));
       const publishers = new Set(allSources.map((s) => s.publisher));
-      const hasPrimary = allSources.some((s) => s.sourceType === "primary");
+      // A primary document can start a story alone, unless it comes from an alert feed (quakes, weather…).
+      const seeds = new Set(cfg.feeds.filter((f) => f.seedsStory).map((f) => f.id));
+      const hasPrimary = c.leadIds.some((id) => {
+        const l = leads[id];
+        return l?.source?.sourceType === "primary" && (!l.feedId || seeds.has(l.feedId));
+      });
       if (!c.storyId && publishers.size < cfg.minPublishers && !hasPrimary) continue;
       const isNew = !c.storyId;
       if ((isNew && created >= cfg.maxNewStoriesPerCycle) || (!isNew && updated >= cfg.maxUpdatesPerCycle) || budget.runs >= cfg.dailyRunBudget) {

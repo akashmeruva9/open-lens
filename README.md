@@ -45,6 +45,15 @@ npm run seed -w @openlens/api -- data/seed/jp-fare-2026
 ```
 Story languages default to the market's languages + English (`APAC` = all 13). See plan.md §1b.
 
+### The wire (automatic discovery every 5–10 min)
+The api can run discovery on a schedule: RSS/Atom feeds (`data/sources/feeds.json`) plus optional GDELT headline signals → dedupe → multilingual clustering → full text **only from verified allowlisted outlets** → create/update stories → pipeline (budgeted) → optional low-risk auto-publish.
+
+1. Review `docs/sources-research.md` and the terms URL of each outlet in `data/sources/allowlist.json`; set `verified: true` only where reuse is confirmed.
+2. Set in `.env`: `INGEST_INTERVAL_MIN=10` (and optionally `AUTO_PUBLISH=low_risk`, `INGEST_MARKETS=JP,KR,…`).
+3. `npm run dev -w @openlens/api` — progress shows in Studio → "The wire" (or click **Run now**).
+
+On Cloud Run, `infra/setup.sh` creates a Cloud Scheduler job hitting `POST /v1/internal/ingest` every 10 minutes. Budgets: `INGEST_MAX_NEW`, `INGEST_MAX_UPDATES`, `INGEST_DAILY_RUNS`, `INGEST_MAX_FETCH` (see `.env.example`).
+
 ### Adding a story by hand
 Create `data/seed/<story>/sources.json` (array of `SourceRecord`, see `packages/schemas/src/ledger.ts`) using only permitted/public sources, set each outlet's `lens.rating` + `ratingBasis` from a documented rating table, and mark primary documents `sourceType: "primary"`. Optional `story.json` sets title/region/topics/languages.
 

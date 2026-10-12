@@ -50,22 +50,39 @@ export interface IntakeResult {
 }
 
 /** Fetch an allowlisted URL and extract the article into a SourceRecord. */
+/** CJK/Thai pack far more meaning per character: a 190-character Japanese statement is a full release. */
+export const minTextLength = (text: string) => (/[\u3040-\u30ff\u4e00-\u9fff\uac00-\ud7af\u0e00-\u0e7f]/.test(text) ? 60 : 200);
+
 export async function intakeUrl(
   url: string,
   storyId: string,
   sourceId: string,
   allowlist: AllowlistEntry[],
   fetchImpl: typeof fetch = fetch,
+  /** Feed-provided title/summary, used for non-HTML items (XML alerts, data files) from permitted outlets. */
+  fallback?: { title: string; summary?: string; publishedAt?: string },
 ): Promise<IntakeResult> {
   const entry = allowlistEntryFor(url, allowlist);
   if (!entry) return { rejected: `${new URL(url).hostname} is not a verified entry in data/sources/allowlist.json (add it with rights + rating basis, then set verified: true)` };
   const res = await fetchImpl(url, { headers: { "user-agent": "OpenLensBot/0.1 (+https://openlens.app/bot)", accept: "text/html" }, signal: AbortSignal.timeout(20000) });
   if (!res.ok) return { rejected: `HTTP ${res.status}` };
+  const ctype = res.headers.get("content-type") ?? "";
+  if (!/html/i.test(ctype)) {
+    const text = [fallback?.title, fallback?.summary].filter(Boolean).join("\n").trim();
+    if (!fallback || text.length < minTextLength(text)) return { rejected: `non-HTML content (${ctype.split(";")[0] || "unknown"}) and no usable feed summary` };
+    return {
+      source: SourceRecord.parse({
+        id: sourceId, storyId, url, publisher: entry.publisher, title: fallback.title, publishedAt: fallback.publishedAt ?? new Date().toISOString(),
+        language: normalizeLang(null, text), sourceType: entry.sourceType, lens: entry.lens, rights: entry.rights, text,
+        contentHash: createHash("sha256").update(text).digest("hex"),
+      }),
+    };
+  }
   const html = await res.text();
   const { document } = parseHTML(html);
   const article = new Readability(document as unknown as Document).parse();
   const text = (article?.textContent ?? "").replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
-  if (text.length < 200) return { rejected: "could not extract article text (paywall, script-rendered page or not an article)" };
+  if (text.length < minTextLength(text)) return { rejected: "could not extract article text (paywall, script-rendered page or not an article)" };
   const meta = (name: string) =>
     document.querySelector(`meta[property="${name}"]`)?.getAttribute("content") ?? document.querySelector(`meta[name="${name}"]`)?.getAttribute("content");
   const published = meta("article:published_time") ?? meta("date") ?? document.querySelector("time[datetime]")?.getAttribute("datetime");

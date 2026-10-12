@@ -14,9 +14,10 @@ const allow = (domain: string, publisher: string, sourceType: "primary" | "repor
 });
 const cfg = (over: Partial<IngestConfig> = {}): IngestConfig => ({
   feeds: [], allowlist: [allow("a.jp", "A Shimbun"), allow("b.jp", "B News")], markets: ["JP"], gdelt: true, lookbackMin: 30,
-  maxNewStoriesPerCycle: 3, maxUpdatesPerCycle: 3, dailyRunBudget: 10, maxConcurrentRuns: 1, minPublishers: 2, autoPublish: "off", autoMediaLangs: [], ...over,
+  maxAgeHours: 48, maxFetchPerCycle: 40, maxNewStoriesPerCycle: 3, maxUpdatesPerCycle: 3, dailyRunBudget: 10, maxConcurrentRuns: 1, minPublishers: 2, autoPublish: "off", autoMediaLangs: [], ...over,
 });
-const lead = (id: string, domain: string, title: string): Lead => ({ id, url: `https://${domain}/${id}`, title, publishedAt: "2026-10-12T00:00:00Z", market: "JP", domain, via: "gdelt" });
+const lead = (id: string, domain: string, title: string, extra: Partial<Lead> = {}): Lead =>
+  ({ id, url: `https://${domain}/${id}`, title, publishedAt: "2026-10-12T00:00:00Z", market: "JP", domain, via: "gdelt", ...extra });
 
 function effects(leads: Lead[], processed: string[]): IngestEffects {
   return {
@@ -90,4 +91,23 @@ test("a primary document alone is enough; daily budget caps pipeline runs", asyn
   assert.equal(r.skippedForBudget, 1);
   const r2 = await ingestCycle(deps, { ...c, dailyRunBudget: 5 }, effects([lead("p2", "gov.jp", "fare order update")], processed), new Date("2026-10-12T01:10:00Z"));
   assert.equal(r2.storiesCreated.length, 1);
+});
+
+test("alert feeds cannot start a story alone; stale backlog items are ignored", async () => {
+  const { deps } = await setup();
+  const processed: string[] = [];
+  const c = cfg({
+    allowlist: [allow("quake.example.org", "Quake Agency", "primary")],
+    feeds: [{ id: "quakes", market: "JP", url: "https://quake.example.org/feed", domain: "quake.example.org", type: "rss", enabled: true, seedsStory: false }],
+  });
+  const fx = effects([], processed);
+  fx.discoverGdelt = async () => [];
+  fx.discoverFeed = async () => [
+    lead("q1", "quake.example.org", "M5.1 earthquake", { via: "rss", feedId: "quakes" }),
+    lead("old", "quake.example.org", "fare history", { via: "rss", feedId: "quakes", publishedAt: "2026-09-01T00:00:00Z" }),
+  ];
+  const r = await ingestCycle(deps, c, fx, new Date("2026-10-12T01:00:00Z"));
+  assert.equal(r.discovered, 2);
+  assert.equal(r.newLeads, 1, "backlog item older than maxAgeHours dropped");
+  assert.equal(r.storiesCreated.length, 0, "alert feed alone does not seed a story");
 });

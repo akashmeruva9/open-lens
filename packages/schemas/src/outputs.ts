@@ -45,6 +45,31 @@ export const AudioPayload = z.object({
 });
 export type AudioPayload = z.infer<typeof AudioPayload>;
 
+/** Hand-off contract: one finished video, everything a distributor (WhatsApp/Instagram/Facebook/X/YouTube) needs.
+ *  Produced from the ledger + rendered outputs; consumers must not need to know how the video was made. */
+export const RenderedAsset = z.object({
+  storyId: z.string(),
+  /** Ledger version the video was generated from; a newer ledger means the asset may be stale. */
+  ledgerVersion: z.number().int(),
+  lang: z.string(),
+  tier: Tier.optional(),
+  aspect: z.enum(["9:16", "16:9"]),
+  mp4Url: z.string(),
+  hlsUrl: z.string().optional(),
+  captionsVttUrl: z.string().optional(),
+  thumbnailUrl: z.string().optional(),
+  durationSeconds: z.number(),
+  /** Claims the video states; used for correction propagation. */
+  claimIds: z.array(z.string()),
+  title: z.string(),
+  presenter: z.string().optional(),
+  /** Always true for generated presenters/narration; distributors must keep the disclosure. */
+  aiDisclosure: z.literal(true),
+  status: z.string(),
+  videoOutputId: z.string(),
+});
+export type RenderedAsset = z.infer<typeof RenderedAsset>;
+
 // ---------- Channel packages ----------
 export const YtMetaPayload = z.object({
   tier: Tier,

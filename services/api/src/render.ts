@@ -3,6 +3,8 @@
 // Narration is cached, so re-running after a layout change costs nothing; only new/changed text is synthesized.
 import { resolve } from "node:path";
 import { LocalAssets } from "./assets.js";
+import { writeFile } from "node:fs/promises";
+import { buildRenderedAssets } from "./handoff.js";
 import { renderMedia } from "./jobs.js";
 import { FileStore } from "./store.js";
 
@@ -27,4 +29,7 @@ if (missing.length) throw new Error(`no script for: ${missing.join(", ")}. Avail
 
 const t0 = Date.now();
 await renderMedia({ store, assets: new LocalAssets(`${DATA_DIR}/assets`), workDir: `${DATA_DIR}/work` }, storyId, undefined, { langs, aspects });
+const assets = buildRenderedAssets((await store.get(storyId))!);
+await writeFile(`${DATA_DIR}/assets/${storyId}/manifest.json`, JSON.stringify(assets, null, 2));
+console.log(`hand-off manifest: ${DATA_DIR}/assets/${storyId}/manifest.json (${assets.length} videos)`);
 console.log(`rendered ${storyId} [${(langs ?? [...have]).join(",")}] in ${((Date.now() - t0) / 1000).toFixed(0)}s -> ${DATA_DIR}/assets/${storyId}/`);

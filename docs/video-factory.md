@@ -52,6 +52,17 @@ Outputs are written to `.data/assets/<storyId>/<tier>-<lang>/v<N>/` (`video-916.
 
 Narration is **cached** by (model, voice, direction, text) in `.data/tts-cache`, so re-rendering after a layout change costs nothing.
 
+## Hand-off to distribution
+
+Finished videos are exposed as plain `RenderedAsset` records (`packages/schemas/src/outputs.ts`), so WhatsApp / Instagram / Facebook / X / YouTube publishers do not need to know how a video was made:
+
+`storyId, ledgerVersion, lang, tier, aspect (9:16|16:9), mp4Url, hlsUrl?, captionsVttUrl?, thumbnailUrl?, durationSeconds, claimIds, title, presenter, aiDisclosure (always true), status, videoOutputId`
+
+```bash
+npm run handoff -w @openlens/api -- <storyId>      # prints the JSON and writes .data/assets/<storyId>/manifest.json
+```
+`npm run render` writes the same `manifest.json` when it finishes. Distributors should pick `9:16` for Reels/Shorts/WhatsApp and `16:9` for YouTube, keep the disclosure, and treat an asset whose `ledgerVersion` is older than the story's as stale (corrections mark dependent outputs `needs_review`). URLs are relative to the assets root (`/assets/...`); with `STORE=firestore` and `ASSETS_BUCKET` they are public bucket URLs.
+
 ## Presenters, voices and assets
 
 | Thing | Where |
@@ -131,5 +142,5 @@ Running on a free-trial credit? Set per-service budgets with spend caps (Billing
 
 - Faces move (blinking, small head movement) but the **mouth is not lip-synced** to the narration. Real lip-sync needs a GPU model (e.g. MuseTalk on a Vertex AI L4) and is a possible next step. Cloud Run GPU quota is 0 on trial projects; Vertex AI L4 quota is separate.
 - No music bed or Veo intro/outro yet.
-- YouTube upload (OAuth, synthetic-media flag) and the hand-off record for distribution are the next pieces.
+- YouTube upload (OAuth Desktop client, synthetic-media flag) is the next piece.
 - Scripts target ~60 s; Japanese and Telugu run a little longer.

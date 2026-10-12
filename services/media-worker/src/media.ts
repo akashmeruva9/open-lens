@@ -1,4 +1,4 @@
-import { AI_DISCLOSURE, PRESENTERS, type PresenterId } from "@openlens/config";
+import { AI_DISCLOSURE, CHANNEL_PLAN, PRESENTERS, isLang, type PresenterId } from "@openlens/config";
 import type { ScriptPayload } from "@openlens/schemas";
 import { mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
@@ -57,7 +57,8 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
   registerDefaultFonts();
   const dir = join(job.outDir, job.key);
   await mkdir(dir, { recursive: true });
-  const presenter = job.script.presenter as PresenterId;
+  // A renamed/unknown presenter id falls back to the language's channel presenter.
+  const presenter = (job.script.presenter in PRESENTERS ? job.script.presenter : isLang(job.lang) ? CHANNEL_PLAN[job.lang].presenter : "maya-apac") as PresenterId;
   const persona = PRESENTERS[presenter];
   const GAP = 0.35;
 

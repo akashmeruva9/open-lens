@@ -175,9 +175,6 @@ function chrome(ctx: SKRSContext2D, brand: Branding, W: number, H: number, verti
   ctx.fillStyle = C.text;
   ctx.font = `800 44px ${ff}`;
   ctx.fillText("OPENLENS", pad + 68, pad + 41);
-  ctx.font = `700 28px ${ff}`;
-  const tagW = ctx.measureText(ui.aiPresenter).width + 44;
-  pill(ctx, ui.aiPresenter, tagRight - tagW, pad, `700 28px ${ff}`, "rgba(251,191,36,0.95)", C.navy, 22, 52);
   const tickY = vertical ? 1632 : H - 118;
   ctx.fillStyle = "rgba(2,6,23,0.9)";
   ctx.fillRect(0, tickY, W, H - tickY);
@@ -310,11 +307,6 @@ function renderSplit(scene: Scene, brand: Branding, index: number, total: number
   ctx.fillStyle = C.text;
   ctx.font = `800 44px ${ff}`;
   ctx.fillText("OPENLENS", pad + 68, pad + 41);
-  const tag = ui.aiPresenter;
-  ctx.font = `700 28px ${ff}`;
-  const tagW = ctx.measureText(tag).width + 44;
-  const tagX = (vertical ? W - pad : 1040 - 40) - tagW;
-  pill(ctx, tag, tagX, pad, `700 28px ${ff}`, "rgba(251,191,36,0.95)", C.navy, 22, 52);
 
   // Layout regions
   const cardX = vertical ? pad : 1090;

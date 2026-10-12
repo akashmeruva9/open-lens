@@ -7,7 +7,12 @@
     "build": "tsc -p .",
     "typecheck": "tsc -p . --noEmit",
     "test": "node --import tsx --test src/**/*.test.ts",
-    "spike": "tsx src/spike.ts"
+    "spike": "tsx src/spike.ts",
+    "preview": "node --import tsx src/preview.ts",
+    "preview:video": "node --import tsx src/previewvideo.ts",
+    "voicetest": "TTS_LOCATION=us-central1 node --env-file-if-exists=../../.env --import tsx src/voicetest.ts",
+    "portraits": "GOOGLE_CLOUD_LOCATION=global node --env-file-if-exists=../../.env --import tsx src/portraits.ts",
+    "idle-clip": "GOOGLE_CLOUD_LOCATION=us-central1 node --env-file-if-exists=../../.env --import tsx src/idleclip.ts"
   },
   "dependencies": {
     "@napi-rs/canvas": "*",

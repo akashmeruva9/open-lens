@@ -74,7 +74,7 @@ Read the transcript exactly as written. Do not speak these notes. Do not add or 
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-const CACHE_DIR = () => process.env.TTS_CACHE_DIR ?? resolve(import.meta.dirname, "../../../.data/tts-cache");
+const CACHE_DIR = () => process.env.TTS_CACHE_DIR || resolve(import.meta.dirname, "../../../.data/tts-cache");
 
 /** Synthesize one line with the presenter's voice; returns a WAV buffer. Cached by (model, voice, direction, text),
  *  so re-rendering after a layout change never re-bills narration. */

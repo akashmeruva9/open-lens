@@ -28,6 +28,20 @@ export interface CreateStoryInput {
   riskTier?: "low" | "sensitive";
   sources: Omit<SourceRecord, "storyId">[];
 }
+export interface WireCycle {
+  id: string; startedAt: string; finishedAt?: string; discovered: number; newLeads: number; byMarket: Record<string, number>;
+  ingested: number; rejected: number; embedded: boolean; candidatesTouched: number; storiesCreated: string[]; storiesUpdated: string[];
+  skippedForBudget: number; errors: string[];
+}
+export interface WireStatus {
+  configured: boolean;
+  running: boolean;
+  policy?: { markets: string[]; gdelt: boolean; autoPublish: "off" | "low_risk"; autoMediaLangs: string[]; minPublishers: number;
+    dailyRunBudget: number; feedsEnabled: number; verifiedOutlets: number };
+  budget: { day: string; runs: number };
+  cycles: WireCycle[];
+  candidates: { id: string; market: string; title: string; domains: string[]; leads: number; storyId?: string; updatedAt: string }[];
+}
 export interface ClaimPatch { text?: string; state?: EvidenceState; reason: string }
 
 export function createClient(opts: ClientOptions) {
@@ -80,6 +94,8 @@ export function createClient(opts: ClientOptions) {
       evals: (id: string) => req<EvalReport>("GET", `/v1/studio/stories/${id}/evals`),
       runs: (id: string) => req<AgentRun[]>("GET", `/v1/studio/stories/${id}/runs`),
       channels: () => req<{ channel: string; live: boolean; reason?: string }[]>("GET", "/v1/studio/channels"),
+      ingest: () => req<WireStatus>("GET", "/v1/studio/ingest"),
+      runIngest: () => req<{ accepted: true }>("POST", "/v1/studio/ingest/run", {}),
     },
   };
 }

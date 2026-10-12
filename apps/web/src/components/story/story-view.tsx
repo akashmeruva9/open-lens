@@ -67,6 +67,11 @@ export function StoryView({ initial }: { initial: StoryBundle }) {
         </Link>
 
         <CorrectionBanner corrections={bundle.corrections} />
+        {bundle.story.autoPublished ? (
+          <p role="note" className="mb-4 rounded-lg border px-3 py-2 text-sm" style={{ borderColor: "var(--st-warn)", color: "var(--st-warn)" }}>
+            Auto-published by the OpenLens wire under the low-risk policy. Every fact links to its source below, but an editor has not reviewed this story yet.
+          </p>
+        ) : null}
 
         <div className="grid gap-x-10 gap-y-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <header className="lg:col-start-1 lg:row-start-1">

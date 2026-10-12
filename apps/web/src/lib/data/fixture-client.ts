@@ -61,6 +61,8 @@ export function createFixtureClient(store: FixtureStore, opts: { baseUrl: string
       publish: (outputId, mode = "dry_run") => wrap(() => store.publish(outputId, mode, LIVE, opts.user()), 500),
       evals: (id) => wrap(() => computeEvals(store.get(id), store.runsFor(id))),
       runs: (id) => wrap(() => store.runsFor(id)),
+      ingest: () => wrap(() => ({ configured: false, running: false, budget: { day: "", runs: 0 }, cycles: [], candidates: [] })),
+      runIngest: () => wrap(() => ({ accepted: true as const })),
       channels: () => wrap(() => CHANNELS),
     },
   };

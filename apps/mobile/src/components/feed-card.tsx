@@ -34,6 +34,7 @@ export function FeedCard({
   const ev = item.evidence;
   const a11y = [
     item.corrected ? 'Corrected story.' : '',
+    item.autoPublished ? 'Auto-published, not yet reviewed by an editor.' : '',
     item.title,
     item.summary,
     `Updated ${updated}.`,
@@ -68,6 +69,7 @@ export function FeedCard({
             {media}
             <View style={styles.overlayRow} pointerEvents="none">
               {item.corrected ? <Pill label="Corrected" icon="↺" fg="#fff" bg="#B91C1C" /> : null}
+              {item.autoPublished ? <Pill label="Auto · not editor-reviewed" fg="#fff" bg="#B45309" /> : null}
               <Pill label={regionName(item.region)} fg="#EEF3FB" bg="rgba(4,10,22,0.7)" />
             </View>
           </View>

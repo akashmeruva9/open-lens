@@ -4,7 +4,7 @@ import { intakeUrl, normalizeLang, type AllowlistEntry } from "./intake.js";
 
 const allow: AllowlistEntry[] = [{
   domain: "example.go.jp", publisher: "Example Ministry", market: "JP", sourceType: "primary",
-  lens: { rating: "unrated", ratingBasis: "primary document" }, rights: { license: "open-government", usage: "attribution" },
+  lens: { rating: "unrated", ratingBasis: "primary document" }, rights: { license: "open-government", usage: "attribution" }, verified: true,
 }];
 const page = `<!doctype html><html lang="ja"><head><title>運賃改定のお知らせ</title>
 <meta property="article:published_time" content="2026-10-01T09:00:00+09:00"></head><body><nav>menu</nav>
@@ -13,7 +13,7 @@ const fakeFetch = (async () => new Response(page, { status: 200, headers: { "con
 
 test("rejects domains not on the allowlist", async () => {
   const r = await intakeUrl("https://news.example.com/a", "s", "s1", allow, fakeFetch);
-  assert.match(r.rejected ?? "", /not in data\/sources\/allowlist/);
+  assert.match(r.rejected ?? "", /not a verified entry/);
 });
 
 test("extracts an allowlisted Japanese article with rights and rating from the allowlist", async () => {
@@ -30,4 +30,9 @@ test("language normalisation", () => {
   assert.equal(normalizeLang("zh-TW", ""), "zh-Hant");
   assert.equal(normalizeLang(null, "ข่าว"), "th");
   assert.equal(normalizeLang("tl", ""), "fil");
+});
+
+test("unverified allowlist entries are never ingested", async () => {
+  const r = await intakeUrl("https://www.example.go.jp/press/1", "s", "s1", [{ ...allow[0]!, verified: false }], fakeFetch);
+  assert.match(r.rejected ?? "", /not a verified entry/);
 });

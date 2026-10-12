@@ -20,8 +20,13 @@ export function FeedCard({ item, lead = false }: { item: FeedItem; lead?: boolea
         <span className="font-semibold uppercase tracking-wider text-ink-2">{regionName(item.region)}</span>
         <span aria-hidden>·</span>
         <span>{item.topics.map(titleCase).join(" / ")}</span>
+        {item.autoPublished ? (
+          <Pill toneVar="--st-warn" className={item.corrected ? "" : "ml-auto"} title="Published automatically under the low-risk policy; an editor has not reviewed it yet.">
+            Auto-published · not editor-reviewed
+          </Pill>
+        ) : null}
         {item.corrected ? (
-          <Pill toneVar="--st-bad" className="ml-auto">
+          <Pill toneVar="--st-bad" className={item.autoPublished ? "" : "ml-auto"}>
             <IconAlert size={12} /> Corrected
           </Pill>
         ) : null}

@@ -1,0 +1,4 @@
+{
+  "_readme": "RSS/Atom feeds the wire polls. A feed is used only when enabled: true AND its domain is a verified entry in allowlist.json. Candidates researched for each JAPAC market are in feeds.candidates.json (review terms, then copy here).",
+  "feeds": []
+}

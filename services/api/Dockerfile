@@ -15,8 +15,9 @@ FROM node:24-bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg fonts-noto-core fonts-noto-cjk ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-ENV NODE_ENV=production DATA_DIR=/tmp/openlens WORK_DIR=/tmp/openlens/work PORT=8080
+ENV NODE_ENV=production DATA_DIR=/tmp/openlens WORK_DIR=/tmp/openlens/work PORT=8080 SOURCES_ROOT=/app
 COPY --from=build /app /app
+COPY data/sources /app/data/sources
 WORKDIR /app/services/api
 EXPOSE 8080
 CMD ["node", "dist/server.js"]

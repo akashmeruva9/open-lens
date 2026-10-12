@@ -78,6 +78,7 @@ export const FeedItem = z.object({
   videoUrl: z.string().optional(),
   corrected: z.boolean(),
   lastCorrection: z.object({ at: z.string(), reason: z.string() }).optional(),
+  autoPublished: z.boolean().optional(),
 });
 export type FeedItem = z.infer<typeof FeedItem>;
 

@@ -142,5 +142,9 @@ export const Story = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   heroImage: z.string().optional(),
+  /** Published by policy (low-risk, no blocking QA flags) before an editor reviewed it. */
+  autoPublished: z.boolean().optional(),
+  /** Set when the story was created by the automatic wire (ingest cycle). */
+  origin: z.enum(["manual", "wire"]).optional(),
 });
 export type Story = z.infer<typeof Story>;

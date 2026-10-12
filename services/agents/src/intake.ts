@@ -13,13 +13,16 @@ export const AllowlistEntry = z.object({
   sourceType: SourceType,
   lens: z.object({ rating: Lens, ratingBasis: z.string().min(3).describe("documented basis for the rating, or 'primary document'") }),
   rights: z.object({ license: z.string(), usage: z.string() }),
+  /** Set true only after a human has checked the outlet's reuse terms. Unverified entries are never ingested. */
+  verified: z.boolean().default(false),
+  termsUrl: z.string().optional(),
 });
 export type AllowlistEntry = z.infer<typeof AllowlistEntry>;
 export const Allowlist = z.object({ entries: z.array(AllowlistEntry) });
 
 export function allowlistEntryFor(url: string, list: AllowlistEntry[]): AllowlistEntry | undefined {
   const host = new URL(url).hostname.toLowerCase();
-  return list.find((e) => host === e.domain || host.endsWith(`.${e.domain}`));
+  return list.find((e) => e.verified && (host === e.domain || host.endsWith(`.${e.domain}`)));
 }
 
 /** Map an HTML lang attribute (ja-JP, zh-TW, zh-Hans…) to a supported language code. */
@@ -55,7 +58,7 @@ export async function intakeUrl(
   fetchImpl: typeof fetch = fetch,
 ): Promise<IntakeResult> {
   const entry = allowlistEntryFor(url, allowlist);
-  if (!entry) return { rejected: `${new URL(url).hostname} is not in data/sources/allowlist.json (add it with rights + rating basis first)` };
+  if (!entry) return { rejected: `${new URL(url).hostname} is not a verified entry in data/sources/allowlist.json (add it with rights + rating basis, then set verified: true)` };
   const res = await fetchImpl(url, { headers: { "user-agent": "OpenLensBot/0.1 (+https://openlens.app/bot)", accept: "text/html" }, signal: AbortSignal.timeout(20000) });
   if (!res.ok) return { rejected: `HTTP ${res.status}` };
   const html = await res.text();

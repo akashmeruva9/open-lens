@@ -10,6 +10,7 @@ import { requireEditor, authMode } from "./auth.js";
 import { emit, subscribe } from "./bus.js";
 import { applyClaimPatch } from "./corrections.js";
 import { evaluate } from "./evals.js";
+import { ingestCycle, ingestRunning, type IngestConfig, type IngestEffects } from "./ingest.js";
 import { isRunning, regenerate, runStory, type Deps } from "./jobs.js";
 import { fallbackDryRun, publisher, type PublishContext } from "./publishing.js";
 import { emptyRecord, type StoryRecord } from "./store.js";
@@ -39,6 +40,7 @@ export function toFeedItem(r: StoryRecord): FeedItem {
     heroImage: (video?.payload as { thumbnailUrl?: string } | undefined)?.thumbnailUrl ?? r.story.heroImage,
     videoUrl: (video?.payload as { mp4Url?: string } | undefined)?.mp4Url,
     corrected: r.corrections.length > 0,
+    autoPublished: r.story.autoPublished,
     lastCorrection: r.corrections.length ? { at: r.corrections.at(-1)!.at, reason: r.corrections.at(-1)!.reason } : undefined,
   };
 }
@@ -63,7 +65,14 @@ const CreateStory = z.object({
   sources: z.array(SourceRecord.omit({ storyId: true })).min(1),
 });
 
-export function createApp(deps: Deps) {
+export interface WireOptions {
+  config: IngestConfig;
+  effects: IngestEffects;
+  /** Shared secret Cloud Scheduler sends as x-ingest-token. Unset = only allowed in dev auth mode. */
+  token?: string;
+}
+
+export function createApp(deps: Deps, wire?: WireOptions) {
   const app = new Hono();
   const corsOrigins = (process.env.CORS_ORIGINS ?? "*").split(",");
   app.use("*", cors({ origin: corsOrigins.includes("*") ? "*" : corsOrigins, allowHeaders: ["authorization", "content-type", "x-dev-user"] }));
@@ -265,6 +274,41 @@ export function createApp(deps: Deps) {
     const pub = await publisher();
     if (pub) return c.json(pub.channelStatuses());
     return c.json(["app", "youtube", "x", "instagram", "facebook", "whatsapp"].map((ch) => ({ channel: ch, live: ch === "app", reason: ch === "app" ? undefined : "publisher not installed" })));
+  });
+
+  // ---------- Wire (automatic discovery) ----------
+  app.post("/v1/internal/ingest", async (c) => {
+    if (!wire) throw httpError(503, "wire not configured");
+    const ok = wire.token ? c.req.header("x-ingest-token") === wire.token : authMode === "dev";
+    if (!ok) return c.json({ error: "forbidden" }, 403);
+    if (ingestRunning()) return c.json({ error: "cycle already running" }, 409);
+    ingestCycle(deps, wire.config, wire.effects).catch((e) => console.error("ingest cycle failed:", e));
+    return c.json({ accepted: true }, 202);
+  });
+  studio.get("/ingest", async (c) => {
+    const cfg = wire?.config;
+    const candidates = await deps.store.getState<{ id: string; market: string; title: string; domains: string[]; leadIds: string[]; storyId?: string; updatedAt: string }[]>("candidates", []);
+    return c.json({
+      configured: Boolean(wire),
+      running: ingestRunning(),
+      policy: cfg && {
+        markets: cfg.markets, gdelt: cfg.gdelt, autoPublish: cfg.autoPublish, autoMediaLangs: cfg.autoMediaLangs,
+        minPublishers: cfg.minPublishers, dailyRunBudget: cfg.dailyRunBudget,
+        feedsEnabled: cfg.feeds.filter((f) => f.enabled).length, verifiedOutlets: cfg.allowlist.filter((a) => a.verified).length,
+      },
+      budget: await deps.store.getState("budget", { day: "", runs: 0 }),
+      cycles: await deps.store.getState("cycles", []),
+      candidates: candidates
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+        .slice(0, 50)
+        .map(({ id, market, title, domains, leadIds, storyId, updatedAt }) => ({ id, market, title, domains, leads: leadIds.length, storyId, updatedAt })),
+    });
+  });
+  studio.post("/ingest/run", async (c) => {
+    if (!wire) throw httpError(503, "wire not configured");
+    if (ingestRunning()) return c.json({ error: "cycle already running" }, 409);
+    ingestCycle(deps, wire.config, wire.effects).catch((e) => console.error("ingest cycle failed:", e));
+    return c.json({ accepted: true }, 202);
   });
 
   app.route("/v1/studio", studio);

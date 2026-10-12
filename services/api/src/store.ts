@@ -24,6 +24,9 @@ export interface Store {
   addDevice(d: Device): Promise<void>;
   removeSubscriber(phone: string): Promise<void>;
   removeDevice(token: string): Promise<void>;
+  /** Small JSON state documents (ingest leads, candidates, cycle log, budget). */
+  getState<T>(key: string, fallback: T): Promise<T>;
+  putState<T>(key: string, value: T): Promise<void>;
 }
 
 export function emptyRecord(story: Story): StoryRecord {
@@ -77,6 +80,13 @@ export class FileStore implements Store {
   async removeDevice(token: string) {
     const all = await this.readJson<Device[]>(join(this.dir, "devices.json"), []);
     await this.writeJson(join(this.dir, "devices.json"), all.filter((x) => x.token !== token));
+  }
+  getState<T>(key: string, fallback: T) {
+    return this.readJson<T>(join(this.dir, "state", `${key}.json`), fallback);
+  }
+  async putState<T>(key: string, value: T) {
+    await mkdir(join(this.dir, "state"), { recursive: true });
+    await this.writeJson(join(this.dir, "state", `${key}.json`), value);
   }
   async addDevice(d: Device) {
     const all = await this.readJson<Device[]>(join(this.dir, "devices.json"), []);
@@ -144,6 +154,14 @@ export class FirestoreStore implements Store {
   }
   async addDevice(d: Device) {
     await this.db.collection("devices").doc(d.id).set(d);
+  }
+  async getState<T>(key: string, fallback: T): Promise<T> {
+    const doc = await this.db.collection("state").doc(key).get();
+    return doc.exists ? (JSON.parse(doc.data()!.json as string) as T) : fallback;
+  }
+  async putState<T>(key: string, value: T) {
+    // Stored as a JSON string: avoids Firestore's nested-array limits (embedding centroids).
+    await this.db.collection("state").doc(key).set({ json: JSON.stringify(value), at: new Date().toISOString() });
   }
   async removeSubscriber(phone: string) {
     const snap = await this.db.collection("subscribers").where("phone", "==", phone).get();

@@ -9,3 +9,6 @@ export * from "./script.js";
 export * from "./channels.js";
 export * from "./pipeline.js";
 export * from "./validators.js";
+export * from "./discovery.js";
+export * from "./cluster.js";
+export * from "./intake.js";

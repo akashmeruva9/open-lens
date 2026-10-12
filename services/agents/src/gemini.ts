@@ -151,3 +151,16 @@ export async function generateStructured<S extends z.ZodType>(opts: {
   }
   throw new Error(`Structured output failed validation after retry: ${String(lastErr)}`);
 }
+
+/** Batch-embed texts with the Gemini embedding model (multilingual, so ja/en coverage of one event clusters). */
+export async function embedTexts(texts: string[], model: string, dims = 256): Promise<number[][]> {
+  if (!texts.length) return [];
+  const ai = getClient();
+  // Small vectors (rounded) keep cluster state compact enough for a Firestore document.
+  const res = await withResilience(model, (m) =>
+    ai.models.embedContent({ model: m, contents: texts, config: { taskType: "CLUSTERING", outputDimensionality: dims } }),
+  );
+  const out = (res.embeddings ?? []).map((e) => (e.values ?? []).map((v) => Math.round(v * 1e4) / 1e4));
+  if (out.length !== texts.length) throw new Error(`embedding count mismatch: ${out.length}/${texts.length}`);
+  return out;
+}

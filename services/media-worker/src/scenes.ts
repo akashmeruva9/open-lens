@@ -16,6 +16,8 @@ export interface Scene {
   claimIds: string[];
   /** Small header, e.g. "WHAT WE KNOW". */
   label?: string;
+  /** Outlet names behind the claims (shown in the source chip instead of raw ids). */
+  sources?: string[];
 }
 
 export interface Branding {
@@ -59,109 +61,200 @@ function fitWidth(ctx: SKRSContext2D, text: string, maxWidth: number): string {
   return `${out}…`;
 }
 
-function presenterBadge(ctx: SKRSContext2D, brand: Branding, x: number, y: number, r: number) {
-  ctx.save();
+const C = {
+  navy: "#0b1220",
+  navy2: "#16243f",
+  card: "rgba(11,18,32,0.82)",
+  accent: "#38bdf8",
+  amber: "#fbbf24",
+  text: "#f8fafc",
+  muted: "#94a3b8",
+};
+
+/** Draw an image to cover a box (centre-top crop so faces stay in frame). */
+function drawCover(ctx: SKRSContext2D, img: Image, x: number, y: number, w: number, h: number) {
+  const s = Math.max(w / img.width, h / img.height);
+  const sw = w / s, sh = h / s;
+  const sx = (img.width - sw) / 2;
+  const sy = Math.max(0, (img.height - sh) * 0.15);
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+}
+
+function roundRect(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
-  ctx.arc(x + r, y + r, r, 0, Math.PI * 2);
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
   ctx.closePath();
-  ctx.clip();
-  if (brand.presenterImage) {
-    ctx.drawImage(brand.presenterImage, x, y, r * 2, r * 2);
-  } else {
-    ctx.fillStyle = "#1d4ed8";
-    ctx.fillRect(x, y, r * 2, r * 2);
-    ctx.fillStyle = "#e0f2fe";
-    ctx.font = `700 ${Math.round(r)}px ${brand.fontFamily}`;
-    const initial = (brand.presenterName ?? "AI").slice(0, 1);
-    ctx.fillText(initial, x + r - ctx.measureText(initial).width / 2, y + r * 1.35);
+}
+
+/** Draw a wrapped line, highlighting numbers (digits, %, currency) in the accent colour. */
+function drawHighlighted(ctx: SKRSContext2D, line: string, x: number, y: number, base: string, hi: string) {
+  let cx = x;
+  for (const part of line.split(/(\d[\d.,:/%]*)/)) {
+    if (!part) continue;
+    ctx.fillStyle = /^\d/.test(part) ? hi : base;
+    ctx.fillText(part, cx, y);
+    cx += ctx.measureText(part).width;
   }
-  ctx.restore();
-  ctx.strokeStyle = "#38bdf8";
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.arc(x + r, y + r, r, 0, Math.PI * 2);
-  ctx.stroke();
+}
+
+function pill(ctx: SKRSContext2D, text: string, x: number, y: number, font: string, bg: string, fg: string, padX = 22, h = 52): number {
+  ctx.font = font;
+  const w = ctx.measureText(text).width + padX * 2;
+  ctx.fillStyle = bg;
+  roundRect(ctx, x, y, w, h, h / 2);
+  ctx.fill();
+  ctx.fillStyle = fg;
+  ctx.fillText(text, x + padX, y + h * 0.68);
+  return w;
+}
+
+function background(ctx: SKRSContext2D, brand: Branding, W: number, H: number, vertical: boolean) {
+  // Solid base so the portrait fade has no visible seam.
+  ctx.fillStyle = C.navy;
+  ctx.fillRect(0, 0, W, H);
+  const img = brand.presenterImage;
+  if (vertical) {
+    const ph = 1040;
+    if (img) drawCover(ctx, img, 0, 0, W, ph);
+    const f = ctx.createLinearGradient(0, ph - 360, 0, ph + 20);
+    f.addColorStop(0, "rgba(11,18,32,0)");
+    f.addColorStop(1, C.navy);
+    ctx.fillStyle = f;
+    ctx.fillRect(0, ph - 360, W, 380);
+  } else {
+    const pw = 1040;
+    if (img) drawCover(ctx, img, 0, 0, pw, H);
+    const f = ctx.createLinearGradient(pw - 360, 0, pw + 20, 0);
+    f.addColorStop(0, "rgba(11,18,32,0)");
+    f.addColorStop(1, C.navy);
+    ctx.fillStyle = f;
+    ctx.fillRect(pw - 360, 0, 380, H);
+  }
+  if (!img) {
+    // No portrait: large initial so the layout never looks empty.
+    ctx.fillStyle = "#1d4ed8";
+    ctx.beginPath();
+    ctx.arc(vertical ? W / 2 : 480, vertical ? 480 : H / 2 - 40, 220, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#e0f2fe";
+    ctx.font = `700 240px ${brand.fontFamily}`;
+    const ini = (brand.presenterName ?? "AI").slice(0, 1);
+    ctx.fillText(ini, (vertical ? W / 2 : 480) - ctx.measureText(ini).width / 2, (vertical ? 480 : H / 2 - 40) + 85);
+  }
 }
 
 export function renderSceneFrame(scene: Scene, brand: Branding, index: number, total: number, aspect: Aspect = "9:16"): Buffer {
   const { w: W, h: H } = SIZES[aspect];
   const vertical = aspect === "9:16";
-  const pad = vertical ? 72 : 96;
   const canvas = createCanvas(W, H);
   const ctx = canvas.getContext("2d");
-
-  const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, "#0b1220");
-  g.addColorStop(1, "#16243f");
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, W, H);
-
-  // Header
-  ctx.fillStyle = "#7dd3fc";
-  ctx.font = `700 44px ${brand.fontFamily}`;
-  ctx.fillText("OPENLENS", pad, 130);
-  ctx.fillStyle = "#94a3b8";
-  ctx.font = `400 34px ${brand.fontFamily}`;
-  ctx.fillText(fitWidth(ctx, brand.title, W - pad * 2), pad, 190);
-
-  // Presenter badge (fictional AI presenter, always labelled)
-  const r = vertical ? 90 : 80;
-  const bx = vertical ? pad : W - pad - r * 2;
-  const by = vertical ? 280 : 90;
-  presenterBadge(ctx, brand, bx, by, r);
-  ctx.fillStyle = "#e2e8f0";
-  ctx.font = `600 34px ${brand.fontFamily}`;
   const ui = uiStrings(brand.lang ?? "en");
-  const pLabel = `${brand.presenterName ?? "Presenter"} · ${ui.aiPresenter}`;
-  ctx.fillText(pLabel, vertical ? bx + r * 2 + 28 : bx - ctx.measureText(pLabel).width - 24, by + r + 12);
+  const pad = vertical ? 60 : 72;
+  const ff = brand.fontFamily;
 
-  const top = vertical ? 600 : 330;
+  background(ctx, brand, W, H, vertical);
+
+  // Logo bug (top-left) and AI-presenter tag (top-right)
+  ctx.fillStyle = C.accent;
+  ctx.beginPath();
+  ctx.arc(pad + 26, pad + 26, 26, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = C.navy;
+  ctx.beginPath();
+  ctx.arc(pad + 26, pad + 26, 11, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = C.text;
+  ctx.font = `800 44px ${ff}`;
+  ctx.fillText("OPENLENS", pad + 68, pad + 41);
+  const tag = ui.aiPresenter;
+  ctx.font = `700 28px ${ff}`;
+  const tagW = ctx.measureText(tag).width + 44;
+  const tagX = (vertical ? W - pad : 1040 - 40) - tagW;
+  pill(ctx, tag, tagX, pad, `700 28px ${ff}`, "rgba(251,191,36,0.95)", C.navy, 22, 52);
+
+  // Layout regions
+  const cardX = vertical ? pad : 1090;
+  const cardW = vertical ? W - pad * 2 : W - 1090 - pad;
+  const cardY = vertical ? 1000 : 170;
+  const cardH = vertical ? 470 : 600;
+
+  // Lower third: presenter name plate over the portrait
+  const ltY = vertical ? 880 : H - 330;
+  const ltX = vertical ? pad : pad;
+  ctx.fillStyle = "rgba(11,18,32,0.78)";
+  roundRect(ctx, ltX, ltY, vertical ? W - pad * 2 : 900, 110, 14);
+  ctx.fill();
+  ctx.fillStyle = C.accent;
+  ctx.fillRect(ltX, ltY, 10, 110);
+  ctx.fillStyle = C.text;
+  ctx.font = `800 46px ${ff}`;
+  ctx.fillText(`${brand.presenterName ?? ""}`, ltX + 34, ltY + 50);
+  ctx.fillStyle = C.muted;
+  ctx.font = `500 30px ${ff}`;
+  ctx.fillText(fitWidth(ctx, brand.title, (vertical ? W - pad * 2 : 900) - 60), ltX + 34, ltY + 92);
+
+  // Fact card
+  ctx.fillStyle = C.card;
+  roundRect(ctx, cardX, cardY, cardW, cardH, 22);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(56,189,248,0.35)";
+  ctx.lineWidth = 2;
+  roundRect(ctx, cardX, cardY, cardW, cardH, 22);
+  ctx.stroke();
+  const inner = cardW - 76;
+  let textTop = cardY + 54;
   if (scene.label) {
-    ctx.fillStyle = "#fbbf24";
-    ctx.font = `700 40px ${brand.fontFamily}`;
-    ctx.fillText(scene.label.toUpperCase(), pad, top);
+    pill(ctx, scene.label.toUpperCase(), cardX + 38, cardY + 34, `800 32px ${ff}`, C.amber, C.navy, 20, 52);
+    textTop = cardY + 140;
   }
-
-  // Body text, shrink to fit
-  const maxH = vertical ? 760 : 460;
-  let size = vertical ? 76 : 68;
+  const maxH = cardH - (textTop - cardY) - 40;
+  let size = vertical ? 64 : 60;
   let lines: string[] = [];
-  for (; size >= 40; size -= 4) {
-    ctx.font = `600 ${size}px ${brand.fontFamily}`;
-    lines = wrap(ctx, scene.text, W - pad * 2, brand.lang);
-    if (lines.length * size * 1.3 < maxH) break;
+  for (; size >= 34; size -= 4) {
+    ctx.font = `700 ${size}px ${ff}`;
+    lines = wrap(ctx, scene.text, inner, brand.lang);
+    if (lines.length * size * 1.3 <= maxH) break;
   }
-  ctx.fillStyle = "#f8fafc";
-  lines.forEach((l, i) => ctx.fillText(l, pad, top + 100 + i * size * 1.3));
+  ctx.font = `700 ${size}px ${ff}`;
+  lines.forEach((l, i) => drawHighlighted(ctx, l, cardX + 38, textTop + size + i * size * 1.3, C.text, C.amber));
 
-  // Source chip
-  const chipY = vertical ? H - 360 : H - 250;
-  if (scene.claimIds.length) {
+  // Source chip: outlet names (falls back to claim ids)
+  const all = scene.sources?.length ? scene.sources : [];
+  ctx.font = `600 28px ${ff}`;
+  const joined = all.length ? all.join(" · ") : scene.claimIds.join(", ");
+  const names = all.length > 1 && ctx.measureText(`${ui.evidence}: ${joined}`).width > cardW - 56 ? `${all[0]} +${all.length - 1}` : joined;
+  const chipY = vertical ? cardY + cardH + 24 : cardY + cardH + 22;
+  if (names) {
     ctx.fillStyle = "#1e3a5f";
-    ctx.fillRect(pad, chipY, W - pad * 2, 90);
+    roundRect(ctx, cardX, chipY, cardW, 78, 16);
+    ctx.fill();
     ctx.fillStyle = "#bae6fd";
-    ctx.font = `500 34px ${brand.fontFamily}`;
-    ctx.fillText(fitWidth(ctx, `${ui.evidence}: ${scene.claimIds.join(", ")} · ${ui.openResearch}`, W - pad * 2 - 48), pad + 24, chipY + 58);
+    ctx.font = `600 28px ${ff}`;
+    ctx.fillText(fitWidth(ctx, `${ui.evidence}: ${names}`, cardW - 56), cardX + 28, chipY + 50);
   }
 
-  // Progress bar
-  const barY = vertical ? H - 220 : H - 130;
-  ctx.fillStyle = "#334155";
-  ctx.fillRect(pad, barY, W - pad * 2, 10);
-  ctx.fillStyle = "#38bdf8";
-  ctx.fillRect(pad, barY, ((W - pad * 2) * (index + 1)) / total, 10);
-
-  // AI disclosure on every frame — wrapped, never truncated (shrinks to fit two lines).
+  // Ticker strip: progress + disclosure on every frame (kept clear of the Reels/Shorts UI zone)
+  const tickY = vertical ? 1632 : H - 118;
+  ctx.fillStyle = "rgba(2,6,23,0.9)";
+  ctx.fillRect(0, tickY, W, H - tickY);
+  ctx.fillStyle = "#1e293b";
+  ctx.fillRect(0, tickY, W, 8);
+  ctx.fillStyle = C.accent;
+  ctx.fillRect(0, tickY, (W * (index + 1)) / total, 8);
   ctx.fillStyle = "#e2e8f0";
-  let dSize = 30;
+  let dSize = 28;
   let dLines: string[] = [];
-  for (; dSize >= 20; dSize -= 2) {
-    ctx.font = `500 ${dSize}px ${brand.fontFamily}`;
+  for (; dSize >= 18; dSize -= 2) {
+    ctx.font = `500 ${dSize}px ${ff}`;
     dLines = wrap(ctx, brand.disclosure, W - pad * 2, brand.lang);
     if (dLines.length <= 2) break;
   }
-  const dTop = (vertical ? H - 150 : H - 85) - (dLines.length - 1) * dSize * 0.6;
-  dLines.forEach((l, i) => ctx.fillText(l, pad, dTop + i * dSize * 1.25));
+  const dTop = tickY + (vertical ? 58 : 46) - (dLines.length - 1) * dSize * 0.5;
+  dLines.forEach((l, i) => ctx.fillText(l, pad, dTop + i * dSize * 1.3));
 
   return canvas.toBuffer("image/png");
 }

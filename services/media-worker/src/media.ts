@@ -1,7 +1,8 @@
 import { AI_DISCLOSURE, PRESENTERS, type PresenterId } from "@openlens/config";
 import type { ScriptPayload } from "@openlens/schemas";
 import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { existsSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { fontFor, registerDefaultFonts } from "./fonts.js";
 import { run, renderVideo } from "./render.js";
 import { loadPresenter, type Aspect, type Scene } from "./scenes.js";
@@ -17,6 +18,8 @@ export interface MediaJob {
   /** Skip TTS (silent track, estimated timings) — for tests/offline. */
   silent?: boolean;
   presenterImagePath?: string;
+  /** claimId -> outlet names, for the on-screen source chip. */
+  sourceLabels?: Record<string, string[]>;
 }
 
 export interface MediaResult {
@@ -24,6 +27,12 @@ export interface MediaResult {
   captionsVtt: string;
   videos: { aspect: Aspect; mp4: string; hls?: string; thumbnail: string; durationSeconds: number }[];
 }
+
+/** Repo portrait for a presenter (data/presenters/<id>.png) when it exists. */
+const defaultPortrait = (id: string) => {
+  const p = resolve(import.meta.dirname, "../../../data/presenters", `${id}.png`);
+  return existsSync(p) ? p : undefined;
+};
 
 const fmt = (t: number) => {
   const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
@@ -85,9 +94,12 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
     fontFamily: fontFor(job.lang),
     lang: job.lang,
     presenterName: persona?.name,
-    presenterImage: await loadPresenter(job.presenterImagePath),
+    presenterImage: await loadPresenter(job.presenterImagePath ?? defaultPortrait(presenter)),
   };
-  const scenes: Scene[] = timed.map((t) => ({ label: t.label, text: t.text, claimIds: t.claimIds, seconds: t.seconds }));
+  const scenes: Scene[] = timed.map((t) => ({
+    label: t.label, text: t.text, claimIds: t.claimIds, seconds: t.seconds,
+    sources: [...new Set(t.claimIds.flatMap((id) => job.sourceLabels?.[id] ?? []))].slice(0, 2),
+  }));
   const videos: MediaResult["videos"] = [];
   for (const aspect of job.aspects ?? (["9:16"] as Aspect[])) {
     const name = aspect === "9:16" ? "video-916" : "video-169";

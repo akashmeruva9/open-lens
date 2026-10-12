@@ -84,6 +84,10 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
     if (!rec) throw new Error("story not found");
     const scripts = rec.outputs.filter((o) => o.kind === "script" && (!onlyScripts || onlyScripts.includes(o.id)));
     const made: OutputRecord[] = [];
+    const publisher = new Map(rec.sources.map((x) => [x.id, x.publisher]));
+    const sourceLabels = Object.fromEntries(
+      rec.claims.map((c) => [c.id, [...new Set(c.evidence.map((e) => publisher.get(e.sourceId)).filter((x): x is string => Boolean(x)))]]),
+    );
     for (const s of scripts) {
       const sfx = `${s.tier ?? "national"}-${s.lang}`;
       const script = s.payload as unknown as ScriptPayload;
@@ -91,6 +95,7 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
         key: sfx, lang: s.lang, script, outDir: join(deps.workDir, storyId),
         aspects: ["9:16", "16:9"], silent: process.env.MEDIA_SILENT === "1",
         presenterImagePath: deps.presenterImages?.[script.presenter],
+        sourceLabels,
       });
       const base = `${storyId}/${sfx}/v${rec.story.version}`;
       const captionsUrl = await deps.assets.put(r.captionsVtt, `${base}/captions.vtt`, "text/vtt");

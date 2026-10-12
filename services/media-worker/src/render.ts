@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { renderSceneFrame, type Aspect, type Branding, type Scene } from "./scenes.js";
+import { portraitBox, renderSceneFrame, SIZES, type Aspect, type Branding, type Scene } from "./scenes.js";
 
 export function run(cmd: string, args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -37,29 +37,53 @@ export async function renderVideo(opts: RenderOptions): Promise<RenderResult> {
   const work = join(outDir, `${name}-frames`);
   await mkdir(work, { recursive: true });
 
-  const listLines: string[] = [];
-  for (let i = 0; i < scenes.length; i++) {
-    const file = join(work, `scene-${String(i).padStart(3, "0")}.png`);
-    await writeFile(file, renderSceneFrame(scenes[i]!, brand, i, scenes.length, opts.aspect ?? "9:16"));
-    listLines.push(`file '${file}'`, `duration ${scenes[i]!.seconds}`);
-  }
-  // concat demuxer needs the last file repeated
-  listLines.push(`file '${join(work, `scene-${String(scenes.length - 1).padStart(3, "0")}.png`)}'`);
-  const listPath = join(work, "list.txt");
-  await writeFile(listPath, listLines.join("\n"));
-
+  const aspect = opts.aspect ?? "9:16";
   const total = scenes.reduce((s, sc) => s + sc.seconds, 0);
   const mp4 = join(outDir, `${name}.mp4`);
   const audioArgs = opts.audioPath
     ? ["-i", opts.audioPath]
     : ["-f", "lavfi", "-i", "anullsrc=channel_layout=mono:sample_rate=44100"];
 
+  // With a presenter idle clip: each scene is composited (navy base + looping clip + transparent text overlay).
+  // Without one: still frames per scene, as before.
+  const listLines: string[] = [];
+  const { w: W, h: H } = SIZES[aspect];
+  for (let i = 0; i < scenes.length; i++) {
+    const sc = scenes[i]!;
+    const tag = String(i).padStart(3, "0");
+    if (brand.presenterVideo) {
+      const overlay = join(work, `overlay-${tag}.png`);
+      await writeFile(overlay, renderSceneFrame(sc, brand, i, scenes.length, aspect, true));
+      const box = portraitBox(sc.layout === "anchor" ? "anchor" : "split", aspect);
+      const seg = join(work, `seg-${tag}.mp4`);
+      const offset = ((i * 2.7) % 6).toFixed(2); // stagger so consecutive scenes don't show the same blink
+      await run("ffmpeg", [
+        "-y",
+        "-f", "lavfi", "-i", `color=c=0x0b1220:s=${W}x${H}:r=30:d=${sc.seconds}`,
+        "-stream_loop", "-1", "-ss", offset, "-i", brand.presenterVideo,
+        "-loop", "1", "-framerate", "30", "-t", String(sc.seconds), "-i", overlay,
+        "-filter_complex",
+        `[1:v]crop=iw:trunc(min(ih\\,iw*4/3)/2)*2:0:(ih-min(ih\\,iw*4/3))/2,scale=${box.w}:${box.h}:force_original_aspect_ratio=increase,crop=${box.w}:${box.h}:(iw-${box.w})/2:(ih-${box.h})*0.15,setsar=1,fps=30[v];` +
+          `[0:v][v]overlay=${box.x}:${box.y}[b];[b][2:v]overlay=0:0:format=auto,format=yuv420p[o]`,
+        "-map", "[o]", "-t", String(sc.seconds), "-an",
+        "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", seg,
+      ]);
+      listLines.push(`file '${seg}'`);
+    } else {
+      const file = join(work, `scene-${tag}.png`);
+      await writeFile(file, renderSceneFrame(sc, brand, i, scenes.length, aspect));
+      listLines.push(`file '${file}'`, `duration ${sc.seconds}`);
+    }
+  }
+  if (!brand.presenterVideo) listLines.push(`file '${join(work, `scene-${String(scenes.length - 1).padStart(3, "0")}.png`)}'`); // concat demuxer needs the last file repeated
+  const listPath = join(work, "list.txt");
+  await writeFile(listPath, listLines.join("\n"));
+
   await run("ffmpeg", [
     "-y", "-f", "concat", "-safe", "0", "-i", listPath,
     ...audioArgs,
     "-t", String(total),
-    "-vf", "fps=30,format=yuv420p",
-    "-c:v", "libx264", "-preset", "veryfast", "-crf", "23",
+    ...(brand.presenterVideo ? ["-c:v", "copy"] : ["-vf", "fps=30,format=yuv420p", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23"]),
     "-af", "loudnorm=I=-16:TP=-1.5:LRA=11",
     "-c:a", "aac", "-b:a", "128k", "-shortest",
     "-movflags", "+faststart",

@@ -34,6 +34,12 @@ const defaultPortrait = (id: string) => {
   return existsSync(p) ? p : undefined;
 };
 
+/** Repo idle clip for a presenter (data/presenters/<id>.idle.mp4) when it exists. */
+const defaultIdleClip = (id: string) => {
+  const p = resolve(import.meta.dirname, "../../../data/presenters", `${id}.idle.mp4`);
+  return existsSync(p) && process.env.PRESENTER_VIDEO !== "0" ? p : undefined;
+};
+
 const fmt = (t: number) => {
   const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${s.toFixed(3).padStart(6, "0")}`;
@@ -96,6 +102,7 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
     lang: job.lang,
     presenterName: persona?.name,
     presenterImage: await loadPresenter(job.presenterImagePath ?? defaultPortrait(presenter)),
+    presenterVideo: defaultIdleClip(presenter),
   };
   const scenes: Scene[] = timed.map((t, i) => ({
     label: t.label, text: t.text, claimIds: t.claimIds, seconds: t.seconds,

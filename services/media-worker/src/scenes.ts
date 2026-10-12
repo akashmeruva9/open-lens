@@ -32,6 +32,8 @@ export interface Branding {
   presenterName?: string;
   /** Optional presenter portrait (fictional, disclosed). */
   presenterImage?: Image;
+  /** Optional looping idle clip of the presenter (silent, 9:16). Composited by ffmpeg under the overlay. */
+  presenterVideo?: string;
 }
 
 /** Register extra font files (e.g. Noto Sans Telugu in the Docker image). */
@@ -72,6 +74,13 @@ const C = {
   text: "#f8fafc",
   muted: "#94a3b8",
 };
+
+/** Where the presenter sits for each layout/shape (also used to place the idle video in ffmpeg). */
+export function portraitBox(layout: "anchor" | "split", aspect: Aspect): { x: number; y: number; w: number; h: number } {
+  const { w: W, h: H } = SIZES[aspect];
+  if (aspect === "9:16") return layout === "anchor" ? { x: 0, y: 0, w: W, h: 1260 } : { x: 0, y: 0, w: W, h: 1040 };
+  return layout === "anchor" ? { x: (W - 1100) / 2, y: 0, w: 1100, h: H } : { x: 0, y: 0, w: 1040, h: H };
+}
 
 /** Draw an image to cover a box (centre-top crop so faces stay in frame). */
 function drawCover(ctx: SKRSContext2D, img: Image, x: number, y: number, w: number, h: number) {
@@ -114,11 +123,13 @@ function pill(ctx: SKRSContext2D, text: string, x: number, y: number, font: stri
   return w;
 }
 
-function background(ctx: SKRSContext2D, brand: Branding, W: number, H: number, vertical: boolean) {
+function background(ctx: SKRSContext2D, brand: Branding, W: number, H: number, vertical: boolean, overlay = false) {
   // Solid base so the portrait fade has no visible seam.
-  ctx.fillStyle = C.navy;
-  ctx.fillRect(0, 0, W, H);
-  const img = brand.presenterImage;
+  if (!overlay) {
+    ctx.fillStyle = C.navy;
+    ctx.fillRect(0, 0, W, H);
+  }
+  const img = overlay ? undefined : brand.presenterImage;
   if (vertical) {
     const ph = 1040;
     if (img) drawCover(ctx, img, 0, 0, W, ph);
@@ -136,7 +147,7 @@ function background(ctx: SKRSContext2D, brand: Branding, W: number, H: number, v
     ctx.fillStyle = f;
     ctx.fillRect(pw - 360, 0, 380, H);
   }
-  if (!img) {
+  if (!img && !overlay) {
     // No portrait: large initial so the layout never looks empty.
     ctx.fillStyle = "#1d4ed8";
     ctx.beginPath();
@@ -149,8 +160,9 @@ function background(ctx: SKRSContext2D, brand: Branding, W: number, H: number, v
   }
 }
 
-export function renderSceneFrame(scene: Scene, brand: Branding, index: number, total: number, aspect: Aspect = "9:16"): Buffer {
-  return scene.layout === "anchor" ? renderAnchor(scene, brand, index, total, aspect) : renderSplit(scene, brand, index, total, aspect);
+/** overlay=true renders a transparent text/graphics layer (no base, no portrait) to composite over the presenter video. */
+export function renderSceneFrame(scene: Scene, brand: Branding, index: number, total: number, aspect: Aspect = "9:16", overlay = false): Buffer {
+  return scene.layout === "anchor" ? renderAnchor(scene, brand, index, total, aspect, overlay) : renderSplit(scene, brand, index, total, aspect, overlay);
 }
 
 /** First sentence of a scene as a TV headline (works for । and 。 too). */
@@ -195,7 +207,7 @@ function chrome(ctx: SKRSContext2D, brand: Branding, W: number, H: number, verti
 }
 
 /** TV look: presenter full-frame, white headline bar with a source box on the left. */
-function renderAnchor(scene: Scene, brand: Branding, index: number, total: number, aspect: Aspect): Buffer {
+function renderAnchor(scene: Scene, brand: Branding, index: number, total: number, aspect: Aspect, overlay = false): Buffer {
   const { w: W, h: H } = SIZES[aspect];
   const vertical = aspect === "9:16";
   const canvas = createCanvas(W, H);
@@ -204,13 +216,16 @@ function renderAnchor(scene: Scene, brand: Branding, index: number, total: numbe
   const ff = brand.fontFamily;
   const pad = vertical ? 60 : 72;
 
-  ctx.fillStyle = C.navy;
-  ctx.fillRect(0, 0, W, H);
+  if (!overlay) {
+    ctx.fillStyle = C.navy;
+    ctx.fillRect(0, 0, W, H);
+  }
   const img = brand.presenterImage;
-  if (img) {
+  // Overlay mode still draws the edge fades; the presenter video itself is composited by ffmpeg underneath.
+  if (img || overlay) {
     if (vertical) {
       const ph = 1260;
-      drawCover(ctx, img, 0, 0, W, ph);
+      if (img && !overlay) drawCover(ctx, img, 0, 0, W, ph);
       const f = ctx.createLinearGradient(0, ph - 220, 0, ph);
       f.addColorStop(0, "rgba(11,18,32,0)");
       f.addColorStop(1, C.navy);
@@ -218,7 +233,7 @@ function renderAnchor(scene: Scene, brand: Branding, index: number, total: numbe
       ctx.fillRect(0, ph - 220, W, 220);
     } else {
       const pw = 1100, px = (W - pw) / 2;
-      drawCover(ctx, img, px, 0, pw, H);
+      if (img && !overlay) drawCover(ctx, img, px, 0, pw, H);
       for (const [x0, x1, a, b] of [[px, px + 340, 1, 0], [px + pw - 340, px + pw, 0, 1]] as const) {
         const f = ctx.createLinearGradient(x0, 0, x1, 0);
         f.addColorStop(0, `rgba(11,18,32,${a})`);
@@ -284,7 +299,7 @@ function renderAnchor(scene: Scene, brand: Branding, index: number, total: numbe
   return canvas.toBuffer("image/png");
 }
 
-function renderSplit(scene: Scene, brand: Branding, index: number, total: number, aspect: Aspect): Buffer {
+function renderSplit(scene: Scene, brand: Branding, index: number, total: number, aspect: Aspect, overlay = false): Buffer {
   const { w: W, h: H } = SIZES[aspect];
   const vertical = aspect === "9:16";
   const canvas = createCanvas(W, H);
@@ -293,7 +308,7 @@ function renderSplit(scene: Scene, brand: Branding, index: number, total: number
   const pad = vertical ? 60 : 72;
   const ff = brand.fontFamily;
 
-  background(ctx, brand, W, H, vertical);
+  background(ctx, brand, W, H, vertical, overlay);
 
   // Logo bug (top-left) and AI-presenter tag (top-right)
   ctx.fillStyle = C.accent;

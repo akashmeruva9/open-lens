@@ -1,6 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 import { LANGUAGES, MODELS, PRESENTERS, type LangCode, type PresenterId } from "@openlens/config";
-import { writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
 
 let ai: GoogleGenAI | undefined;
 function client() {
@@ -72,9 +74,23 @@ Read the transcript exactly as written. Do not speak these notes. Do not add or 
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/** Synthesize one line with the presenter's voice; returns a WAV buffer. */
+const CACHE_DIR = () => process.env.TTS_CACHE_DIR ?? resolve(import.meta.dirname, "../../../.data/tts-cache");
+
+/** Synthesize one line with the presenter's voice; returns a WAV buffer. Cached by (model, voice, direction, text),
+ *  so re-rendering after a layout change never re-bills narration. */
 export async function synthesize(text: string, presenter: PresenterId): Promise<Buffer> {
   const p = PRESENTERS[presenter];
+  const key = createHash("sha256").update([MODELS.tts, p.voice, direction(presenter), text].join("\u0000")).digest("hex").slice(0, 32);
+  const file = join(CACHE_DIR(), `${key}.wav`);
+  const hit = await readFile(file).catch(() => undefined);
+  if (hit) return hit;
+  const wav = await synthesizeUncached(text, presenter, p);
+  await mkdir(CACHE_DIR(), { recursive: true });
+  await writeFile(file, wav);
+  return wav;
+}
+
+async function synthesizeUncached(text: string, presenter: PresenterId, p: (typeof PRESENTERS)[PresenterId]): Promise<Buffer> {
   let last: unknown;
   for (let attempt = 0; attempt < 4; attempt++) {
     try {

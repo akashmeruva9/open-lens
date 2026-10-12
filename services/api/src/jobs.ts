@@ -77,12 +77,12 @@ async function uploadDir(assets: AssetStore, dir: string, keyPrefix: string) {
 }
 
 /** Render narrated video + audio for every script (or only the given script ids). */
-export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: string[]) {
+export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: string[], opts: { langs?: string[]; aspects?: ("9:16" | "16:9")[] } = {}) {
   emit(storyId, { type: "stage", stage: "media", status: "started" });
   try {
     const rec = await deps.store.get(storyId);
     if (!rec) throw new Error("story not found");
-    const scripts = rec.outputs.filter((o) => o.kind === "script" && (!onlyScripts || onlyScripts.includes(o.id)));
+    const scripts = rec.outputs.filter((o) => o.kind === "script" && (!onlyScripts || onlyScripts.includes(o.id)) && (!opts.langs?.length || opts.langs.includes(o.lang)));
     const made: OutputRecord[] = [];
     const publisher = new Map(rec.sources.map((x) => [x.id, x.publisher]));
     const sourceLabels = Object.fromEntries(
@@ -93,7 +93,7 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
       const script = s.payload as unknown as ScriptPayload;
       const r = await renderScriptMedia({
         key: sfx, lang: s.lang, script, outDir: join(deps.workDir, storyId),
-        aspects: ["9:16", "16:9"], silent: process.env.MEDIA_SILENT === "1",
+        aspects: opts.aspects ?? ["9:16", "16:9"], silent: process.env.MEDIA_SILENT === "1",
         presenterImagePath: deps.presenterImages?.[script.presenter],
         sourceLabels,
       });

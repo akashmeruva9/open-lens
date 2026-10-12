@@ -9,6 +9,7 @@
     "test": "node --import tsx --test src/**/*.test.ts",
     "dev": "node --env-file-if-exists=../../.env --import tsx --watch src/server.ts",
     "start": "node dist/server.js",
+    "render": "node --env-file-if-exists=../../.env --import tsx src/render.ts",
     "seed": "node --env-file-if-exists=../../.env --import tsx src/seed.ts"
   },
   "dependencies": {

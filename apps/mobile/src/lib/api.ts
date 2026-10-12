@@ -1,3 +1,4 @@
+import { matchesRegion } from './catalog';
 import { createClient, type FeedQuery } from '@openlens/client';
 
 import feedFixture from '../../../../data/fixtures/feed.json';
@@ -20,7 +21,7 @@ const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 function matches(item: FeedItem, q: FeedQuery) {
   if (q.lang && !item.languages.includes(q.lang)) return false;
-  if (q.region && item.region !== q.region && !item.region.startsWith(`${q.region}-`)) return false;
+  if (q.region && !matchesRegion(item.region, q.region)) return false;
   if (q.topic && !item.topics.includes(q.topic)) return false;
   return true;
 }

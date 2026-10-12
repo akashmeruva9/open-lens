@@ -22,6 +22,29 @@ Rubric weighting drives priorities: **Technical Merit & GenAI 40% · Problem/Imp
 
 ---
 
+## 1b. JAPAC scope (updated 12 Oct)
+
+OpenLens covers the whole Asia-Pacific region. The registry in `packages/config/src/japac.ts` is the single source of truth:
+
+| Market | Languages | | Market | Languages |
+|---|---|---|---|---|
+| APAC (region-wide desk) | en | | SG Singapore | en, zh-Hans, ms |
+| IN India | hi, en, te, ta | | MY Malaysia | ms, en, zh-Hans |
+| JP Japan | ja | | ID Indonesia | id |
+| KR South Korea | ko | | TH Thailand | th |
+| TW Taiwan | zh-Hant | | VN Vietnam | vi |
+| HK Hong Kong | zh-Hant, en | | PH Philippines | fil, en |
+| AU Australia / NZ New Zealand | en | | | |
+
+- **Story languages** default to the story's market languages + English (`languagesFor`). APAC-wide stories render in all 13 languages and appear in every market's feed.
+- **YouTube:** one channel per language (`CHANNEL_PLAN`): English = "OpenLens Asia-Pacific" (international tier), Telugu/Tamil = regional, all others national. Each has a fictional, disclosed presenter (`PRESENTERS`). Publisher reads `YOUTUBE_REFRESH_TOKEN_<LANG>` per channel.
+- **Rendering:** word-aware line breaking (`Intl.Segmenter`) for Japanese, Chinese and Thai; Noto CJK/Thai/Tamil fonts in Docker; on-screen labels and the AI disclosure are localized (disclosure always also says "AI-generated").
+- **Cost:** channel copy is one structured Gemini call per language (was six); a language costs ~3 calls (localize, back-translate, channel package) plus TTS per script line.
+- **Mainland China is out of scope:** YouTube, X, Instagram, Facebook and WhatsApp are unavailable there.
+- **Real sources:** `npm run intake -w @openlens/agents -- <id> <region> "<title>" <urls…>` ingests only domains in `data/sources/allowlist.json`, which records rights and a documented lens-rating basis per outlet. Left/centre/right is not a universal axis across JAPAC; ratings must cite a per-market source or stay `unrated`.
+
+---
+
 ## 2. System architecture
 
 ```

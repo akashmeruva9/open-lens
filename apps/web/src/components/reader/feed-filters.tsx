@@ -1,10 +1,11 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
+import { LANG_CODES, MARKET_CODES } from "@openlens/config";
 import { langName, langNative, regionName } from "@/lib/format";
 
-const LANGS = ["en", "hi", "te", "es"];
-const REGIONS = ["IN-TG", "IN-KA", "IN-MH", "IN-DL"];
+const LANGS = LANG_CODES;
+const REGIONS = MARKET_CODES.filter((m) => m !== "APAC");
 
 export function FeedFilters() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export function FeedFilters() {
       <label className="sr-only" htmlFor="f-region">Region</label>
       <select id="f-region" value={region} onChange={(e) => set("region", e.target.value)}
         className="h-9 rounded-lg border border-line bg-surface px-2.5 text-sm text-ink">
-        <option value="">All regions</option>
+        <option value="">All of Asia-Pacific</option>
         {REGIONS.map((r) => (
           <option key={r} value={r}>{regionName(r)}</option>
         ))}

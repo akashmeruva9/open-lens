@@ -1,13 +1,10 @@
-import { MODELS } from "@openlens/config";
+import { MODELS, numbersIn } from "@openlens/config";
 import type { Assessment, Claim, QaFlag, SourceRecord } from "@openlens/schemas";
 import { z } from "zod";
 import { generateStructured, type RunMeta } from "./gemini.js";
 import { validateAssessment, validateClaims } from "./validators.js";
 
-/** Numbers (with optional %/decimal) appearing in text. */
-export function numbersIn(text: string): string[] {
-  return (text.match(/\d[\d,]*(?:\.\d+)?%?/g) ?? []).map((n) => n.replace(/,/g, "").replace(/%$/, ""));
-}
+export { numbersIn };
 
 /** Numbers in `text` that do not appear anywhere in the reference texts (claims + passages). */
 export function unknownNumbers(text: string, reference: string[]): string[] {

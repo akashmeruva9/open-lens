@@ -31,7 +31,7 @@ const fmt = (t: number) => {
 };
 
 /** Words-per-second estimate used when TTS is skipped. */
-const estimate = (text: string) => Math.max(2.5, text.split(/\s+/).length / 2.6);
+const estimate = (text: string) => Math.max(2.5, [...new Intl.Segmenter(undefined, { granularity: "word" }).segment(text)].filter((s) => s.isWordLike).length / 2.6);
 
 export function toVtt(lines: { text: string; seconds: number }[]): string {
   let t = 0;
@@ -83,6 +83,7 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
     title: job.script.title,
     disclosure: AI_DISCLOSURE[job.lang] ?? AI_DISCLOSURE.en!,
     fontFamily: fontFor(job.lang),
+    lang: job.lang,
     presenterName: persona?.name,
     presenterImage: await loadPresenter(job.presenterImagePath),
   };

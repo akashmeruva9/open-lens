@@ -12,7 +12,7 @@ RUN npm ci -w @openlens/api -w @openlens/agents -w @openlens/media-worker -w @op
  && npm run build -w @openlens/api
 
 FROM node:24-bookworm-slim
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg fonts-noto-core ca-certificates \
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg fonts-noto-core fonts-noto-cjk ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 ENV NODE_ENV=production DATA_DIR=/tmp/openlens WORK_DIR=/tmp/openlens/work PORT=8080

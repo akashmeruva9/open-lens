@@ -1,6 +1,7 @@
 // Usage:
 //   npm run seed -w @openlens/api -- --fixture            load data/fixtures/story-bundle.json (instant, no AI)
 //   npm run seed -w @openlens/api -- [storyDir] [--stages a,b]  create a story from a source pack and run the live pipeline
+import { languagesFor } from "@openlens/config";
 import { SourceRecord, type Story, type StoryBundle } from "@openlens/schemas";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -30,7 +31,7 @@ if (args.includes("--fixture")) {
   if (!(await store.get(id)) || !stages) {
     const rec = emptyRecord({
       id, title: meta.title ?? sources[0]!.title, summary: "", region: meta.region ?? "IN", topics: meta.topics ?? [],
-      languages: meta.languages ?? ["en", "hi", "te", "es"], riskTier: "low", status: "draft", version: 1, createdAt: t, updatedAt: t,
+      languages: meta.languages ?? languagesFor([meta.region ?? "APAC"]), riskTier: "low", status: "draft", version: 1, createdAt: t, updatedAt: t,
     });
     rec.sources = sources;
     await store.put(rec);

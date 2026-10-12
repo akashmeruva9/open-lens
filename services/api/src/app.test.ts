@@ -72,3 +72,11 @@ test("contesting a claim cited as established blocks approval until resynthesis"
   assert.equal(res.status, 409);
   assert.match(JSON.stringify(await res.json()), /unsupported_established/);
 });
+
+test("market filter: own market, sub-national, and APAC-wide stories", async () => {
+  const { inMarket } = await import("./app.js");
+  assert.ok(inMarket("IN-TG", "IN"));
+  assert.ok(inMarket("APAC", "JP"));
+  assert.ok(!inMarket("JP", "IN"));
+  assert.ok(inMarket("JP", "APAC"));
+});

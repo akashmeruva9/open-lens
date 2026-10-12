@@ -1,24 +1,16 @@
-const LANG_NAMES: Record<string, { name: string; native: string }> = {
-  en: { name: "English", native: "English" },
-  hi: { name: "Hindi", native: "हिन्दी" },
-  te: { name: "Telugu", native: "తెలుగు" },
-  es: { name: "Spanish", native: "Español" },
-  ar: { name: "Arabic", native: "العربية" },
-  ta: { name: "Tamil", native: "தமிழ்" },
-};
+import { isLang, LANGUAGES, marketOf, regionLabel } from "@openlens/config";
 
-export const langName = (code: string) => LANG_NAMES[code]?.name ?? code.toUpperCase();
-export const langNative = (code: string) => LANG_NAMES[code]?.native ?? code.toUpperCase();
+export const langName = (code: string) => (isLang(code) ? LANGUAGES[code].name : code.toUpperCase());
+export const langNative = (code: string) => (isLang(code) ? LANGUAGES[code].native : code.toUpperCase());
 
-const REGION_NAMES: Record<string, string> = {
-  "IN-TG": "Telangana, India",
-  "IN-MH": "Maharashtra, India",
-  "IN-KA": "Karnataka, India",
-  "IN-DL": "Delhi, India",
-  IN: "India",
-  GLOBAL: "Global",
-};
-export const regionName = (code: string) => REGION_NAMES[code] ?? code;
+export const regionName = (code: string) => regionLabel(code);
+
+/** Market filter: own market (incl. sub-national regions) plus region-wide APAC stories. */
+export function matchesRegion(storyRegion: string, filter: string): boolean {
+  if (!filter || filter === "APAC") return true;
+  const m = marketOf(storyRegion);
+  return m === "APAC" || storyRegion === filter || m === marketOf(filter);
+}
 
 export function relativeTime(iso: string, now: number = Date.now()): string {
   const t = new Date(iso).getTime();

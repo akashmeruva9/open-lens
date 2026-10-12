@@ -1,4 +1,5 @@
 "use client";
+import { matchesRegion } from "@/lib/format";
 import type { FeedItem } from "@openlens/schemas";
 import { useLiveFeed } from "@/lib/data/live";
 import { FeedCard } from "./feed-card";
@@ -6,7 +7,7 @@ import { FeedCard } from "./feed-card";
 export function FeedList({ initial, lang, region }: { initial: FeedItem[]; lang?: string; region?: string }) {
   const items = useLiveFeed(
     initial,
-    (f) => (!lang || f.languages.includes(lang)) && (!region || f.region === region),
+    (f) => (!lang || f.languages.includes(lang)) && (!region || matchesRegion(f.region, region)),
   );
   if (!items.length) {
     return (

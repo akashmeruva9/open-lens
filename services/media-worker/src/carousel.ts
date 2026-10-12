@@ -1,5 +1,5 @@
 import { createCanvas } from "@napi-rs/canvas";
-import { AI_DISCLOSURE } from "@openlens/config";
+import { AI_DISCLOSURE, uiStrings, wrapText } from "@openlens/config";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fontFor, registerDefaultFonts } from "./fonts.js";
@@ -8,17 +8,6 @@ export interface Slide { heading: string; body: string; claimIds: string[] }
 
 const W = 1080;
 const H = 1350; // Instagram 4:5 portrait
-
-function wrap(ctx: ReturnType<ReturnType<typeof createCanvas>["getContext"]>, text: string, max: number) {
-  const out: string[] = [];
-  let line = "";
-  for (const w of text.split(/\s+/)) {
-    const t = line ? `${line} ${w}` : w;
-    if (ctx.measureText(t).width > max && line) { out.push(line); line = w; } else line = t;
-  }
-  if (line) out.push(line);
-  return out;
-}
 
 /** Render Instagram carousel slides to PNG files; returns paths in slide order. */
 export async function renderCarouselSlides(slides: Slide[], lang: string, title: string, outDir: string): Promise<string[]> {
@@ -44,7 +33,7 @@ export async function renderCarouselSlides(slides: Slide[], lang: string, title:
     ctx.fillStyle = "#fbbf24";
     let size = 64;
     ctx.font = `700 ${size}px ${font}`;
-    const head = wrap(ctx, s.heading, W - 160);
+    const head = wrapText(s.heading, lang, W - 160, (t) => ctx.measureText(t).width);
     head.forEach((l, k) => ctx.fillText(l, 80, 330 + k * size * 1.25));
 
     let y = 330 + head.length * size * 1.25 + 60;
@@ -52,7 +41,7 @@ export async function renderCarouselSlides(slides: Slide[], lang: string, title:
     let body: string[] = [];
     for (; size >= 32; size -= 2) {
       ctx.font = `500 ${size}px ${font}`;
-      body = wrap(ctx, s.body, W - 160);
+      body = wrapText(s.body, lang, W - 160, (t) => ctx.measureText(t).width);
       if (y + body.length * size * 1.4 < H - 260) break;
     }
     ctx.fillStyle = "#f8fafc";
@@ -61,11 +50,12 @@ export async function renderCarouselSlides(slides: Slide[], lang: string, title:
     if (s.claimIds.length) {
       ctx.fillStyle = "#bae6fd";
       ctx.font = `500 28px ${font}`;
-      ctx.fillText(`Evidence: ${s.claimIds.join(", ")}`, 80, H - 170);
+      ctx.fillText(`${uiStrings(lang).evidence}: ${s.claimIds.join(", ")}`, 80, H - 190);
     }
     ctx.fillStyle = "#cbd5e1";
     ctx.font = `400 26px ${font}`;
-    ctx.fillText((AI_DISCLOSURE[lang] ?? AI_DISCLOSURE.en!).slice(0, 80), 80, H - 90);
+    const disc = wrapText(AI_DISCLOSURE[lang] ?? AI_DISCLOSURE.en!, lang, W - 160, (t) => ctx.measureText(t).width);
+    disc.slice(0, 3).forEach((l, k) => ctx.fillText(l, 80, H - 120 + k * 34));
 
     const p = join(outDir, `slide-${String(i + 1).padStart(2, "0")}.png`);
     await writeFile(p, c.toBuffer("image/png"));

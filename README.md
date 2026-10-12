@@ -37,7 +37,15 @@ npm run dev -w @openlens/api    # http://localhost:8080  (AUTH_MODE=dev locally)
 
 Useful env (`.env.example` lists all): `GEMINI_CACHE_DIR` (cache model responses while iterating), `MEDIA_SILENT=1` (skip TTS), `RESEARCH_GROUNDING=0` (skip Search grounding), `MODEL_*` overrides.
 
-### Adding a real story
+### Adding a real story (any JAPAC market)
+Add the outlets to `data/sources/allowlist.json` (rights + documented lens-rating basis), then:
+```bash
+npm run intake -w @openlens/agents -- jp-fare-2026 JP "Tokyo Metro fare revision" <url1> <url2> <primary-doc-url>
+npm run seed -w @openlens/api -- data/seed/jp-fare-2026
+```
+Story languages default to the market's languages + English (`APAC` = all 13). See plan.md §1b.
+
+### Adding a story by hand
 Create `data/seed/<story>/sources.json` (array of `SourceRecord`, see `packages/schemas/src/ledger.ts`) using only permitted/public sources, set each outlet's `lens.rating` + `ratingBasis` from a documented rating table, and mark primary documents `sourceType: "primary"`. Optional `story.json` sets title/region/topics/languages.
 
 ## Tests

@@ -1,5 +1,5 @@
 import { validateAssessment } from "@openlens/agents";
-import { PUBLIC_WEB_URL } from "@openlens/config";
+import { languagesFor, marketOf, PUBLIC_WEB_URL } from "@openlens/config";
 import { SourceRecord, type FeedItem, type OutputRecord, type Story, type StoryBundle } from "@openlens/schemas";
 import { createHash } from "node:crypto";
 import { Hono, type Context } from "hono";
@@ -17,6 +17,13 @@ import { emptyRecord, type StoryRecord } from "./store.js";
 const PUBLIC_STATUSES = new Set(["published", "stale", "corrected"]);
 const READER_KINDS = new Set(["script", "video", "audio"]);
 const READER_OUTPUT_STATUSES = new Set(["approved", "published"]);
+
+/** A market filter matches its own and sub-national stories, plus region-wide (APAC) stories. */
+export function inMarket(storyRegion: string, filter: string): boolean {
+  if (filter.toUpperCase() === "APAC") return true;
+  const m = marketOf(storyRegion);
+  return m === "APAC" || storyRegion === filter || m === marketOf(filter);
+}
 
 const httpError = (status: number, message: string) => Object.assign(new Error(message), { status });
 const userOf = (c: Context) => (c.get("user" as never) as string) ?? "unknown";
@@ -50,7 +57,8 @@ const CreateStory = z.object({
   title: z.string().min(3),
   region: z.string(),
   topics: z.array(z.string()),
-  languages: z.array(z.string()).default(["en", "hi", "te", "es"]),
+  /** Defaults to the market's languages + English (see languagesFor). */
+  languages: z.array(z.string()).optional(),
   riskTier: z.enum(["low", "sensitive"]).default("low"),
   sources: z.array(SourceRecord.omit({ storyId: true })).min(1),
 });
@@ -88,7 +96,7 @@ export function createApp(deps: Deps) {
     const recs = await Promise.all((await deps.store.listStories()).filter((s) => PUBLIC_STATUSES.has(s.status)).map((s) => deps.store.get(s.id)));
     const items = recs
       .filter((r): r is StoryRecord => Boolean(r))
-      .filter((r) => (!lang || r.story.languages.includes(lang)) && (!region || r.story.region === region) && (!topic || r.story.topics.includes(topic)))
+      .filter((r) => (!lang || r.story.languages.includes(lang)) && (!region || inMarket(r.story.region, region)) && (!topic || r.story.topics.includes(topic)))
       .map(toFeedItem)
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     return c.json(items);
@@ -151,7 +159,7 @@ export function createApp(deps: Deps) {
     const b = CreateStory.parse(await c.req.json());
     const id = b.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) + "-" + Date.now().toString(36).slice(-4);
     const t = new Date().toISOString();
-    const story: Story = { id, title: b.title, summary: "", region: b.region, topics: b.topics, languages: b.languages, riskTier: b.riskTier, status: "draft", version: 1, createdAt: t, updatedAt: t };
+    const story: Story = { id, title: b.title, summary: "", region: b.region, topics: b.topics, languages: b.languages ?? languagesFor([b.region]), riskTier: b.riskTier, status: "draft", version: 1, createdAt: t, updatedAt: t };
     const rec = emptyRecord(story);
     rec.sources = b.sources.map((s) => ({ ...s, storyId: id, contentHash: createHash("sha256").update(s.text).digest("hex") }));
     await deps.store.put(rec);

@@ -1,0 +1,4 @@
+{
+  "_readme": "Only domains listed here can be ingested. Add an outlet only after confirming you may reuse its content (licence, syndication agreement, or public-domain/open-government terms). lens.ratingBasis must cite a documented source (e.g. a published media-bias or audience-positioning study); never invent ratings. Primary documents (government releases, court orders, regulators) use rating 'unrated' and ratingBasis 'primary document'.",
+  "entries": []
+}

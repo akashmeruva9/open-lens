@@ -27,35 +27,9 @@ export function hasAiDisclosure(text: string): boolean {
   return DISCLOSURE_PATTERNS.some((re) => re.test(text));
 }
 
-// ---------- X weighted length (twitter-text v3 approximation) ----------
-const X_URL_RE = /https?:\/\/[^\s]+/gi;
-const X_LIGHT_RANGES: [number, number][] = [
-  [0, 4351],
-  [8192, 8205],
-  [8208, 8223],
-  [8242, 8247],
-];
-const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
-
-/** Weighted length per twitter-text v3: URLs = 23, emoji = 2, CJK etc. = 2, Latin/Indic = 1. */
-export function xWeightedLength(text: string): number {
-  let len = 0;
-  const withoutUrls = text.normalize("NFC").replace(X_URL_RE, () => {
-    len += 23;
-    return "";
-  });
-  for (const { segment } of segmenter.segment(withoutUrls)) {
-    if (/\p{Extended_Pictographic}/u.test(segment)) {
-      len += 2;
-      continue;
-    }
-    for (const ch of segment) {
-      const cp = ch.codePointAt(0)!;
-      len += X_LIGHT_RANGES.some(([a, b]) => cp >= a && cp <= b) ? 1 : 2;
-    }
-  }
-  return len;
-}
+// ---------- X weighted length ----------
+// Shared with the agents so generated threads and publish-time validation agree.
+export { xWeightedLength } from "@openlens/config";
 
 // ---------- Media ----------
 export async function resolveVideo(

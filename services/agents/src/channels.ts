@@ -1,4 +1,6 @@
-import { AI_DISCLOSURE, CHANNEL_LIMITS, LANGUAGES, MODELS, PUBLIC_WEB_URL, type LangCode } from "@openlens/config";
+import {
+  AI_DISCLOSURE, CHANNEL_LIMITS, CHANNEL_PLAN, LANGUAGES, MODELS, PUBLIC_WEB_URL, xTruncate, xWeightedLength, type LangCode,
+} from "@openlens/config";
 import {
   CarouselPayload, FbPostPayload, IgReelPayload, WaDigestPayload, XThreadPayload, YtMetaPayload,
   type Claim, type ScriptPayload, type SourceRecord, type Tier,
@@ -10,12 +12,22 @@ const SYSTEM = `You are the Channel Adapter Agent of a transparent newsroom. Ada
 Rules: use only facts in the script; keep attribution and uncertainty ("not yet verified", "critics say"); no clickbait, no emojis beyond one per post, no hashtags spam.
 Write in the requested language. Include the story link where a field asks for it.`;
 
-const XDraft = z.object({ posts: z.array(z.string()).min(2).max(6) });
-const YtDraft = z.object({ title: z.string(), descriptionBody: z.string(), tags: z.array(z.string()).max(12) });
-const IgDraft = z.object({ caption: z.string(), hashtags: z.array(z.string()).max(6) });
-const CarouselDraft = CarouselPayload.omit({ caption: true }).extend({ caption: z.string() });
-const FbDraft = z.object({ message: z.string() });
-const WaDraft = z.object({ headline: z.string().describe("max 60 chars"), oneLine: z.string().describe("max 160 chars") });
+const Draft = z.object({
+  x: z.object({ posts: z.array(z.string()).min(2).max(6).describe("X thread; each post <= 140 CJK/Thai characters or <= 260 Latin characters; first post states what happened") }),
+  youtube: z.object({
+    title: z.string().describe("<= 90 characters, factual, in the target language"),
+    descriptionBody: z.string().describe("3-5 short paragraphs: established vs disputed vs unknown"),
+    tags: z.array(z.string()).max(12),
+  }),
+  instagram: z.object({ caption: z.string().describe("Reel caption <= 1200 chars ending with a 'full evidence: link in bio' line in the target language"), hashtags: z.array(z.string()).max(6) }),
+  carousel: z.object({
+    slides: z.array(z.object({ heading: z.string().describe("<= 40 chars"), body: z.string().describe("<= 200 chars"), claimIds: z.array(z.string()) })).min(5).max(7)
+      .describe("what happened, sources, where they disagree, evidence, unknowns"),
+    caption: z.string(),
+  }),
+  facebook: z.object({ message: z.string().describe("<= 900 chars neutral summary inviting readers to the evidence") }),
+  whatsapp: z.object({ headline: z.string().describe("<= 60 chars"), oneLine: z.string().describe("<= 160 chars") }),
+});
 
 export interface ChannelPackage {
   yt: z.infer<typeof YtMetaPayload>;
@@ -26,17 +38,15 @@ export interface ChannelPackage {
   wa: z.infer<typeof WaDigestPayload>;
 }
 
-/** X counts URLs as 23 chars; approximate weighted length. */
-export function xLength(s: string): number {
-  return s.replace(/https?:\/\/\S+/g, "x".repeat(23)).length;
-}
+/** X weighted length (URLs 23, CJK/Thai 2). */
+export const xLength = xWeightedLength;
 
 const X_DISCLOSURE = "AI-assisted summary, reviewed by OpenLens editors.";
 
 function fitThread(posts: string[], link: string): string[] {
   const max = CHANNEL_LIMITS.x.maxChars;
   const out = posts
-    .map((p) => (xLength(p) <= max ? p : `${p.slice(0, max - 1)}…`))
+    .map((p) => xTruncate(p, max))
     .slice(0, CHANNEL_LIMITS.x.maxThreadPosts - 1);
   // Closing post always carries the evidence link and the AI disclosure.
   const closing = `Evidence, sources and what's still unknown: ${link}\n${X_DISCLOSURE}`;
@@ -55,21 +65,15 @@ export async function buildChannelPackage(
   const langName = LANGUAGES[lang].name;
   const disclosure = AI_DISCLOSURE[lang] ?? AI_DISCLOSURE.en!;
   const base = `LANGUAGE: ${langName}\nSTORY LINK: ${link}\nSCRIPT:\n${script.lines.map((l) => `[${l.label}] ${l.text}`).join("\n")}`;
-  const metas: RunMeta[] = [];
-  const call = async <S extends z.ZodType>(schema: S, task: string) => {
-    const r = await generateStructured({ model: MODELS.fast, system: SYSTEM, schema, prompt: `${task}\n\n${base}`, temperature: 0.5 });
-    metas.push(r.meta);
-    return r.data as z.infer<S>;
-  };
-
-  const [x, yt, ig, car, fb, wa] = await Promise.all([
-    call(XDraft, "Write an X thread (each post <= 260 characters). First post states what happened; last post links to the story."),
-    call(YtDraft, `Write YouTube metadata for the ${tier} channel. Title <= 90 chars, factual. descriptionBody: 3-5 short paragraphs summarizing what is established vs. disputed vs. unknown.`),
-    call(IgDraft, "Write an Instagram Reel caption (<= 1200 chars) ending with 'Full evidence: link in bio'."),
-    call(CarouselDraft, "Write a 5-7 slide Instagram carousel: what happened, sources, where they disagree, evidence, unknowns. Each slide heading <= 40 chars, body <= 200 chars. Cite claimIds per slide using the ids that appear in the script lines' facts (use [] if unsure)."),
-    call(FbDraft, "Write a Facebook Page post (<= 900 chars) with a neutral summary and an invitation to read the evidence."),
-    call(WaDraft, "Write a WhatsApp digest: a short headline and one line summary."),
-  ]);
+  const r = await generateStructured({
+    model: MODELS.fast,
+    system: SYSTEM,
+    schema: Draft,
+    temperature: 0.5,
+    prompt: `Produce every platform package below for the ${tier} OpenLens channel "${CHANNEL_PLAN[lang]?.channel ?? "OpenLens"}". All text in ${langName}. In carousel slides cite claimIds from the script only (use [] if unsure).\n\n${base}`,
+  });
+  const metas: RunMeta[] = [r.meta];
+  const { x, youtube: yt, instagram: ig, carousel: car, facebook: fb, whatsapp: wa } = r.data;
 
   const known = new Set(claims.map((c) => c.id));
   const sourceList = sources.map((s) => `• ${s.publisher}: ${s.url}`).join("\n");
@@ -77,7 +81,7 @@ export async function buildChannelPackage(
     x: XThreadPayload.parse({ posts: fitThread(x.posts, link) }),
     yt: YtMetaPayload.parse({
       tier,
-      title: yt.title.slice(0, CHANNEL_LIMITS.youtube.titleMax),
+      title: [...yt.title].slice(0, CHANNEL_LIMITS.youtube.titleMax).join(""),
       description: `${yt.descriptionBody}\n\nRead the evidence: ${link}\n\nSources:\n${sourceList}\n\n${disclosure}`.slice(0, CHANNEL_LIMITS.youtube.descriptionMax),
       tags: yt.tags,
       containsSyntheticMedia: true,
@@ -90,7 +94,7 @@ export async function buildChannelPackage(
     fb: FbPostPayload.parse({ message: `${fb.message}\n\n${disclosure}`, link }),
     wa: WaDigestPayload.parse({
       templateName: `openlens_digest_${lang}`,
-      params: [wa.headline.slice(0, 60), wa.oneLine.slice(0, 160), link],
+      params: [[...wa.headline].slice(0, 60).join(""), [...wa.oneLine].slice(0, 160).join(""), link],
       previewText: `${wa.headline}\n${wa.oneLine}\n${link}`.slice(0, CHANNEL_LIMITS.whatsapp.templateBodyMax),
       link,
     }),

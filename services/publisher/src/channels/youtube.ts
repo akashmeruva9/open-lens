@@ -35,15 +35,19 @@ const TIER_ENV: Record<Tier, string> = {
   international: "YOUTUBE_REFRESH_TOKEN_INTERNATIONAL",
 };
 
-/** Name of the env var holding the refresh token for a tier (per-tier channel, else the default). */
-export function refreshTokenEnvFor(tier: Tier | undefined): string | undefined {
+/** YOUTUBE_REFRESH_TOKEN_<LANG> env name, e.g. zh-Hant -> YOUTUBE_REFRESH_TOKEN_ZH_HANT. */
+export const langTokenEnv = (lang: string) => `YOUTUBE_REFRESH_TOKEN_${lang.toUpperCase().replace(/-/g, "_")}`;
+
+/** Refresh-token env var for a channel: per-language channel first, then per-tier, then the default. */
+export function refreshTokenEnvFor(tier: Tier | undefined, lang?: string): string | undefined {
+  if (lang && env(langTokenEnv(lang))) return langTokenEnv(lang);
   if (tier && env(TIER_ENV[tier])) return TIER_ENV[tier];
   return env("YOUTUBE_REFRESH_TOKEN") ? "YOUTUBE_REFRESH_TOKEN" : undefined;
 }
 
-function status(tier?: Tier): Status {
+function status(tier?: Tier, lang?: string): Status {
   const m = missingEnv(["YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET"]);
-  const hasToken = tier ? !!refreshTokenEnvFor(tier) : ["YOUTUBE_REFRESH_TOKEN", ...Object.values(TIER_ENV)].some((n) => env(n));
+  const hasToken = tier || lang ? !!refreshTokenEnvFor(tier, lang) : ["YOUTUBE_REFRESH_TOKEN", ...Object.values(TIER_ENV)].some((n) => env(n));
   if (!hasToken) m.push(tier ? `YOUTUBE_REFRESH_TOKEN (or ${TIER_ENV[tier]})` : "YOUTUBE_REFRESH_TOKEN (or YOUTUBE_REFRESH_TOKEN_<TIER>)");
   return m.length ? { live: false, reason: `missing env: ${m.join(", ")}` } : { live: true };
 }
@@ -53,8 +57,8 @@ export function clearYoutubeTokenCache(): void {
   tokenCache.clear();
 }
 
-async function accessToken(tier: Tier | undefined): Promise<string> {
-  const envName = refreshTokenEnvFor(tier);
+async function accessToken(tier: Tier | undefined, lang?: string): Promise<string> {
+  const envName = refreshTokenEnvFor(tier, lang);
   if (!envName) throw new PublishError("not_live", "no YouTube refresh token configured");
   const cached = tokenCache.get(envName);
   if (cached && cached.exp > Date.now() + 60_000) return cached.token;
@@ -99,6 +103,7 @@ function localizationsOf(output: OutputRecord) {
 
 interface YtState {
   tier?: Tier;
+  lang?: string;
   video: Video;
   insertUrl: string;
   insertBody: Record<string, unknown>;
@@ -118,6 +123,10 @@ function multipartRelated(meta: unknown, media: Buffer, mediaType: string): { bo
   );
   const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
   return { body: Buffer.concat([head, media, tail]), contentType: `multipart/related; boundary=${boundary}` };
+}
+
+function langOf(pub: Publication): string | undefined {
+  return typeof pub.response?.lang === "string" ? pub.response.lang : undefined;
 }
 
 function tierOf(pub: Publication): Tier | undefined {
@@ -152,8 +161,8 @@ export const youtubePublisher = definePublisher<YtState>({
       warnings.push("containsSyntheticMedia is true but the description has no AI disclosure text");
     }
     if (output.tier && output.tier !== meta.tier) warnings.push(`output.tier (${output.tier}) differs from payload.tier (${meta.tier}); using payload.tier`);
-    if (opts?.mode === "live" && !refreshTokenEnvFor(meta.tier)) errors.push(`no refresh token for tier ${meta.tier} (${TIER_ENV[meta.tier]} or YOUTUBE_REFRESH_TOKEN)`);
-    else if (env("YOUTUBE_REFRESH_TOKEN") && !env(TIER_ENV[meta.tier])) warnings.push(`no ${TIER_ENV[meta.tier]}; using the default channel (YOUTUBE_REFRESH_TOKEN)`);
+    if (opts?.mode === "live" && !refreshTokenEnvFor(meta.tier, output.lang)) errors.push(`no refresh token for ${output.lang}/${meta.tier} (${langTokenEnv(output.lang)}, ${TIER_ENV[meta.tier]} or YOUTUBE_REFRESH_TOKEN)`);
+    else if (env("YOUTUBE_REFRESH_TOKEN") && !env(TIER_ENV[meta.tier]) && !env(langTokenEnv(output.lang))) warnings.push(`no ${TIER_ENV[meta.tier]}; using the default channel (YOUTUBE_REFRESH_TOKEN)`);
 
     const loc = output.payload.localizations;
     if (loc !== undefined && !Localizations.safeParse(loc).success) errors.push("payload.localizations must map lang -> {title<=100, description<=5000}");
@@ -192,7 +201,7 @@ export const youtubePublisher = definePublisher<YtState>({
       },
       ...(localizations ? { localizations } : {}),
     };
-    const tokenEnv = refreshTokenEnvFor(meta.tier) ?? `${TIER_ENV[meta.tier]} | YOUTUBE_REFRESH_TOKEN`;
+    const tokenEnv = refreshTokenEnvFor(meta.tier, output.lang) ?? `${langTokenEnv(output.lang)} | ${TIER_ENV[meta.tier]} | YOUTUBE_REFRESH_TOKEN`;
     const auth = `OAuth2 bearer (refresh token from ${tokenEnv})`;
     const requests: RequestSpec[] = [
       { step: "oauth.refresh", method: "POST", url: GOOGLE_TOKEN_URL, body: { grant_type: "refresh_token", refresh_token: `$${tokenEnv}` } },
@@ -217,12 +226,12 @@ export const youtubePublisher = definePublisher<YtState>({
       thumbnail = { asset: video.thumbnailUrl };
       requests.push({ step: "thumbnails.set", method: "POST", url: `${UPLOAD}/thumbnails/set?videoId={{video_id}}&uploadType=media`, auth, body: `<binary ${video.thumbnailUrl}>` });
     }
-    return { requests, state: { tier: meta.tier, video, insertUrl, insertBody, captions, thumbnail } };
+    return { requests, state: { tier: meta.tier, lang: output.lang, video, insertUrl, insertBody, captions, thumbnail } };
   },
 
   async execute(prep, _output, ctx) {
     const s = prep.state;
-    const token = await accessToken(s.tier);
+    const token = await accessToken(s.tier, s.lang);
     const authz = { Authorization: `Bearer ${token}` };
     const location = await ctx.resolveAsset(s.video.mp4Url, { public: false });
     const bytes = await loadAsset(location, "youtube.video");
@@ -282,7 +291,8 @@ export const youtubePublisher = definePublisher<YtState>({
       url: isShort ? `https://www.youtube.com/shorts/${videoId}` : `https://www.youtube.com/watch?v=${videoId}`,
       response: {
         tier: s.tier,
-        refreshTokenEnv: refreshTokenEnvFor(s.tier),
+        lang: s.lang,
+        refreshTokenEnv: refreshTokenEnvFor(s.tier, s.lang),
         request: s.insertBody,
         video: { id: videoId, status: up.json?.status, uploadStatus: up.json?.status?.uploadStatus },
         ...extras,
@@ -305,12 +315,12 @@ export const youtubePublisher = definePublisher<YtState>({
       pub,
       action: "update",
       channel: "youtube",
-      status: status(tier),
+      status: status(tier, langOf(pub)),
       onSuccess: "corrected",
       ledgerVersion: output.ledgerVersion,
       requests: [{ step: "videos.update", method: "PUT", url, body }],
       run: async () => {
-        const token = await accessToken(tier);
+        const token = await accessToken(tier, langOf(pub));
         const res = await http({ method: "PUT", url, label: "youtube.videos.update", headers: { Authorization: `Bearer ${token}` }, json: body });
         return { id: res.json?.id, title: res.json?.snippet?.title };
       },
@@ -329,11 +339,11 @@ export const youtubePublisher = definePublisher<YtState>({
       pub,
       action: "retract",
       channel: "youtube",
-      status: status(tier),
+      status: status(tier, langOf(pub)),
       onSuccess: "retracted",
       requests: [{ step: "videos.update (set private)", method: "PUT", url, body }],
       run: async () => {
-        const token = await accessToken(tier);
+        const token = await accessToken(tier, langOf(pub));
         const res = await http({ method: "PUT", url, label: "youtube.videos.retract", headers: { Authorization: `Bearer ${token}` }, json: body });
         return { id: res.json?.id, privacyStatus: res.json?.status?.privacyStatus };
       },

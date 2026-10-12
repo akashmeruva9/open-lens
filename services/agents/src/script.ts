@@ -2,7 +2,7 @@ import { LANGUAGES, MODELS, PRESENTERS, type LangCode, type PresenterId } from "
 import { ScriptPayload, type Assessment, type Claim } from "@openlens/schemas";
 import { z } from "zod";
 import { generateStructured, type RunMeta } from "./gemini.js";
-import { numbersIn } from "./qa.js";
+import { numbersIn } from "@openlens/config";
 
 const SCRIPT_SYSTEM = `You write 45-75 second vertical news video scripts for a transparent newsroom.
 Structure (4-7 lines): what happened; why / stated reasons; what different sources emphasize; what is established; what remains unknown; call to action "Open the research in the OpenLens app".
@@ -15,7 +15,7 @@ Rules:
 export async function buildScript(
   assessment: Assessment,
   claims: Claim[],
-  presenter: PresenterId = "arjun-en",
+  presenter: PresenterId = "maya-apac",
 ): Promise<{ script: ScriptPayload; meta: RunMeta }> {
   const usable = claims.filter((c) => c.state !== "superseded");
   const { data, meta } = await generateStructured({
@@ -33,6 +33,7 @@ export async function buildScript(
 }
 
 const LOCALIZE_SYSTEM = `You localize news scripts for a specific audience. Adapt phrasing so it sounds natural to native speakers of the target language and region — not word-for-word translation.
+Use the standard written news register of the target market (e.g. です・ます style for Japanese, 합니다 style for Korean, Taiwan usage for Traditional Chinese, Singapore usage for Simplified Chinese).
 Hard rules: keep every fact, qualifier, attribution and uncertainty; keep all numbers, dates and percentages exactly (digits may stay as Western numerals); keep names of people and organizations recognizable; do not add or drop information; keep claimIds per line unchanged and in the same order.`;
 
 const BACK_SYSTEM = `You are a translation QA judge. Translate the localized script back to English literally, then compare it to the original English script line by line.

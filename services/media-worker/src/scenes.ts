@@ -1,4 +1,5 @@
 import { createCanvas, GlobalFonts, loadImage, type Image, type SKRSContext2D } from "@napi-rs/canvas";
+import { uiStrings, wrapText } from "@openlens/config";
 
 export type Aspect = "9:16" | "16:9";
 export const SIZES: Record<Aspect, { w: number; h: number }> = {
@@ -22,6 +23,8 @@ export interface Branding {
   /** Required disclosure shown on every frame. */
   disclosure: string;
   fontFamily: string;
+  /** BCP-47 language, used for word-aware line breaking (CJK/Thai have no spaces). */
+  lang?: string;
   presenterName?: string;
   /** Optional presenter portrait (fictional, disclosed). */
   presenterImage?: Image;
@@ -41,19 +44,19 @@ export async function loadPresenter(path: string | undefined): Promise<Image | u
   }
 }
 
-function wrap(ctx: SKRSContext2D, text: string, maxWidth: number) {
-  const words = text.split(/\s+/);
-  const lines: string[] = [];
-  let line = "";
-  for (const w of words) {
-    const test = line ? `${line} ${w}` : w;
-    if (ctx.measureText(test).width > maxWidth && line) {
-      lines.push(line);
-      line = w;
-    } else line = test;
+function wrap(ctx: SKRSContext2D, text: string, maxWidth: number, lang = "en") {
+  return wrapText(text, lang, maxWidth, (t) => ctx.measureText(t).width);
+}
+
+/** Truncate to a pixel width on grapheme boundaries (safe for CJK width and Thai combining marks). */
+function fitWidth(ctx: SKRSContext2D, text: string, maxWidth: number): string {
+  if (ctx.measureText(text).width <= maxWidth) return text;
+  let out = "";
+  for (const { segment } of new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text)) {
+    if (ctx.measureText(`${out}${segment}…`).width > maxWidth) break;
+    out += segment;
   }
-  if (line) lines.push(line);
-  return lines;
+  return `${out}…`;
 }
 
 function presenterBadge(ctx: SKRSContext2D, brand: Branding, x: number, y: number, r: number) {
@@ -99,7 +102,7 @@ export function renderSceneFrame(scene: Scene, brand: Branding, index: number, t
   ctx.fillText("OPENLENS", pad, 130);
   ctx.fillStyle = "#94a3b8";
   ctx.font = `400 34px ${brand.fontFamily}`;
-  ctx.fillText(brand.title.slice(0, vertical ? 48 : 90), pad, 190);
+  ctx.fillText(fitWidth(ctx, brand.title, W - pad * 2), pad, 190);
 
   // Presenter badge (fictional AI presenter, always labelled)
   const r = vertical ? 90 : 80;
@@ -108,7 +111,8 @@ export function renderSceneFrame(scene: Scene, brand: Branding, index: number, t
   presenterBadge(ctx, brand, bx, by, r);
   ctx.fillStyle = "#e2e8f0";
   ctx.font = `600 34px ${brand.fontFamily}`;
-  const pLabel = `${brand.presenterName ?? "Presenter"} · AI presenter`;
+  const ui = uiStrings(brand.lang ?? "en");
+  const pLabel = `${brand.presenterName ?? "Presenter"} · ${ui.aiPresenter}`;
   ctx.fillText(pLabel, vertical ? bx + r * 2 + 28 : bx - ctx.measureText(pLabel).width - 24, by + r + 12);
 
   const top = vertical ? 600 : 330;
@@ -124,7 +128,7 @@ export function renderSceneFrame(scene: Scene, brand: Branding, index: number, t
   let lines: string[] = [];
   for (; size >= 40; size -= 4) {
     ctx.font = `600 ${size}px ${brand.fontFamily}`;
-    lines = wrap(ctx, scene.text, W - pad * 2);
+    lines = wrap(ctx, scene.text, W - pad * 2, brand.lang);
     if (lines.length * size * 1.3 < maxH) break;
   }
   ctx.fillStyle = "#f8fafc";
@@ -137,7 +141,7 @@ export function renderSceneFrame(scene: Scene, brand: Branding, index: number, t
     ctx.fillRect(pad, chipY, W - pad * 2, 90);
     ctx.fillStyle = "#bae6fd";
     ctx.font = `500 34px ${brand.fontFamily}`;
-    ctx.fillText(`Evidence: ${scene.claimIds.join(", ")} · open the research in the OpenLens app`, pad + 24, chipY + 58);
+    ctx.fillText(fitWidth(ctx, `${ui.evidence}: ${scene.claimIds.join(", ")} · ${ui.openResearch}`, W - pad * 2 - 48), pad + 24, chipY + 58);
   }
 
   // Progress bar
@@ -147,10 +151,17 @@ export function renderSceneFrame(scene: Scene, brand: Branding, index: number, t
   ctx.fillStyle = "#38bdf8";
   ctx.fillRect(pad, barY, ((W - pad * 2) * (index + 1)) / total, 10);
 
-  // AI disclosure on every frame
+  // AI disclosure on every frame — wrapped, never truncated (shrinks to fit two lines).
   ctx.fillStyle = "#e2e8f0";
-  ctx.font = `500 30px ${brand.fontFamily}`;
-  ctx.fillText(brand.disclosure.slice(0, vertical ? 70 : 120), pad, vertical ? H - 120 : H - 60);
+  let dSize = 30;
+  let dLines: string[] = [];
+  for (; dSize >= 20; dSize -= 2) {
+    ctx.font = `500 ${dSize}px ${brand.fontFamily}`;
+    dLines = wrap(ctx, brand.disclosure, W - pad * 2, brand.lang);
+    if (dLines.length <= 2) break;
+  }
+  const dTop = (vertical ? H - 150 : H - 85) - (dLines.length - 1) * dSize * 0.6;
+  dLines.forEach((l, i) => ctx.fillText(l, pad, dTop + i * dSize * 1.25));
 
   return canvas.toBuffer("image/png");
 }

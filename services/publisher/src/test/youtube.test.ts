@@ -172,3 +172,17 @@ test("youtube scheduleAt sets private + publishAt; dry-run update needs no creds
     net.restore();
   }
 });
+
+test("per-language channel token wins over tier token", async () => {
+  const { refreshTokenEnvFor, langTokenEnv } = await import("../channels/youtube.js");
+  const saved = { ...process.env };
+  process.env.YOUTUBE_REFRESH_TOKEN_NATIONAL = "t-national";
+  process.env.YOUTUBE_REFRESH_TOKEN_ZH_HANT = "t-zh";
+  try {
+    assert.equal(langTokenEnv("zh-Hant"), "YOUTUBE_REFRESH_TOKEN_ZH_HANT");
+    assert.equal(refreshTokenEnvFor("national", "zh-Hant"), "YOUTUBE_REFRESH_TOKEN_ZH_HANT");
+    assert.equal(refreshTokenEnvFor("national", "ja"), "YOUTUBE_REFRESH_TOKEN_NATIONAL");
+  } finally {
+    process.env = saved;
+  }
+});

@@ -1,4 +1,4 @@
-import { YT_TIERS, type LangCode, type PresenterId } from "@openlens/config";
+import { CHANNEL_PLAN, isLang } from "@openlens/config";
 import type {
   AgentRun, Assessment, Claim, ContextItem, LensLane, OutputRecord, QaFlag, ScriptPayload,
   SourceRecord, Story, TimelineEvent, Tier,
@@ -124,14 +124,14 @@ export async function runPipeline(state: PipelineState, sink: PipelineSink, only
   });
   await step("scripts", async () => {
     if (!state.assessment) throw new Error("No assessment to script from");
-    const base = await buildScript(state.assessment, state.claims, "arjun-en");
+    const base = await buildScript(state.assessment, state.claims, CHANNEL_PLAN.en.presenter);
     const metas = [base.meta];
     const scripts: OutputRecord[] = [];
-    const wanted = YT_TIERS.filter((t) => state.story.languages.includes(t.lang));
+    const wanted = state.story.languages.filter(isLang).map((lang) => ({ lang, ...CHANNEL_PLAN[lang] }));
     for (const t of wanted) {
       let payload: ScriptPayload = base.script;
       if (t.lang !== "en") {
-        const loc = await localizeScript(base.script, t.lang as LangCode, t.presenter as PresenterId);
+        const loc = await localizeScript(base.script, t.lang, t.presenter);
         payload = loc.script;
         metas.push(...loc.metas);
       } else {
@@ -152,8 +152,9 @@ export async function runPipeline(state: PipelineState, sink: PipelineSink, only
     const scripts = state.outputs.filter((o) => o.kind === "script");
     const made: OutputRecord[] = [];
     for (const s of scripts) {
-      const lang = s.lang as LangCode;
-      const tier = s.tier ?? "national";
+      if (!isLang(s.lang)) continue;
+      const lang = s.lang;
+      const tier = s.tier ?? CHANNEL_PLAN[lang].tier;
       const r = await buildChannelPackage(id, s.payload as unknown as ScriptPayload, lang, tier, state.sources, state.claims);
       metas.push(...r.metas);
       const common = { lang, tier, claimIds: s.claimIds, dependsOn: [s.id] };

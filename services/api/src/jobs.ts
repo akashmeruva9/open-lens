@@ -2,7 +2,7 @@ import {
   buildChannelPackage, buildScript, localizeScript, runPipeline, scriptId,
   type PipelineState, type Stage,
 } from "@openlens/agents";
-import { YT_TIERS, type LangCode, type PresenterId } from "@openlens/config";
+import { CHANNEL_PLAN, isLang } from "@openlens/config";
 import { renderCarouselSlides, renderScriptMedia } from "@openlens/media-worker";
 import type { CarouselPayload, OutputRecord, ScriptPayload, Tier } from "@openlens/schemas";
 import { readdir } from "node:fs/promises";
@@ -151,13 +151,13 @@ export function regenerate(deps: Deps, storyId: string, outputId: string): Promi
     if (!rec?.assessment) throw new Error("story has no assessment");
     const out = rec.outputs.find((o) => o.id === outputId);
     if (!out) throw new Error(`output ${outputId} not found`);
-    const tier = (out.tier ?? "national") as Tier;
-    const lang = out.lang as LangCode;
-    const t = YT_TIERS.find((x) => x.tier === tier && x.lang === lang);
-    const presenter = (t?.presenter ?? "arjun-en") as PresenterId;
+    if (!isLang(out.lang)) throw new Error(`unsupported language ${out.lang}`);
+    const lang = out.lang;
+    const tier = (out.tier ?? CHANNEL_PLAN[lang].tier) as Tier;
+    const presenter = CHANNEL_PLAN[lang].presenter;
     emit(storyId, { type: "stage", stage: "scripts", status: "started", detail: `regenerating ${tier}-${lang}` });
 
-    const base = await buildScript(rec.assessment, rec.claims, "arjun-en");
+    const base = await buildScript(rec.assessment, rec.claims, CHANNEL_PLAN.en.presenter);
     const script = lang === "en" ? { ...base.script, presenter } : (await localizeScript(base.script, lang, presenter)).script;
     const sid = scriptId(lang, tier);
     const { pkg } = await buildChannelPackage(storyId, script, lang, tier, rec.sources, rec.claims);

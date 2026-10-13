@@ -187,10 +187,10 @@
         "ratingBasis": "primary document"
       },
       "rights": {
-        "license": "GDACS links to EC legal notice: EU-owned content under CC BY 4.0 'provided appropriate credit is given and changes are indicated'; third-party (partner) content may differ.",
+        "license": "GDACS links to the EC legal notice: EU-owned content is CC BY 4.0 (reuse allowed with appropriate credit, changes indicated); third-party content, logos and industrial-property material excluded. Terms page read and confirmed 2026-10-13.",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
+      "verified": true,
       "termsUrl": "https://commission.europa.eu/legal-notice_en"
     },
     {
@@ -203,10 +203,10 @@
         "ratingBasis": "primary document"
       },
       "rights": {
-        "license": "USGS-authored data is generally US public domain with credit requested (policy page blocked automated fetch — re-verify). Global feed; filter to APAC bbox.",
+        "license": "USGS-authored data and information are in the U.S. Public Domain; some non-USGS photos/graphics on the site are copyrighted (use text/data only). Credit requested ('Credit: U.S. Geological Survey'). Terms page read and confirmed 2026-10-13.",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
+      "verified": true,
       "termsUrl": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits"
     },
     {

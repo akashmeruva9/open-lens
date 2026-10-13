@@ -37,7 +37,15 @@ gcloud services enable aiplatform.googleapis.com
 ```
 Use a personal/team account that owns the project. Do **not** create an AI Studio API key on a billing-linked project; keep `GEMINI_API_KEY` empty so everything goes through Vertex AI and your billing account.
 
-### Make videos
+### Make videos from links, in one command
+```bash
+# links in -> claims/evidence -> scripts per language -> narrated 9:16 + 16:9 videos -> hand-off manifest
+npm run story -w @openlens/api -- jp-fare-2026 JP "Tokyo Metro fare revision" <url1> <url2> <primary-doc-url> [--langs ja,en,ko]
+```
+Sources must be outlets listed in `data/sources/allowlist.json` (rights + documented lens rating); anything else is rejected with the reason and nothing is written. Add `--intake-only` to check the sources first (no AI calls). The story ID is the first argument you choose; list stored stories with `npm run render -w @openlens/api -- --list`.
+It writes `.data/assets/<storyId>/` (videos, captions, `manifest.json`). Add languages or re-render later with `npm run render` (below).
+
+### Or step by step
 ```bash
 # 1. Build a story (claims → scripts → channel packages → videos). Sample story is fictional.
 npm run seed -w @openlens/api -- data/seed/sample-story

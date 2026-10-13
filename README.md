@@ -36,6 +36,10 @@ npm run dev -w @openlens/api    # http://localhost:8080  (AUTH_MODE=dev locally)
 ```
 
 ### Video factory
+Links in, videos out, in one command (sources must be on the allowlist):
+```bash
+npm run story -w @openlens/api -- <story-id> <market> "<title>" <url> [url...] [--langs en,hi,te]
+```
 Render narrated videos for any stored story, any languages, both shapes (narration is cached, so re-renders are free):
 ```bash
 npm run render -w @openlens/api -- --list

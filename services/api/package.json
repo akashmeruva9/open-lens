@@ -10,6 +10,7 @@
     "dev": "node --env-file-if-exists=../../.env --import tsx --watch src/server.ts",
     "start": "node dist/server.js",
     "render": "node --env-file-if-exists=../../.env --import tsx src/render.ts",
+    "story": "node --env-file-if-exists=../../.env --import tsx src/story.ts",
     "handoff": "node --env-file-if-exists=../../.env --import tsx src/handoff-cli.ts",
     "seed": "node --env-file-if-exists=../../.env --import tsx src/seed.ts"
   },

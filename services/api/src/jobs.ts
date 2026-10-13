@@ -84,7 +84,9 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
     if (!rec) throw new Error("story not found");
     const scripts = rec.outputs.filter((o) => o.kind === "script" && (!onlyScripts || onlyScripts.includes(o.id)) && (!opts.langs?.length || opts.langs.includes(o.lang)));
     const made: OutputRecord[] = [];
-    const publisher = new Map(rec.sources.map((x) => [x.id, x.publisher]));
+    // Short on-screen outlet name: drop trailing descriptors like "(EC JRC / UN OCHA disaster alerts)".
+    const shortName = (n: string) => n.replace(/\s*\([^)]*\)\s*/g, " ").replace(/\s+/g, " ").trim() || n;
+    const publisher = new Map(rec.sources.map((x) => [x.id, shortName(x.publisher)]));
     const sourceLabels = Object.fromEntries(
       rec.claims.map((c) => [c.id, [...new Set(c.evidence.map((e) => publisher.get(e.sourceId)).filter((x): x is string => Boolean(x)))]]),
     );

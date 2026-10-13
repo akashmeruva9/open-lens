@@ -32,6 +32,8 @@ export const VideoPayload = z.object({
   mp4Url: z.string(),
   hlsUrl: z.string().optional(),
   captionsVttUrl: z.string().optional(),
+  /** Subtitle tracks in every language the story was produced in (lang -> .vtt url), timed to this video. */
+  captionTracks: z.record(z.string(), z.string()).optional(),
   thumbnailUrl: z.string().optional(),
   durationSeconds: z.number(),
   scriptOutputId: z.string(),
@@ -57,6 +59,7 @@ export const RenderedAsset = z.object({
   mp4Url: z.string(),
   hlsUrl: z.string().optional(),
   captionsVttUrl: z.string().optional(),
+  captionTracks: z.record(z.string(), z.string()).optional(),
   thumbnailUrl: z.string().optional(),
   durationSeconds: z.number(),
   /** Claims the video states; used for correction propagation. */

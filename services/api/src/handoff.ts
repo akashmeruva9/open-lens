@@ -20,6 +20,7 @@ export function buildRenderedAssets(rec: Pick<StoryRecord, "outputs">): Rendered
         mp4Url: v.data.mp4Url,
         hlsUrl: v.data.hlsUrl,
         captionsVttUrl: v.data.captionsVttUrl,
+        captionTracks: v.data.captionTracks,
         thumbnailUrl: v.data.thumbnailUrl,
         durationSeconds: v.data.durationSeconds,
         claimIds: o.claimIds,

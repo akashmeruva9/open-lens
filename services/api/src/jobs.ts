@@ -88,17 +88,28 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
     const sourceLabels = Object.fromEntries(
       rec.claims.map((c) => [c.id, [...new Set(c.evidence.map((e) => publisher.get(e.sourceId)).filter((x): x is string => Boolean(x)))]]),
     );
+    // Every language's line texts (aligned line-by-line), offered as extra subtitle tracks on each video.
+    const allScripts = rec.outputs.filter((o) => o.kind === "script");
     for (const s of scripts) {
       const sfx = `${s.tier ?? "national"}-${s.lang}`;
       const script = s.payload as unknown as ScriptPayload;
+      const nLines = script.lines.length;
+      const captionTracks = Object.fromEntries(
+        allScripts
+          .map((o) => [o.lang, ((o.payload as unknown as ScriptPayload).lines ?? []).map((l) => l.text)] as const)
+          .filter(([lang, texts]) => lang !== s.lang && texts.length === nLines),
+      );
       const r = await renderScriptMedia({
         key: sfx, lang: s.lang, script, outDir: join(deps.workDir, storyId),
         aspects: opts.aspects ?? ["9:16", "16:9"], silent: process.env.MEDIA_SILENT === "1",
         presenterImagePath: deps.presenterImages?.[script.presenter],
         sourceLabels,
+        captionTracks,
       });
       const base = `${storyId}/${sfx}/v${rec.story.version}`;
       const captionsUrl = await deps.assets.put(r.captionsVtt, `${base}/captions.vtt`, "text/vtt");
+      const captionTrackUrls: Record<string, string> = {};
+      for (const c of r.captionTracks) captionTrackUrls[c.lang] = c.lang === s.lang ? captionsUrl : await deps.assets.put(c.path, `${base}/captions.${c.lang}.vtt`, "text/vtt");
       const common = { storyId, lang: s.lang, tier: s.tier, claimIds: s.claimIds, ledgerVersion: rec.story.version,
         status: "draft" as const, aiDisclosure: true, dependsOn: [s.id], createdAt: now(), updatedAt: now() };
       for (const v of r.videos) {
@@ -112,7 +123,7 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
           hlsUrl = deps.assets.localPath(mp4Url) ? `/assets/${base}/hls-${tag}/index.m3u8` : mp4Url.replace(/video-\d+\.mp4$/, `hls-${tag}/index.m3u8`);
         }
         made.push({ ...common, id: `video-${sfx}-${tag}`, kind: "video", channel: "app",
-          payload: { aspect: v.aspect, mp4Url, hlsUrl, captionsVttUrl: captionsUrl, thumbnailUrl, durationSeconds: v.durationSeconds, scriptOutputId: s.id } });
+          payload: { aspect: v.aspect, mp4Url, hlsUrl, captionsVttUrl: captionsUrl, captionTracks: captionTrackUrls, thumbnailUrl, durationSeconds: v.durationSeconds, scriptOutputId: s.id } });
       }
       if (process.env.MEDIA_SILENT !== "1") {
         const audioUrl = await deps.assets.put(r.audio.path, `${base}/narration.m4a`, "audio/mp4");

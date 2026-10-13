@@ -1,6 +1,6 @@
-import { AI_DISCLOSURE, CHANNEL_PLAN, PRESENTERS, isLang, type PresenterId } from "@openlens/config";
+import { AI_DISCLOSURE, CHANNEL_PLAN, LANGUAGES, PRESENTERS, isLang, type PresenterId } from "@openlens/config";
 import type { ScriptPayload } from "@openlens/schemas";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rename, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fontFor, registerDefaultFonts } from "./fonts.js";
@@ -20,11 +20,15 @@ export interface MediaJob {
   presenterImagePath?: string;
   /** claimId -> outlet names, for the on-screen source chip. */
   sourceLabels?: Record<string, string[]>;
+  /** lang -> line texts (same line order as `script`), for extra subtitle tracks timed to this video. */
+  captionTracks?: Record<string, string[]>;
 }
 
 export interface MediaResult {
   audio: { path: string; durationSeconds: number; transcript: string };
   captionsVtt: string;
+  /** Subtitle tracks (own language first), each timed to this video. */
+  captionTracks: { lang: string; path: string }[];
   videos: { aspect: Aspect; mp4: string; hls?: string; thumbnail: string; durationSeconds: number }[];
 }
 
@@ -44,6 +48,34 @@ const fmt = (t: number) => {
   const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${s.toFixed(3).padStart(6, "0")}`;
 };
+
+/** ISO 639-2 codes for MP4 subtitle track metadata. */
+const ISO3: Record<string, string> = { en: "eng", hi: "hin", te: "tel", ta: "tam", ja: "jpn", ko: "kor", "zh-Hant": "zho", "zh-Hans": "zho", id: "ind", ms: "msa", th: "tha", vi: "vie", fil: "fil" };
+
+/** Split a scene's text into sentence cues, sharing the scene's time in proportion to text length (readable subtitles). */
+export function sentenceCues(text: string, start: number, seconds: number): { text: string; start: number; end: number }[] {
+  const parts = [...new Intl.Segmenter(undefined, { granularity: "sentence" }).segment(text)].map((x) => x.segment.trim()).filter(Boolean);
+  const sentences = parts.length ? parts : [text];
+  const weight = sentences.map((x) => Math.max(8, [...x].length));
+  const sum = weight.reduce((a, b) => a + b, 0);
+  let t = start;
+  return sentences.map((x, i) => {
+    const d = (seconds * weight[i]!) / sum;
+    const cue = { text: x, start: t, end: i === sentences.length - 1 ? start + seconds : t + d };
+    t += d;
+    return cue;
+  });
+}
+
+export function toCuesVtt(texts: string[], seconds: number[]): string {
+  let t = 0;
+  const cues: string[] = [];
+  texts.forEach((text, i) => {
+    for (const c of sentenceCues(text, t, seconds[i]!)) cues.push(`${cues.length + 1}\n${fmt(c.start)} --> ${fmt(c.end)}\n${c.text}\n`);
+    t += seconds[i]!;
+  });
+  return `WEBVTT\n\n${cues.join("\n")}`;
+}
 
 /** Words-per-second estimate used when TTS is skipped. */
 const estimate = (text: string) => Math.max(2.5, [...new Intl.Segmenter(undefined, { granularity: "word" }).segment(text)].filter((s) => s.isWordLike).length / 2.6);
@@ -92,7 +124,15 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
 
   // 3) Captions.
   const captionsVtt = join(dir, "captions.vtt");
-  await writeFile(captionsVtt, toVtt(timed));
+  const secs = timed.map((t) => t.seconds);
+  await writeFile(captionsVtt, toCuesVtt(timed.map((t) => t.text), secs));
+  const captionTracks: { lang: string; path: string }[] = [{ lang: job.lang, path: captionsVtt }];
+  for (const [lang, texts] of Object.entries(job.captionTracks ?? {})) {
+    if (lang === job.lang || texts.length !== timed.length) continue; // only line-aligned scripts
+    const path = join(dir, `captions.${lang}.vtt`);
+    await writeFile(path, toCuesVtt(texts, secs));
+    captionTracks.push({ lang, path });
+  }
 
   // 4) Videos.
   const brand = {
@@ -117,9 +157,28 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
     videos.push({ aspect, mp4: r.mp4, hls: r.hlsPlaylist, thumbnail: r.thumbnail, durationSeconds: r.durationSeconds });
   }
 
+  // Soft subtitle tracks inside each MP4 (selectable in QuickTime/VLC; platforms use the .vtt files).
+  if (captionTracks.length > 0) {
+    for (const v of videos) {
+      const tmp = `${v.mp4}.sub.mp4`;
+      const args = ["-y", "-i", v.mp4, ...captionTracks.flatMap((c) => ["-i", c.path]), "-map", "0:v", "-map", "0:a"];
+      captionTracks.forEach((_, i) => args.push("-map", String(i + 1)));
+      args.push("-c:v", "copy", "-c:a", "copy", "-c:s", "mov_text");
+      captionTracks.forEach((c, i) => args.push(`-metadata:s:s:${i}`, `language=${ISO3[c.lang] ?? "und"}`, `-metadata:s:s:${i}`, `title=${isLang(c.lang) ? LANGUAGES[c.lang].name : c.lang}`));
+      args.push("-movflags", "+faststart", tmp);
+      try {
+        await run("ffmpeg", args);
+        await rename(tmp, v.mp4);
+      } catch (e) {
+        console.warn(`subtitle embed skipped for ${v.mp4}: ${(e as Error).message.slice(0, 200)}`);
+      }
+    }
+  }
+
   return {
     audio: { path: audioPath, durationSeconds: total, transcript: job.script.lines.map((l) => l.text).join("\n") },
     captionsVtt,
+    captionTracks,
     videos,
   };
 }

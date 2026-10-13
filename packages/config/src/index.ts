@@ -7,7 +7,7 @@ export * from "./text.js";
 export const MODELS = {
   reasoning: process.env.MODEL_REASONING ?? "gemini-3.8-flash",
   fast: process.env.MODEL_FAST ?? "gemini-3.8-flash",
-  tts: process.env.MODEL_TTS ?? "gemini-3.8-flash-tts",
+  tts: process.env.MODEL_TTS ?? "gemini-3.1-flash-tts-preview",
   embed: process.env.MODEL_EMBED ?? "gemini-embedding-2",
 } as const;
 

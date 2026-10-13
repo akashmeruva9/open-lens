@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, readFile, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { renderScriptMedia, toVtt } from "./media.js";
+import { renderScriptMedia, sentenceCues, toCuesVtt, toVtt } from "./media.js";
 import { pcmToWav, wavDuration } from "./tts.js";
 
 test("wav header round-trips duration", () => {
@@ -42,4 +42,13 @@ test("renders carousel slides as 4:5 PNGs", async () => {
   const png = await readFile(files[0]!);
   assert.equal(png.readUInt32BE(16), 1080);
   assert.equal(png.readUInt32BE(20), 1350);
+});
+
+test("sentenceCues splits a scene into timed sentences that fill the scene", () => {
+  const c = sentenceCues("The board voted. Fares rise by 20 percent from January.", 10, 8);
+  assert.equal(c.length, 2);
+  assert.equal(c[0]!.start, 10);
+  assert.equal(c[1]!.end, 18);
+  assert.ok(c[0]!.end > 10 && c[0]!.end < 18);
+  assert.match(toCuesVtt(["A b. C d."], [4]), /^WEBVTT[\s\S]*1\n[\s\S]*2\n/);
 });

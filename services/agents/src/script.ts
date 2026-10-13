@@ -4,13 +4,15 @@ import { z } from "zod";
 import { generateStructured, type RunMeta } from "./gemini.js";
 import { numbersIn } from "@openlens/config";
 
-const SCRIPT_SYSTEM = `You write 45-75 second vertical news video scripts for a transparent newsroom.
+const SCRIPT_SYSTEM = `You write 45-60 second vertical news video scripts for a transparent newsroom, to be SPOKEN aloud by a TV presenter, not read as an article.
 Structure (4-7 lines): what happened; why / stated reasons; what different sources emphasize; what is established; what remains unknown; call to action "Open the research in the OpenLens app".
 Rules:
 - Use ONLY the approved claims. Every line lists the claimIds it states (CTA line may cite the main claim).
 - Attributed claims must keep attribution ("the Authority says", "critics argue").
 - Never state contested or unverified claims as fact. No sensational language.
-- Each line is 1-2 short spoken sentences. "label" is a 1-3 word on-screen header in CAPS.`;
+- Each line is 1-2 short spoken sentences, at most about 18 words each, about 110-140 words in total.
+- Write for the ear: plain conversational newsreader English ("The Metro Authority has approved...", not "resolved to"), contractions where natural, one idea per sentence, no semicolons, no parentheses, no abbreviations or jargon. Write numbers as digits with the unit spelled out ("20 percent", "January 1").
+- Never start two lines the same way. "label" is a 1-3 word on-screen header in CAPS.`;
 
 export async function buildScript(
   assessment: Assessment,
@@ -33,7 +35,7 @@ export async function buildScript(
 }
 
 const LOCALIZE_SYSTEM = `You localize news scripts for a specific audience. Adapt phrasing so it sounds natural to native speakers of the target language and region — not word-for-word translation.
-Use the standard written news register of the target market (e.g. です・ます style for Japanese, 합니다 style for Korean, Taiwan usage for Traditional Chinese, Singapore usage for Simplified Chinese).
+Write it the way a TV news presenter in that market SPEAKS, not as a written article: natural spoken news register, short sentences (at most about 18 words), common everyday vocabulary instead of heavy formal or Sanskritized/literary words, no stacked clauses (e.g. です・ます style for Japanese, 합니다 style for Korean, Taiwan usage for Traditional Chinese, Singapore usage for Simplified Chinese). Commonly used English loanwords (metro, board, percent) are fine when that is how people actually say it.
 Hard rules: keep every fact, qualifier, attribution and uncertainty; keep all numbers, dates and percentages exactly (digits may stay as Western numerals); keep names of people and organizations recognizable; do not add or drop information; keep claimIds per line unchanged and in the same order.`;
 
 const BACK_SYSTEM = `You are a translation QA judge. Translate the localized script back to English literally, then compare it to the original English script line by line.

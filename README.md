@@ -10,7 +10,7 @@ One story → one reviewed **Claim & Evidence Ledger** → our own web + mobile 
 | `packages/config` | Model registry, languages, presenters (fictional, disclosed), YouTube tiers, channel limits |
 | `packages/client` | Typed REST client shared by web + mobile |
 | `services/agents` | Gemini agent pipeline: claims → corroborate → lenses → research → synthesize → QA → scripts (+localize, back-translation) → channel packages |
-| `services/media-worker` | Gemini TTS narration → canvas scenes (Indic-safe) → FFmpeg 9:16 / 16:9 + HLS + WebVTT |
+| `services/media-worker` | The video factory: Gemini TTS narration → news-style scenes (anchor / split-screen, headline bar) → Veo idle-motion presenter → FFmpeg 9:16 / 16:9 + HLS + WebVTT. See [`docs/video-factory.md`](docs/video-factory.md) |
 | `services/api` | Hono REST/SSE: reader feed, studio, approvals, correction propagation, publishing, evals |
 | `services/publisher` | Channel adapters (YouTube, X, Instagram, Facebook, WhatsApp, FCM) with dry-run mode |
 | `apps/web` | Next.js reader + newsroom studio (PWA) |
@@ -34,6 +34,18 @@ npm run seed -w @openlens/api -- data/seed/<story> --stages scripts,channels,med
 
 npm run dev -w @openlens/api    # http://localhost:8080  (AUTH_MODE=dev locally)
 ```
+
+### Video factory
+Links in, videos out, in one command (sources must be on the allowlist):
+```bash
+npm run story -w @openlens/api -- <story-id> <market> "<title>" <url> [url...] [--langs en,hi,te]
+```
+Render narrated videos for any stored story, any languages, both shapes (narration is cached, so re-renders are free):
+```bash
+npm run render -w @openlens/api -- --list
+npm run render -w @openlens/api -- <storyId> --langs en,hi,te --aspects 9:16,16:9
+```
+Setup (Vertex AI via ADC, locations, voices, portraits, idle clips, costs, troubleshooting): [`docs/video-factory.md`](docs/video-factory.md).
 
 Useful env (`.env.example` lists all): `GEMINI_CACHE_DIR` (cache model responses while iterating), `MEDIA_SILENT=1` (skip TTS), `RESEARCH_GROUNDING=0` (skip Search grounding), `MODEL_*` overrides.
 

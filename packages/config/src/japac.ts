@@ -66,11 +66,11 @@ export function languagesFor(regions: string[]): LangCode[] {
 // Fictional, disclosed synthetic presenters — never modelled on a real journalist.
 // Gemini TTS prebuilt voices are multilingual; the language comes from the text.
 export const PRESENTERS = {
-  "maya-apac": { name: "Maya", lang: "en", voice: "Aoede", style: "warm, clear Asia-Pacific news host" },
-  "kavya-hi": { name: "Kavya", lang: "hi", voice: "Kore", style: "crisp Hindi news anchor, measured pace" },
-  "priya-te": { name: "Priya", lang: "te", voice: "Leda", style: "friendly Telugu regional news presenter" },
+  "maya-apac": { name: "Maya", lang: "en", voice: "Kore", style: "warm, clear Asia-Pacific news host" },
+  "kavya-hi": { name: "Kavya", lang: "hi", voice: "Leda", style: "crisp Hindi news anchor, measured pace" },
+  "priya-te": { name: "Priya", lang: "te", voice: "Sulafat", style: "friendly Telugu regional news presenter" },
   "meena-ta": { name: "Meena", lang: "ta", voice: "Kore", style: "calm Tamil regional news presenter" },
-  "haruto-ja": { name: "Haruto", lang: "ja", voice: "Charon", style: "polite, measured Japanese news anchor" },
+  "haruka-ja": { name: "Haruka", lang: "ja", voice: "Kore", style: "polite, measured Japanese news anchor" },
   "jiwoo-ko": { name: "Ji-woo", lang: "ko", voice: "Leda", style: "clear, composed Korean news anchor" },
   "weiting-zhhant": { name: "Wei-Ting", lang: "zh-Hant", voice: "Aoede", style: "steady Taiwanese Mandarin news anchor" },
   "jiahui-zhhans": { name: "Jia Hui", lang: "zh-Hans", voice: "Kore", style: "clear Singaporean Mandarin news presenter" },
@@ -90,7 +90,7 @@ export const CHANNEL_PLAN: Record<LangCode, { tier: Tier; channel: string; prese
   hi: { tier: "national", channel: "OpenLens India हिन्दी", presenter: "kavya-hi" },
   te: { tier: "regional", channel: "OpenLens తెలుగు", presenter: "priya-te" },
   ta: { tier: "regional", channel: "OpenLens தமிழ்", presenter: "meena-ta" },
-  ja: { tier: "national", channel: "OpenLens 日本", presenter: "haruto-ja" },
+  ja: { tier: "national", channel: "OpenLens 日本", presenter: "haruka-ja" },
   ko: { tier: "national", channel: "OpenLens 한국", presenter: "jiwoo-ko" },
   "zh-Hant": { tier: "national", channel: "OpenLens 繁體中文", presenter: "weiting-zhhant" },
   "zh-Hans": { tier: "national", channel: "OpenLens 简体中文", presenter: "jiahui-zhhans" },

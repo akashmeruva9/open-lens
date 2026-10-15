@@ -18,12 +18,12 @@ export function YouTubeFrame({
 }: { tier: string; title: string; description: string; tags: string[]; synthetic: boolean; lang: string; videoLabel?: string }) {
   return (
     <div className="overflow-hidden rounded-xl bg-white text-neutral-900 dark:bg-[#0f0f0f] dark:text-neutral-100" lang={lang}>
-      <div className="relative flex aspect-video items-end bg-gradient-to-br from-[#16181d] via-[#2b2f38] to-[#7c2d12] p-3">
+      <div className="relative flex aspect-video items-end bg-gradient-to-br from-[#0a0a0a] via-[#1f1f1f] to-[#1d3bb3] p-3">
         <span className="absolute left-2 top-2"><TierBadge tier={tier} /></span>
         {synthetic ? (
           <span className="absolute right-2 top-2 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">AI presenter</span>
         ) : null}
-        <p className="line-clamp-2 max-w-[80%] font-serif text-lg font-semibold leading-tight text-white drop-shadow">{title}</p>
+        <p className="line-clamp-2 max-w-[80%] font-display text-lg font-semibold leading-tight text-white drop-shadow">{title}</p>
         <span className="absolute bottom-2 right-2 rounded bg-black/80 px-1 text-[10px] font-semibold text-white">{videoLabel ?? "0:45"}</span>
       </div>
       <div className="flex gap-2.5 p-3">
@@ -54,7 +54,7 @@ export function YouTubeFrame({
 export function ScriptFrame({ script, lang }: { script: ScriptPayload; lang: string }) {
   return (
     <div className="rounded-xl border border-line bg-surface-2/50 p-3" lang={lang}>
-      <p className="font-serif font-semibold">{script.title}</p>
+      <p className="font-display font-semibold">{script.title}</p>
       <p className="text-[11px] text-ink-3">Presenter: {script.presenter} (fictional persona)</p>
       <ol className="mt-2 space-y-1.5">
         {script.lines.map((l, i) => (
@@ -74,7 +74,7 @@ export function ScriptFrame({ script, lang }: { script: ScriptPayload; lang: str
 export function VideoFrame({ video }: { video: VideoPayload }) {
   const vertical = video.aspect === "9:16";
   return (
-    <div className={`relative mx-auto flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-[#16181d] to-[#3b2a20] text-white ${vertical ? "aspect-[9/16] max-w-[180px]" : "aspect-video"}`}>
+    <div className={`relative mx-auto flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-[#0a0a0a] to-[#141a33] text-white ${vertical ? "aspect-[9/16] max-w-[180px]" : "aspect-video"}`}>
       <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold"><IconSparkle size={10} /> AI presenter</span>
       <span className="text-xs text-white/70">▶ {video.aspect} · {video.durationSeconds}s</span>
       <span className="absolute bottom-2 left-2 right-2 truncate text-[10px] text-white/50">{video.hlsUrl ? "HLS + MP4" : "MP4"} · captions {video.captionsVttUrl ? "✓" : "—"}</span>

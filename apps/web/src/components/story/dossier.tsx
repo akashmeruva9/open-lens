@@ -40,25 +40,27 @@ export function Dossier(props: {
   }
 
   return (
-    <section id="research" aria-labelledby="research-title" className="mt-10 scroll-mt-20">
+    <section id="research" aria-labelledby="research-title" className="mt-16 scroll-mt-24">
+      <h2>
       <button
         type="button"
         aria-expanded={open}
         aria-controls="research-body"
         onClick={() => setOpen(!open)}
-        className="card flex w-full items-center gap-3 p-4 text-left transition hover:border-ink-3"
+        className="flex w-full items-center gap-4 rounded-lg bg-ink p-5 text-left text-bg transition hover:bg-ink/90"
       >
-        <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-ink text-bg">
+        <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-accent-ink">
           <IconBook size={20} />
         </span>
         <span className="flex-1">
-          <span id="research-title" className="block font-serif text-xl font-semibold tracking-tight">Open the research</span>
-          <span className="block text-sm text-ink-2">
+          <span id="research-title" className="display block text-[24px] leading-[28px]">Open the research</span>
+          <span className="mt-0.5 block text-sm opacity-75">
             {counts.claims} claims · {counts.sources} sources · {counts.timeline} timeline events · {counts.context} context items
           </span>
         </span>
-        <IconChevronDown size={20} className={`text-ink-3 transition ${open ? "rotate-180" : ""}`} />
+        <IconChevronDown size={22} className={`opacity-75 transition ${open ? "rotate-180" : ""}`} />
       </button>
+      </h2>
 
       {open ? (
         <div id="research-body" className="mt-3">
@@ -72,7 +74,7 @@ export function Dossier(props: {
                 aria-controls={`dossier-panel-${t.id}`}
                 tabIndex={tab === t.id ? 0 : -1}
                 onClick={() => setTab(t.id)}
-                className={`-mb-px whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium ${tab === t.id ? "border-brand text-ink" : "border-transparent text-ink-3 hover:text-ink"}`}
+                className={`-mb-px whitespace-nowrap border-b-[3px] px-3 py-2.5 text-sm font-semibold ${tab === t.id ? "border-accent text-ink" : "border-transparent text-ink-3 hover:text-ink"}`}
               >
                 {t.label} <span className="ml-0.5 text-xs tabular-nums text-ink-3">{counts[t.id]}</span>
               </button>

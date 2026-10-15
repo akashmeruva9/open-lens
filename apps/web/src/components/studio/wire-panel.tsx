@@ -48,7 +48,7 @@ export function WirePanel() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="eyebrow">Automatic discovery</p>
-          <h2 id="wire-h" className="font-serif text-xl font-semibold">The wire</h2>
+          <h2 id="wire-h" className="font-display text-xl font-semibold">The wire</h2>
           <p className="mt-1 text-xs text-ink-3">
             {p.markets.length} markets · {p.verifiedOutlets} verified outlets · {p.feedsEnabled} feeds{p.gdelt ? " + GDELT signals" : ""} · auto-publish{" "}
             <strong>{p.autoPublish === "low_risk" ? "low-risk only" : "off (editor approval)"}</strong> · pipeline runs today {data.budget.runs}/{p.dailyRunBudget}

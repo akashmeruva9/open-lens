@@ -57,35 +57,35 @@ export function LensLanes({ lanes }: { lanes: LensLane[] }) {
   if (!ordered.length) return null;
 
   return (
-    <section aria-labelledby="lenses-title" className="mt-10">
+    <section aria-labelledby="lenses-title" className="mt-16">
       <div className="flex items-end justify-between gap-3">
         <div>
           <p className="eyebrow">Perspectives</p>
-          <h2 id="lenses-title" className="font-serif text-2xl font-semibold tracking-tight">How outlets frame it</h2>
+          <h2 id="lenses-title" className="display mt-1 text-[24px] leading-[28px]">How outlets framed it</h2>
         </div>
-        <div className="hidden gap-1 sm:flex">
+        <div className="hidden gap-1.5 sm:flex">
           <button type="button" aria-label="Previous perspective" disabled={active === 0}
             onClick={() => scrollTo(active - 1)}
-            className="inline-flex size-9 items-center justify-center rounded-lg border border-line bg-surface disabled:opacity-40">
+            className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-bg hover:bg-surface disabled:opacity-40">
             <IconChevronLeft />
           </button>
           <button type="button" aria-label="Next perspective" disabled={active === ordered.length - 1}
             onClick={() => scrollTo(active + 1)}
-            className="inline-flex size-9 items-center justify-center rounded-lg border border-line bg-surface disabled:opacity-40">
+            className="inline-flex size-10 items-center justify-center rounded-full border border-line bg-bg hover:bg-surface disabled:opacity-40">
             <IconChevronRight />
           </button>
         </div>
       </div>
 
-      <p className="mt-2 flex items-start gap-2 rounded-lg bg-surface-2 px-3 py-2 text-[13px] leading-snug text-ink-2">
-        <IconSparkle size={15} className="mt-0.5 shrink-0 text-brand" />
+      <p className="mt-3 flex items-start gap-2 rounded-lg bg-surface px-3 py-2.5 text-[13px] leading-[19px] text-ink-2">
+        <IconSparkle size={15} className="mt-0.5 shrink-0 text-accent" />
         <span>
           <strong className="font-semibold text-ink">Model-generated framing.</strong> Each lane summarises how outlets with a given rating cover
           this story. Ratings come from a documented outlet table. Lanes are <em>not</em> a truth meter. Check the cited claims.
         </span>
       </p>
 
-      <div role="tablist" aria-label="Perspective lanes" className="mt-4 flex gap-1 rounded-xl border border-line bg-surface p-1" onKeyDown={onTabKey}>
+      <div role="tablist" aria-label="Perspective lanes" className="mt-4 flex gap-1 rounded-full bg-surface p-1" onKeyDown={onTabKey}>
         {ordered.map((lane, i) => {
           const m = LENS[lane.lens] ?? LENS.unrated;
           const selected = i === active;
@@ -104,7 +104,7 @@ export function LensLanes({ lanes }: { lanes: LensLane[] }) {
                 setActive(i);
                 scrollTo(i);
               }}
-              className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium transition ${selected ? "bg-ink text-bg" : "text-ink-2 hover:bg-surface-2"}`}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-full px-2 py-2 text-sm font-semibold transition ${selected ? "bg-ink text-bg" : "text-ink-2 hover:bg-surface-2"}`}
             >
               <span aria-hidden className="size-2 rounded-full" style={{ background: `var(${m.tone})` }} />
               {m.short}
@@ -147,12 +147,12 @@ function LaneCard({ lane, index, total }: { lane: LensLane; index: number; total
       <div aria-hidden className="absolute inset-y-0 left-0 w-1" style={{ background: `var(${m.tone})` }} />
       <header className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-semibold" style={{ color: `var(${m.tone})` }}>{m.label}</h3>
-        <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-line px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-ink-3">
+        <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-ink-3 px-2 py-0.5 text-[11px] font-semibold text-ink-3">
           <IconSparkle size={11} /> Model-generated framing
         </span>
       </header>
 
-      <p className="mt-3 font-serif text-lg leading-snug text-ink">{lane.summary}</p>
+      <p className="display mt-3 text-[19px] leading-[25px] text-ink">{lane.summary}</p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div>

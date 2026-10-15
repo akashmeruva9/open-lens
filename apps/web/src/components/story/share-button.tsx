@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
+import { buttonClass } from "@/components/ui/button";
 import { IconCheck, IconShare } from "@/components/ui/icons";
 
-export function ShareButton({ title, text }: { title: string; text: string }) {
+export function ShareButton({ title, text, compact = false }: { title: string; text: string; compact?: boolean }) {
   const [msg, setMsg] = useState("");
 
   async function share() {
-    const url = window.location.href;
+    const url = window.location.href.split("#")[0];
     try {
       if (navigator.share) {
         await navigator.share({ title, text, url });
@@ -27,13 +28,12 @@ export function ShareButton({ title, text }: { title: string; text: string }) {
   }
 
   return (
-    <div className="relative inline-flex items-center">
-      <button type="button" onClick={share}
-        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 text-sm font-medium text-ink hover:bg-surface-2">
-        {msg === "Link copied" ? <IconCheck size={15} /> : <IconShare size={15} />}
-        Share
+    <div className={`relative ${compact ? "flex" : "inline-flex items-center"}`}>
+      <button type="button" onClick={share} className={buttonClass("secondary", compact ? "md" : "lg", compact ? "w-full" : "")}>
+        {msg === "Link copied" ? <IconCheck size={16} /> : <IconShare size={16} />}
+        {compact && msg ? msg : "Share"}
       </button>
-      <span role="status" aria-live="polite" className="ml-2 text-xs text-ink-3">{msg}</span>
+      <span role="status" aria-live="polite" className={compact ? "sr-only" : "ml-2 text-xs text-ink-3"}>{msg}</span>
     </div>
   );
 }

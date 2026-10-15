@@ -36,7 +36,7 @@ export function SimulateCorrectionDialog({
       className="m-auto w-[min(640px,calc(100vw-2rem))] rounded-2xl border border-line bg-surface p-0 text-ink backdrop:bg-black/50">
       {pick ? (
         <div className="p-5">
-          <h2 id="sim-title" className="font-serif text-xl font-semibold">Simulate a correction</h2>
+          <h2 id="sim-title" className="font-display text-xl font-semibold">Simulate a correction</h2>
           <p className="mt-1 text-sm text-ink-2">
             Editing this claim will flag <strong>{pick.impacted}</strong> dependent output{pick.impacted === 1 ? "" : "s"} (direct citations plus anything built on them) as <em>needs review</em>, bump the ledger version and log a public correction.
           </p>

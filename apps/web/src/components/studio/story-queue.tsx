@@ -21,7 +21,7 @@ export function StoryQueue() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="eyebrow">Newsroom</p>
-          <h1 className="font-serif text-3xl font-semibold tracking-tight">Story queue</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight">Story queue</h1>
         </div>
         <div role="group" aria-label="Filter by status" className="flex flex-wrap gap-1">
           {["all", ...Object.keys(STORY_STATUS).filter((s) => counts[s])].map((s) => (
@@ -58,7 +58,7 @@ function QueueRow({ story }: { story: Story }) {
           {story.riskTier === "sensitive" ? <Tag>Sensitive · human gate</Tag> : null}
           <span className="text-xs text-ink-3">{regionName(story.region)}</span>
         </div>
-        <Link href={`/studio/${story.id}`} className="mt-1 block font-serif text-lg font-semibold leading-snug text-ink after:absolute after:inset-0 hover:underline">
+        <Link href={`/studio/${story.id}`} className="mt-1 block font-display text-lg font-semibold leading-snug text-ink after:absolute after:inset-0 hover:underline">
           {story.title}
         </Link>
         <p className="mt-0.5 text-xs text-ink-3">

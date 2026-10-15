@@ -5,7 +5,7 @@ import { IconBookmark, IconHeart, IconMessage, IconMore, IconRepeat, IconSend, I
 import { hostname } from "@/lib/format";
 
 const AVATAR = (
-  <span aria-hidden className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-[13px] font-bold text-white ring-2 ring-[#ea580c]">
+  <span aria-hidden className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-neutral-900 text-[13px] font-bold text-white ring-2 ring-[#2f5bff]">
     OL
   </span>
 );
@@ -43,7 +43,7 @@ export function XThreadFrame({ posts, video }: { posts: string[]; video?: string
 export function IgReelFrame({ caption, hashtags, video }: { caption: string; hashtags: string[]; video?: string }) {
   return (
     <div className="mx-auto w-full max-w-[260px]">
-      <div className="relative aspect-[9/16] overflow-hidden rounded-[22px] border-4 border-neutral-900 bg-gradient-to-b from-[#1f2937] via-[#3b2a20] to-[#7c2d12] text-white shadow-lg">
+      <div className="relative aspect-[9/16] overflow-hidden rounded-[22px] border-4 border-neutral-900 bg-gradient-to-b from-[#0a0a0a] via-[#141a33] to-[#1d3bb3] text-white shadow-lg">
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-3 text-xs font-semibold">
           <span>Reels</span>
           <span className="rounded bg-white/20 px-1.5 py-0.5 text-[10px]">AI info</span>
@@ -72,10 +72,10 @@ export function CarouselFrame({ slides, caption }: { slides: { heading: string; 
     <div>
       <div className="no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1">
         {slides.map((s, i) => (
-          <div key={i} className="flex aspect-square w-[200px] shrink-0 snap-start flex-col justify-between rounded-lg bg-[#16181d] p-4 text-[#f7f5f0]">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-[#fb923c]">OpenLens · {i + 1}/{slides.length}</span>
+          <div key={i} className="flex aspect-square w-[200px] shrink-0 snap-start flex-col justify-between rounded-lg bg-[#0a0a0a] p-4 text-[#f5f5f5]">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-[#9db0ff]">OpenLens · {i + 1}/{slides.length}</span>
             <div>
-              <p className="font-serif text-lg font-semibold leading-tight">{s.heading}</p>
+              <p className="font-display text-lg font-semibold leading-tight">{s.heading}</p>
               <p className="mt-1 text-xs leading-snug text-white/75">{s.body}</p>
             </div>
             <span className="text-[9px] text-white/50">Claims: {s.claimIds.join(", ")}</span>

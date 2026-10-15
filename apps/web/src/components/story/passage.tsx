@@ -23,14 +23,14 @@ export function SourceWithPassage({ text, passage }: { text: string; passage: st
   if (!span) {
     return (
       <div className="space-y-2">
-        <blockquote className="border-l-2 border-brand pl-3 font-serif text-[15px] italic text-ink">“{passage}”</blockquote>
+        <blockquote className="border-l-2 border-brand pl-3 text-[15px] italic text-ink">“{passage}”</blockquote>
         <p className="text-xs text-ink-3">Passage could not be located in the stored source text.</p>
       </div>
     );
   }
   const [a, b] = span;
   return (
-    <p ref={box} className="relative max-h-56 overflow-y-auto whitespace-pre-line font-serif text-[15px] leading-relaxed text-ink-2">
+    <p ref={box} className="relative max-h-56 overflow-y-auto whitespace-pre-line text-[15px] leading-relaxed text-ink-2">
       {text.slice(0, a)}
       <mark ref={ref} className="passage text-ink">{text.slice(a, b)}</mark>
       {text.slice(b)}

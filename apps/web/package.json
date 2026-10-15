@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "deps": "npm run build -w @openlens/schemas -w @openlens/client",
+    "deps": "npm run build -w @openlens/config -w @openlens/schemas -w @openlens/client",
     "predev": "npm run deps",
     "dev": "next dev --port 3000",
     "prebuild": "npm run deps",

@@ -96,7 +96,7 @@ export function StoryWorkspace({ id }: { id: string }) {
               <span>{regionName(story.region)}</span>
               <span>· <RelTime iso={story.updatedAt} prefix="updated " /></span>
             </div>
-            <h1 className="mt-1.5 font-serif text-2xl font-semibold leading-tight tracking-tight sm:text-[28px]">{story.title}</h1>
+            <h1 className="mt-1.5 font-display text-2xl font-semibold leading-tight tracking-tight sm:text-[28px]">{story.title}</h1>
             <p className="mt-1 text-xs text-ink-3">
               {bundle.claims.length} claims · {bundle.sources.length} sources · {bundle.outputs.length} outputs · {bundle.publications.length} publications · {bundle.corrections.length} corrections
             </p>

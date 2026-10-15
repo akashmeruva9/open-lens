@@ -1,11 +1,18 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { IconPlay } from "@/components/ui/icons";
 
-/** MP4 player with HLS upgrade (native on Safari, hls.js elsewhere) and graceful fallback. */
+/**
+ * MP4 player with HLS upgrade (native on Safari, hls.js elsewhere) and graceful fallback.
+ * Never autoplays with sound: playback only starts from the user's controls or the Watch button.
+ */
 export function VideoPlayer({
-  mp4, hls, captions, poster, aspect, label, captionLang,
-}: { mp4: string; hls?: string; captions?: string; poster?: string; aspect: "9:16" | "16:9"; label: string; captionLang: string }) {
+  mp4, hls, captions, poster, aspect, label, captionLang, fallback, className = "",
+}: {
+  mp4: string; hls?: string; captions?: string; poster?: string; aspect: "9:16" | "16:9"; label: string; captionLang: string;
+  /** Rendered instead of the player when the media cannot be loaded. */
+  fallback?: ReactNode; className?: string;
+}) {
   const ref = useRef<HTMLVideoElement>(null);
   const [failed, setFailed] = useState(false);
 
@@ -41,15 +48,17 @@ export function VideoPlayer({
     };
   }, [mp4, hls]);
 
-  const ratio = aspect === "9:16" ? "aspect-[9/16] max-h-[70vh]" : "aspect-video";
+  const ratio = aspect === "9:16" ? "aspect-[9/16] max-h-[80vh]" : "aspect-video";
+
+  if (failed && fallback) return <>{fallback}</>;
 
   return (
-    <div className={`relative mx-auto overflow-hidden rounded-xl bg-black ${ratio}`}>
+    <div className={`relative mx-auto overflow-hidden bg-black ${ratio} ${className}`}>
       {failed ? (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-neutral-900 to-neutral-800 p-6 text-center text-neutral-200">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-frame p-6 text-center text-frame-ink">
           <span className="inline-flex size-12 items-center justify-center rounded-full bg-white/10"><IconPlay size={22} /></span>
-          <p className="text-sm font-medium">Video unavailable right now</p>
-          <p className="text-xs text-neutral-400">The rendered asset is served by the media pipeline. Read the transcript below.</p>
+          <p className="text-sm font-semibold">Video unavailable right now</p>
+          <p className="text-xs text-frame-ink-2">The rendered asset is served by the media pipeline. Read the transcript below.</p>
         </div>
       ) : null}
       <video

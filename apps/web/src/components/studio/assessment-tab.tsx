@@ -18,7 +18,7 @@ export function AssessmentTab({ bundle, onApprove, busy }: { bundle: StoryBundle
       <div className="card flex flex-wrap items-start justify-between gap-4 p-4">
         <div className="min-w-0">
           <p className="eyebrow">Headline</p>
-          <p className="font-serif text-xl font-semibold">{a.headline}</p>
+          <p className="font-display text-xl font-semibold">{a.headline}</p>
           <p className="mt-1 text-sm text-ink-2">{a.neutralSummary}</p>
           <p className="mt-2 text-xs text-ink-3">
             Written against ledger v{a.ledgerVersion} · current v{bundle.story.version}

@@ -82,7 +82,7 @@ function ClaimItem({ claim, open, onToggle }: { claim: Claim; open: boolean; onT
                     </a>
                   ) : null}
                 </figcaption>
-                {src ? <SourceWithPassage text={src.text} passage={ev.passage} /> : <blockquote className="font-serif italic">“{ev.passage}”</blockquote>}
+                {src ? <SourceWithPassage text={src.text} passage={ev.passage} /> : <blockquote className="italic">“{ev.passage}”</blockquote>}
               </figure>
             );
           })}

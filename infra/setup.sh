@@ -42,15 +42,16 @@ if ! gcloud secrets describe ingest-token >/dev/null 2>&1; then
   openssl rand -hex 24 | tr -d '\n' | gcloud secrets create ingest-token --data-file=-
 fi
 
-# The wire: Cloud Scheduler calls the api every 10 minutes (after the first deploy).
+# The wire: Cloud Scheduler calls the api every WIRE_EVERY_MIN minutes (default 15; after the first deploy).
+WIRE_EVERY_MIN="${WIRE_EVERY_MIN:-15}"
 API_URL="$(gcloud run services describe openlens-api --region="$REGION" --format='value(status.url)' 2>/dev/null || true)"
 if [ -n "$API_URL" ]; then
   TOKEN="$(gcloud secrets versions access latest --secret=ingest-token)"
   gcloud scheduler jobs describe openlens-wire --location="$REGION" >/dev/null 2>&1 && \
     gcloud scheduler jobs delete openlens-wire --location="$REGION" --quiet
-  gcloud scheduler jobs create http openlens-wire --location="$REGION" --schedule="*/10 * * * *" \
+  gcloud scheduler jobs create http openlens-wire --location="$REGION" --schedule="*/$WIRE_EVERY_MIN * * * *" \
     --uri="$API_URL/v1/internal/ingest" --http-method=POST --headers="x-ingest-token=$TOKEN" --attempt-deadline=60s
-  echo "Wire scheduled every 10 minutes -> $API_URL/v1/internal/ingest"
+  echo "Wire scheduled every $WIRE_EVERY_MIN minutes -> $API_URL/v1/internal/ingest"
 else
   echo "Deploy the api first, then re-run this script to schedule the wire."
 fi

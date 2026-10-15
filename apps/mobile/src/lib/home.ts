@@ -5,7 +5,7 @@ import { mediaItems } from './bundle';
 import { matchesRegion } from './catalog';
 import type { FeedItem } from './types';
 
-/** Video facts a card needs. In live mode the feed only carries `videoUrl`, so duration/lang may be missing. */
+/** Video facts a card needs: from `FeedItem.videos` (live API) or the fixture bundle (demo mode). */
 export type CardVideo = {
   url: string;
   hlsUrl?: string;
@@ -18,6 +18,16 @@ export type CardVideo = {
 export type HomeItem = FeedItem & { video?: CardVideo };
 
 export function toHomeItem(item: FeedItem): HomeItem {
+  const fromFeed = item.videos?.find((v) => v.mp4Url && v.aspect !== '16:9') ?? item.videos?.find((v) => v.mp4Url);
+  if (fromFeed?.mp4Url) {
+    return {
+      ...item,
+      video: {
+        url: fromFeed.mp4Url, hlsUrl: fromFeed.hlsUrl, durationSeconds: fromFeed.durationSeconds,
+        lang: fromFeed.lang, thumbnailUrl: fromFeed.thumbnailUrl, aiPresenter: fromFeed.aiPresenter,
+      },
+    };
+  }
   if (!item.videoUrl) return item;
   const b = fixtureBundle(item.id);
   const v = b ? mediaItems(b).find((m) => m.kind === 'video') : undefined;

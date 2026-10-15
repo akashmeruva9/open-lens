@@ -109,6 +109,8 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
         key: sfx, lang: s.lang, script, outDir: join(deps.workDir, storyId),
         aspects: opts.aspects ?? ["9:16", "16:9"], silent: process.env.MEDIA_SILENT === "1",
         presenterImagePath: deps.presenterImages?.[script.presenter],
+        storyId,
+        autoIllustrations: Number(process.env.AUTO_ILLUSTRATIONS ?? 0) || 0,
         sourceLabels,
         captionTracks,
         claims,

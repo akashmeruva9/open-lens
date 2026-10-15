@@ -50,6 +50,8 @@ export interface BeatContext {
   total: number;
   /** Beat chosen for the previous line (used to avoid monotonous runs). */
   prev?: BeatKind;
+  /** Every beat kind chosen so far in this video: the sources card is shown at most once (it repeats the evidence chip). */
+  used?: BeatKind[];
   /** Where the end card should point (set from OPENLENS_PUBLIC_URL). */
   ctaUrl?: string;
   /** An illustration image was supplied for this line. */
@@ -219,7 +221,8 @@ export function pickBeat(line: ScriptLine, ctx: BeatContext, hint?: BeatHint): B
     const h = cands.find((b) => b.kind === hint.kind);
     if (h) return h;
   }
-  return cands.find((b) => b.kind !== ctx.prev) ?? cands[0]!;
+  const fresh = cands.filter((b) => !(b.kind === "sources" && ctx.used?.includes("sources")));
+  return fresh.find((b) => b.kind !== ctx.prev) ?? fresh[0] ?? cands[0]!;
 }
 
 /** "2026-09-29" -> "29 Sept 2026" in the video's language; "2020" stays "2020"; anything else is shown as written. */

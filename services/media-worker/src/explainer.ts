@@ -43,17 +43,17 @@ export function explainerLayout(aspect: Aspect): ExplainerLayout {
     const W = 1080, H = 1920;
     return {
       W, H, pad: 60,
-      // Reels/Shorts: caption + buttons cover the bottom ~20%; like/comment/share column sits on the right below mid-height.
-      safe: { top: 80, bottom: Math.round(H * 0.8), right: W - 150, rightFrom: 900 },
+      // Reels/Shorts: caption + buttons cover the bottom ~35% (Shorts: ~672 px) and the right ~192 px.
+      safe: { top: 80, bottom: 1248, right: W - 192, rightFrom: 840 },
       logo: { x: 60, y: 96 },
       disclosure: { x: 60, y: 166, w: 680, h: 118 },
       pip: { x: 780, y: 100, w: 240, h: 300 },
       label: { x: 60, y: 318 },
-      beat: { x: 60, y: 410, w: 960, h: 470 },
-      chip: { x: 60, y: 912, w: 870, h: 64 },
-      caption: { x: 60, y: 1010, w: 870, h: 510 },
+      beat: { x: 60, y: 410, w: 960, h: 430 },
+      chip: { x: 60, y: 866, w: 828, h: 58 },
+      caption: { x: 60, y: 944, w: 828, h: 304 },
       hook: { x: 0, y: 0, w: W, h: H },
-      hookCaption: { x: 60, y: 1150, w: 870, h: 370 },
+      hookCaption: { x: 60, y: 940, w: 828, h: 308 },
     };
   }
   const W = 1920, H = 1080;

@@ -4,10 +4,11 @@ import { mkdir, rename, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fontFor, registerDefaultFonts } from "./fonts.js";
-import { pickBeat, type Beat, type BeatClaim, type BeatHint, type BeatKind } from "./beats.js";
+import { beatCandidates, pickBeat, type Beat, type BeatClaim, type BeatHint, type BeatKind } from "./beats.js";
 import { run, renderVideo, type HookClip } from "./render.js";
 import { loadPresenter, type Aspect, type Scene } from "./scenes.js";
 import { synthesizeToFile } from "./tts.js";
+import { pickIllustrationLines, planIllustrations } from "./visuals.js";
 
 export interface MediaJob {
   /** e.g. "national-en" — used in file names. */
@@ -34,6 +35,10 @@ export interface MediaJob {
   ledgerLang?: string;
   /** End-card QR/link target. Defaults to OPENLENS_PUBLIC_URL; without either the end card shows a placeholder. */
   ctaUrl?: string;
+  /** Story id (names the folder for generated images). Needed for `autoIllustrations`. */
+  storyId?: string;
+  /** Generate up to N realistic backdrops (about US$0.035 each + one Gemini call) for lines with nothing numeric to show. 0 = off. */
+  autoIllustrations?: number;
   /** Optional supplied illustrations, by script line index (image file paths). Shown full-bleed with an
    *  "AI-generated illustration" label; never invented here. */
   illustrations?: Record<number, string>;
@@ -177,6 +182,13 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
     presenterImage: await loadPresenter(job.presenterImagePath ?? defaultPortrait(presenter)),
     presenterVideo: defaultIdleClip(presenter),
   };
+  if (job.style !== "tv" && !job.illustrations && (job.autoIllustrations ?? 0) > 0 && job.storyId) {
+    const ctaUrl = job.ctaUrl ?? (process.env.OPENLENS_PUBLIC_URL?.trim() || undefined);
+    const kinds = timed.map((t, i) => beatCandidates({ label: t.label, text: t.text, claimIds: t.claimIds },
+      { claims: job.claims, sources: outletsFor(job, t.claimIds), timeline: job.timeline, timelineLang: job.ledgerLang ?? "en", lang: job.lang, index: i, total: timed.length, ctaUrl })[0]?.kind);
+    const picks = pickIllustrationLines(kinds, job.autoIllustrations!);
+    if (picks.length) job.illustrations = await planIllustrations({ storyId: job.storyId, title: job.script.title, lines: picks.map((i) => ({ index: i, text: timed[i]!.text })) });
+  }
   const scenes: Scene[] = job.style === "tv" ? tvScenes(job, timed) : explainerScenes(job, timed);
   const beats = scenes.map((s) => s.beat?.kind).filter((k): k is BeatKind => Boolean(k));
   const videos: MediaResult["videos"] = [];
@@ -233,16 +245,18 @@ const END_CARD_SECONDS = 2;
 export function explainerScenes(job: MediaJob, timed: TimedLine[]): Scene[] {
   const ctaUrl = job.ctaUrl ?? (process.env.OPENLENS_PUBLIC_URL?.trim() || undefined);
   let prev: BeatKind | undefined;
+  const used: BeatKind[] = [];
   const scenes: Scene[] = timed.map((t, i) => {
     const sources = outletsFor(job, t.claimIds);
     const imagePath = job.illustrations?.[i];
     const beat: Beat = pickBeat(
       { label: t.label, text: t.text, claimIds: t.claimIds },
       { claims: job.claims, sources, timeline: job.timeline, timelineLang: job.ledgerLang ?? "en", lang: job.lang,
-        index: i, total: timed.length, prev, ctaUrl, illustration: Boolean(imagePath) },
+        index: i, total: timed.length, prev, used, ctaUrl, illustration: Boolean(imagePath) },
       job.beatHints?.[i],
     );
     prev = beat.kind;
+    used.push(beat.kind);
     return { label: t.label, text: t.text, claimIds: t.claimIds, seconds: t.seconds, sources, beat, layout: "beat",
       ...(beat.kind === "illustration" ? { imagePath } : {}) };
   });

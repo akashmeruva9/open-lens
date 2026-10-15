@@ -25,14 +25,26 @@ export const ILLUSTRATION_RULES =
   "Not photorealistic, not a photograph, no news footage, no documents, screenshots, banknotes or official seals. " +
   "Abstract and symbolic, suitable as a neutral background behind news captions.";
 
+/** Realistic look: generic objects and places only. It must never pass for documentary footage of a real event. */
+export const PHOTO_STYLE =
+  "Photorealistic, high-quality documentary-style photograph with natural light, realistic materials and depth of field, " +
+  "shot on a full-frame camera, muted natural colour grade, calm and serious editorial tone";
+export const PHOTO_RULES =
+  "Strictly no text, letters, numbers, digits, logos, flags, uniforms, insignia, watermarks or signatures anywhere in the image. " +
+  "No people: no faces, no recognisable person, no crowds; show only objects, equipment, landscapes or empty places. " +
+  "Generic and plausible, not a depiction of a specific real event, place or incident. No documents, screenshots, banknotes or official seals. " +
+  "Suitable as a neutral background behind news captions.";
+
 const COMPOSITION: Record<"9:16" | "16:9", string> = {
   "9:16": "Vertical composition: main subject centred in the middle of the frame with plenty of empty space above and below it; one continuous seamless background gradient filling the whole frame edge to edge, with no bands, stripes, panels, frames or borders.",
   "16:9": "Wide composition: main subject in the right two-thirds with empty space on the left; one continuous seamless background gradient filling the whole frame edge to edge, with no bands, stripes, panels, frames or borders.",
 };
 
 /** Recommended template: `subject` is ONE visual metaphor, described as objects/shapes, never as a headline. */
-export function illustrationPrompt(subject: string, aspect: "9:16" | "16:9"): string {
-  return `${ILLUSTRATION_STYLE}. Subject: ${subject.trim().replace(/\.$/, "")}. ${COMPOSITION[aspect]} ${ILLUSTRATION_RULES}`;
+export function illustrationPrompt(subject: string, aspect: "9:16" | "16:9", look: "editorial" | "photo" = "editorial"): string {
+  const [style, rules] = look === "photo" ? [PHOTO_STYLE, PHOTO_RULES] : [ILLUSTRATION_STYLE, ILLUSTRATION_RULES];
+  const composition = look === "photo" ? COMPOSITION[aspect].replace(/one continuous seamless background gradient filling the whole frame edge to edge, with no bands, stripes, panels, frames or borders\./, "natural full-frame scene with no borders, frames or panels.") : COMPOSITION[aspect];
+  return `${style}. Subject: ${subject.trim().replace(/\.$/, "")}. ${composition} ${rules}`;
 }
 
 export interface IllustrationOptions {
@@ -44,13 +56,15 @@ export interface IllustrationOptions {
   name?: string;
   force?: boolean;
   dryRun?: boolean;
+  /** "editorial" (default flat vector house style) or "photo" (realistic, generic objects/places only; still labelled AI-generated on screen). */
+  look?: "editorial" | "photo";
 }
 
 export interface Illustration { file: string; cached: boolean; costUsd: number; prompt: string; key: string; latencyS?: number }
 
 export async function generateIllustration(o: IllustrationOptions): Promise<Illustration> {
   const aspect = o.aspect ?? "9:16";
-  const prompt = illustrationPrompt(o.prompt, aspect);
+  const prompt = illustrationPrompt(o.prompt, aspect, o.look ?? "editorial");
   const key = sha(ILLUSTRATION_MODEL, prompt, aspect);
   const slug = (o.name ?? o.prompt).toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 32).replace(/-+$/, "");
   const dir = resolve(DATA_DIR, "illustrations", o.storyId.replace(/[^\w.-]/g, "_"));
@@ -94,9 +108,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const pos = args.filter((a, i) => !a.startsWith("--") && (ai < 0 || i !== ai + 1));
   const [storyId, subject] = pos;
   if (!storyId || !subject) {
-    console.error('usage: illustrations.ts <storyId> "<subject>" [--aspect 9:16|16:9] [--dry] [--force]');
+    console.error('usage: illustrations.ts <storyId> "<subject>" [--aspect 9:16|16:9] [--photo] [--dry] [--force]');
     process.exit(1);
   }
-  const r = await generateIllustration({ storyId, prompt: subject, aspect: (ai >= 0 ? args[ai + 1] : "9:16") as "9:16" | "16:9", dryRun: args.includes("--dry"), force: args.includes("--force") });
+  const r = await generateIllustration({ storyId, prompt: subject, aspect: (ai >= 0 ? args[ai + 1] : "9:16") as "9:16" | "16:9", dryRun: args.includes("--dry"), force: args.includes("--force"), look: args.includes("--photo") ? "photo" : "editorial" });
   console.log(JSON.stringify(r, null, 2));
 }

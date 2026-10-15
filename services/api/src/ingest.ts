@@ -233,14 +233,23 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     const { candidates, touched } = assignLeads(fresh, vectors, prior, { now });
     report.candidatesTouched = touched.size;
 
+    // Only events that could become stories are worth fetching: an existing story, coverage by
+    // enough independent outlets, or a primary document that may start a story on its own
+    // (same rule as promotion below; alert feeds never seed).
+    const seedFeeds = new Set(cfg.feeds.filter((f) => f.seedsStory).map((f) => f.id));
+    const canSeed = (l: StoredLead | undefined) =>
+      Boolean(l) && allowlistEntryFor(l!.url, cfg.allowlist)?.sourceType === "primary" && (!l!.feedId || seedFeeds.has(l!.feedId));
+    const promising = (c: Candidate) =>
+      Boolean(c.storyId) || new Set(c.domains).size >= cfg.minPublishers || c.leadIds.some((id) => canSeed(leads[id]));
     // Candidates still owed work from earlier cycles (fetch cap or story budget hit) stay in play,
     // otherwise an event that arrived in a busy cycle would never become a story.
     const owed = (c: Candidate) =>
+      promising(c) &&
       c.leadIds.some((id) => {
         const l = leads[id];
         return l && !c.processedLeadIds.includes(id) && (l.source || (!l.rejected && allowlistEntryFor(l.url, cfg.allowlist)));
       });
-    const active = candidates.filter((c) => touched.has(c.id) || owed(c));
+    const active = candidates.filter((c) => (touched.has(c.id) && promising(c)) || owed(c));
 
     // 4) Ingest full text for permitted leads in active candidates (widest-covered events first, capped).
     let fetches = 0;
@@ -312,6 +321,8 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
         updated++;
       }
       c.processedLeadIds.push(...pending.map((l) => l.id));
+      // The story now holds these sources; keep only metadata in wire state (Firestore doc size).
+      for (const l of pending) l.source = { ...l.source!, text: "" };
       budget.runs++;
       toRun.push(c.storyId!);
     }

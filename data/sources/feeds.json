@@ -150,6 +150,1016 @@
       "enabled": false,
       "seedsStory": true,
       "note": "Asian Development Bank. Reuse: attribution-required. Disabled: ADB permits republishing only without alteration; OpenLens summarizes/translates."
+    },
+    {
+      "id": "world-bbc",
+      "market": "WORLD",
+      "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
+      "domain": "bbc.co.uk",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "BBC News (UK, en); lean: center."
+    },
+    {
+      "id": "world-guardian",
+      "market": "WORLD",
+      "url": "https://www.theguardian.com/world/rss",
+      "domain": "theguardian.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Guardian (UK, en); lean: left."
+    },
+    {
+      "id": "world-foxnews",
+      "market": "WORLD",
+      "url": "https://moxie.foxnews.com/google-publisher/world.xml",
+      "domain": "foxnews.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Fox News (US, en); lean: right."
+    },
+    {
+      "id": "world-nypost",
+      "market": "WORLD",
+      "url": "https://nypost.com/world-news/feed/",
+      "domain": "nypost.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "New York Post (US, en); lean: right."
+    },
+    {
+      "id": "world-aljazeera",
+      "market": "WORLD",
+      "url": "https://www.aljazeera.com/xml/rss/all.xml",
+      "domain": "aljazeera.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Al Jazeera English (Qatar, en); lean: left."
+    },
+    {
+      "id": "world-dw",
+      "market": "WORLD",
+      "url": "https://rss.dw.com/rdf/rss-en-world",
+      "domain": "dw.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Deutsche Welle (DW) (Germany, en); lean: left."
+    },
+    {
+      "id": "world-france24",
+      "market": "WORLD",
+      "url": "https://www.france24.com/en/rss",
+      "domain": "france24.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "France 24 (France, en); lean: center."
+    },
+    {
+      "id": "world-euronews",
+      "market": "WORLD",
+      "url": "https://www.euronews.com/rss?level=theme&name=news",
+      "domain": "euronews.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Euronews (EU (France), en); lean: left."
+    },
+    {
+      "id": "world-abcnews",
+      "market": "WORLD",
+      "url": "https://abcnews.go.com/abcnews/internationalheadlines",
+      "domain": "abcnews.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "ABC News (US) (US, en); lean: left."
+    },
+    {
+      "id": "world-cbs",
+      "market": "WORLD",
+      "url": "https://www.cbsnews.com/latest/rss/world",
+      "domain": "cbsnews.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "CBS News (US, en); lean: right."
+    },
+    {
+      "id": "world-nbc",
+      "market": "WORLD",
+      "url": "https://feeds.nbcnews.com/nbcnews/public/world",
+      "domain": "nbcnews.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "NBC News (US, en); lean: left."
+    },
+    {
+      "id": "world-newsweek",
+      "market": "WORLD",
+      "url": "https://www.newsweek.com/rss",
+      "domain": "newsweek.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Newsweek (US, en); lean: right."
+    },
+    {
+      "id": "world-independent",
+      "market": "WORLD",
+      "url": "https://www.independent.co.uk/news/world/rss",
+      "domain": "independent.co.uk",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Independent (UK, en); lean: left."
+    },
+    {
+      "id": "world-dailymail",
+      "market": "WORLD",
+      "url": "https://www.dailymail.co.uk/news/worldnews/index.rss",
+      "domain": "dailymail.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Daily Mail (UK, en); lean: right."
+    },
+    {
+      "id": "world-breitbart",
+      "market": "WORLD",
+      "url": "https://feeds.feedburner.com/breitbart",
+      "domain": "breitbart.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Breitbart News (US, en); lean: right."
+    },
+    {
+      "id": "world-dailywire",
+      "market": "WORLD",
+      "url": "https://www.dailywire.com/feeds/rss.xml",
+      "domain": "dailywire.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Daily Wire (US, en); lean: right."
+    },
+    {
+      "id": "world-federalist",
+      "market": "WORLD",
+      "url": "https://thefederalist.com/feed/",
+      "domain": "thefederalist.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Federalist (US, en); lean: right."
+    },
+    {
+      "id": "world-dailycaller",
+      "market": "WORLD",
+      "url": "https://dailycaller.com/feed/",
+      "domain": "dailycaller.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Daily Caller (US, en); lean: right."
+    },
+    {
+      "id": "world-gbnews",
+      "market": "WORLD",
+      "url": "https://www.gbnews.com/feeds/news.rss",
+      "domain": "gbnews.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "GB News (UK, en); lean: right."
+    },
+    {
+      "id": "world-csmonitor",
+      "market": "WORLD",
+      "url": "https://rss.csmonitor.com/feeds/world",
+      "domain": "csmonitor.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Christian Science Monitor (US, en); lean: center."
+    },
+    {
+      "id": "world-arabnews",
+      "market": "WORLD",
+      "url": "https://www.arabnews.com/rss.xml",
+      "domain": "arabnews.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Arab News (Saudi Arabia, en); lean: right."
+    },
+    {
+      "id": "world-jpost",
+      "market": "WORLD",
+      "url": "https://www.jpost.com/rss/rssfeedsfrontpage.aspx",
+      "domain": "jpost.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Jerusalem Post (Israel, en); lean: right."
+    },
+    {
+      "id": "world-africanews",
+      "market": "WORLD",
+      "url": "https://www.africanews.com/feed/rss",
+      "domain": "africanews.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Africanews (Africa (Congo/France), en); lean: left."
+    },
+    {
+      "id": "world-allafrica",
+      "market": "WORLD",
+      "url": "https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf",
+      "domain": "allafrica.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "AllAfrica (Africa (aggregator), en); lean: center."
+    },
+    {
+      "id": "world-mercopress",
+      "market": "WORLD",
+      "url": "https://en.mercopress.com/rss/",
+      "domain": "mercopress.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "MercoPress (Uruguay, en); lean: left."
+    },
+    {
+      "id": "world-batimes",
+      "market": "WORLD",
+      "url": "https://www.batimes.com.ar/feed",
+      "domain": "batimes.com.ar",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Buenos Aires Times (Argentina, en); lean: right."
+    },
+    {
+      "id": "world-time",
+      "market": "WORLD",
+      "url": "https://time.com/feed/",
+      "domain": "time.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "TIME (US, en); lean: left."
+    },
+    {
+      "id": "world-vox",
+      "market": "WORLD",
+      "url": "https://www.vox.com/rss/index.xml",
+      "domain": "vox.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Vox (US, en); lean: left."
+    },
+    {
+      "id": "world-huffpost",
+      "market": "WORLD",
+      "url": "https://www.huffpost.com/section/world-news/feed",
+      "domain": "huffpost.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "HuffPost (US, en); lean: left."
+    },
+    {
+      "id": "world-latimes",
+      "market": "WORLD",
+      "url": "https://www.latimes.com/world-nation/rss2.0.xml",
+      "domain": "latimes.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Los Angeles Times (US, en); lean: center."
+    },
+    {
+      "id": "world-pbs",
+      "market": "WORLD",
+      "url": "https://www.pbs.org/newshour/feeds/rss/world",
+      "domain": "pbs.org",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "PBS NewsHour (US, en); lean: left."
+    },
+    {
+      "id": "world-lemonde",
+      "market": "WORLD",
+      "url": "https://www.lemonde.fr/en/international/rss_full.xml",
+      "domain": "lemonde.fr",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Le Monde (English) (France, en); lean: left."
+    },
+    {
+      "id": "world-irishtimes",
+      "market": "WORLD",
+      "url": "https://www.irishtimes.com/arc/outboundfeeds/feed-world/?outputType=xml",
+      "domain": "irishtimes.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Irish Times (Ireland, en); lean: left."
+    },
+    {
+      "id": "world-upi",
+      "market": "WORLD",
+      "url": "https://rss.upi.com/news/top_news.rss",
+      "domain": "upi.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "UPI (US, en); lean: center."
+    },
+    {
+      "id": "world-reason",
+      "market": "WORLD",
+      "url": "https://reason.com/feed/",
+      "domain": "reason.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Reason (US, en); lean: right."
+    },
+    {
+      "id": "world-cnbc",
+      "market": "WORLD",
+      "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100727362",
+      "domain": "cnbc.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "CNBC (US, en); lean: left."
+    },
+    {
+      "id": "in-thehindu",
+      "market": "IN",
+      "url": "https://www.thehindu.com/news/national/feeder/default.rss",
+      "domain": "thehindu.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Hindu (IN, en); lean: left."
+    },
+    {
+      "id": "in-indianexpress",
+      "market": "IN",
+      "url": "https://indianexpress.com/section/india/feed/",
+      "domain": "indianexpress.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Indian Express (IN, en); lean: left."
+    },
+    {
+      "id": "in-timesofindia",
+      "market": "IN",
+      "url": "https://timesofindia.indiatimes.com/rssfeedstopstories.cms",
+      "domain": "indiatimes.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Times of India (IN, en); lean: right."
+    },
+    {
+      "id": "in-scroll",
+      "market": "IN",
+      "url": "https://feeds.feedburner.com/ScrollinArticles.rss",
+      "domain": "scroll.in",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Scroll.in (IN, en); lean: left."
+    },
+    {
+      "id": "in-theprint",
+      "market": "IN",
+      "url": "https://theprint.in/category/india/feed/",
+      "domain": "theprint.in",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "ThePrint (IN, en); lean: right."
+    },
+    {
+      "id": "in-dainikbhaskar",
+      "market": "IN",
+      "url": "https://www.bhaskar.com/rss-feed/1061/",
+      "domain": "bhaskar.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Dainik Bhaskar (IN, hi); lean: unrated."
+    },
+    {
+      "id": "in-sakshi",
+      "market": "IN",
+      "url": "https://www.sakshi.com/rss.xml",
+      "domain": "sakshi.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Sakshi (IN, te); lean: unrated."
+    },
+    {
+      "id": "sg-cna",
+      "market": "SG",
+      "url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml",
+      "domain": "channelnewsasia.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "CNA (Channel NewsAsia) (SG, en); lean: center."
+    },
+    {
+      "id": "sg-mothership",
+      "market": "SG",
+      "url": "https://mothership.sg/feed/",
+      "domain": "mothership.sg",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Mothership (SG, en); lean: left."
+    },
+    {
+      "id": "my-fmt",
+      "market": "MY",
+      "url": "https://www.freemalaysiatoday.com/feed/",
+      "domain": "freemalaysiatoday.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Free Malaysia Today (MY, en); lean: right."
+    },
+    {
+      "id": "my-nst",
+      "market": "MY",
+      "url": "https://www.nst.com.my/feed",
+      "domain": "nst.com.my",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "New Straits Times (MY, en); lean: center."
+    },
+    {
+      "id": "my-utusan",
+      "market": "MY",
+      "url": "https://www.utusan.com.my/feed/",
+      "domain": "utusan.com.my",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Utusan Malaysia (MY, ms); lean: unrated."
+    },
+    {
+      "id": "id-antara",
+      "market": "ID",
+      "url": "https://www.antaranews.com/rss/terkini.xml",
+      "domain": "antaranews.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Antara (ID, id); lean: unrated."
+    },
+    {
+      "id": "id-detik",
+      "market": "ID",
+      "url": "https://news.detik.com/berita/rss",
+      "domain": "detik.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "detikNews (ID, id); lean: center."
+    },
+    {
+      "id": "id-cnnindonesia",
+      "market": "ID",
+      "url": "https://www.cnnindonesia.com/nasional/rss",
+      "domain": "cnnindonesia.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "CNN Indonesia (ID, id); lean: unrated."
+    },
+    {
+      "id": "id-liputan6",
+      "market": "ID",
+      "url": "https://feed.liputan6.com/rss/news",
+      "domain": "liputan6.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Liputan6 (ID, id); lean: right."
+    },
+    {
+      "id": "id-republika",
+      "market": "ID",
+      "url": "https://www.republika.co.id/rss",
+      "domain": "republika.co.id",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Republika (ID, id); lean: unrated."
+    },
+    {
+      "id": "th-bangkokpost",
+      "market": "TH",
+      "url": "https://www.bangkokpost.com/rss/data/thailand.xml",
+      "domain": "bangkokpost.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Bangkok Post (TH, en); lean: right."
+    },
+    {
+      "id": "th-prachataienglish",
+      "market": "TH",
+      "url": "https://prachataienglish.com/rss.xml",
+      "domain": "prachataienglish.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Prachatai English (TH, en); lean: unrated."
+    },
+    {
+      "id": "th-thairath",
+      "market": "TH",
+      "url": "https://www.thairath.co.th/rss/news",
+      "domain": "thairath.co.th",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Thairath (TH, th); lean: right."
+    },
+    {
+      "id": "vn-vnexpressintl",
+      "market": "VN",
+      "url": "https://e.vnexpress.net/rss/news.rss",
+      "domain": "vnexpress.net",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "VnExpress International (VN, en); lean: unrated."
+    },
+    {
+      "id": "vn-tuoitre",
+      "market": "VN",
+      "url": "https://tuoitre.vn/rss/thoi-su.rss",
+      "domain": "tuoitre.vn",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Tuoi Tre (VN, vi); lean: unrated."
+    },
+    {
+      "id": "vn-thanhnien",
+      "market": "VN",
+      "url": "https://thanhnien.vn/rss/thoi-su.rss",
+      "domain": "thanhnien.vn",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Thanh Nien (VN, vi); lean: unrated."
+    },
+    {
+      "id": "vn-vietnamplus",
+      "market": "VN",
+      "url": "https://www.vietnamplus.vn/rss/chinhtri.rss",
+      "domain": "vietnamplus.vn",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "VietnamPlus (VNA) (VN, vi); lean: unrated."
+    },
+    {
+      "id": "vn-vietnamnet",
+      "market": "VN",
+      "url": "https://vietnamnet.vn/rss/thoi-su.rss",
+      "domain": "vietnamnet.vn",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "VietNamNet (VN, vi); lean: unrated."
+    },
+    {
+      "id": "vn-nhandan",
+      "market": "VN",
+      "url": "https://nhandan.vn/rss/chinhtri.rss",
+      "domain": "nhandan.vn",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Nhan Dan (VN, vi); lean: unrated."
+    },
+    {
+      "id": "ph-rappler",
+      "market": "PH",
+      "url": "https://www.rappler.com/feed/",
+      "domain": "rappler.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Rappler (PH, en); lean: left."
+    },
+    {
+      "id": "ph-philstar",
+      "market": "PH",
+      "url": "https://www.philstar.com/rss/headlines",
+      "domain": "philstar.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Philippine Star (PH, en); lean: left."
+    },
+    {
+      "id": "ph-gma",
+      "market": "PH",
+      "url": "https://data.gmanetwork.com/gno/rss/news/nation/feed.xml",
+      "domain": "gmanetwork.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "GMA News (PH, en); lean: left."
+    },
+    {
+      "id": "ph-manilatimes",
+      "market": "PH",
+      "url": "https://www.manilatimes.net/news/feed/",
+      "domain": "manilatimes.net",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Manila Times (PH, en); lean: right."
+    },
+    {
+      "id": "jp-asahi",
+      "market": "JP",
+      "url": "https://www.asahi.com/rss/asahi/newsheadlines.rdf",
+      "domain": "asahi.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Asahi Shimbun (JP, ja); lean: left."
+    },
+    {
+      "id": "jp-mainichi",
+      "market": "JP",
+      "url": "https://mainichi.jp/rss/etc/mainichi-flash.rss",
+      "domain": "mainichi.jp",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Mainichi Shimbun (JP, ja); lean: left."
+    },
+    {
+      "id": "jp-nhk",
+      "market": "JP",
+      "url": "https://www.nhk.or.jp/rss/news/cat0.xml",
+      "domain": "web.nhk",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "NHK News (JP, ja); lean: right."
+    },
+    {
+      "id": "jp-japantoday",
+      "market": "JP",
+      "url": "https://japantoday.com/feed",
+      "domain": "japantoday.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Japan Today (JP, en); lean: left."
+    },
+    {
+      "id": "kr-koreaherald",
+      "market": "KR",
+      "url": "https://www.koreaherald.com/rss/newsAll",
+      "domain": "koreaherald.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Korea Herald (KR, en); lean: right."
+    },
+    {
+      "id": "kr-koreatimes",
+      "market": "KR",
+      "url": "https://feed.koreatimes.co.kr/k/allnews.xml",
+      "domain": "koreatimes.co.kr",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Korea Times (KR, en); lean: left."
+    },
+    {
+      "id": "kr-yonhap",
+      "market": "KR",
+      "url": "https://en.yna.co.kr/RSS/news.xml",
+      "domain": "yna.co.kr",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Yonhap News Agency (English) (KR, en); lean: right."
+    },
+    {
+      "id": "kr-chosun",
+      "market": "KR",
+      "url": "https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml",
+      "domain": "chosun.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Chosun Ilbo (KR, ko); lean: right."
+    },
+    {
+      "id": "kr-khan",
+      "market": "KR",
+      "url": "https://www.khan.co.kr/rss/rssdata/total_news.xml",
+      "domain": "khan.co.kr",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Kyunghyang Shinmun (KR, ko); lean: unrated."
+    },
+    {
+      "id": "kr-donga",
+      "market": "KR",
+      "url": "https://rss.donga.com/total.xml",
+      "domain": "donga.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Dong-A Ilbo (KR, ko); lean: unrated."
+    },
+    {
+      "id": "tw-taipeitimes",
+      "market": "TW",
+      "url": "https://www.taipeitimes.com/xml/index.rss",
+      "domain": "taipeitimes.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Taipei Times (TW, en); lean: left."
+    },
+    {
+      "id": "tw-focustaiwan",
+      "market": "TW",
+      "url": "https://feeds.feedburner.com/rsscna/engnews",
+      "domain": "focustaiwan.tw",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Focus Taiwan (CNA) (TW, en); lean: left."
+    },
+    {
+      "id": "tw-ltn",
+      "market": "TW",
+      "url": "https://news.ltn.com.tw/rss/all.xml",
+      "domain": "ltn.com.tw",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Liberty Times (自由時報) (TW, zh-Hant); lean: left."
+    },
+    {
+      "id": "tw-pts",
+      "market": "TW",
+      "url": "https://news.pts.org.tw/xml/newsfeed.xml",
+      "domain": "pts.org.tw",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "PTS News (公視新聞網) (TW, zh-Hant); lean: center."
+    },
+    {
+      "id": "tw-ettoday",
+      "market": "TW",
+      "url": "https://feeds.feedburner.com/ettoday/realtime",
+      "domain": "ettoday.net",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "ETtoday (東森新聞雲) (TW, zh-Hant); lean: unrated."
+    },
+    {
+      "id": "hk-scmp",
+      "market": "HK",
+      "url": "https://www.scmp.com/rss/91/feed",
+      "domain": "scmp.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "South China Morning Post (Hong Kong) (HK, en); lean: left."
+    },
+    {
+      "id": "hk-hkfp",
+      "market": "HK",
+      "url": "https://hongkongfp.com/feed/",
+      "domain": "hongkongfp.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Hong Kong Free Press (HK, en); lean: left."
+    },
+    {
+      "id": "hk-rthk",
+      "market": "HK",
+      "url": "https://rthk9.rthk.hk/rthk/news/rss/e_expressnews_elocal.xml",
+      "domain": "rthk.hk",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "RTHK News (English) (HK, en); lean: unrated."
+    },
+    {
+      "id": "hk-singtao",
+      "market": "HK",
+      "url": "https://std.stheadline.com/rss",
+      "domain": "stheadline.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Sing Tao Headline (星島頭條) (HK, zh-Hant); lean: unrated."
+    },
+    {
+      "id": "hk-witness",
+      "market": "HK",
+      "url": "https://thewitnesshk.com/feed/",
+      "domain": "thewitnesshk.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Witness (法庭線) (HK, zh-Hant); lean: unrated."
+    },
+    {
+      "id": "au-abc",
+      "market": "AU",
+      "url": "https://www.abc.net.au/news/feed/51120/rss.xml",
+      "domain": "abc.net.au",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "ABC News (Australia) (AU, en); lean: left."
+    },
+    {
+      "id": "au-sbs",
+      "market": "AU",
+      "url": "https://www.sbs.com.au/news/topic/latest/feed",
+      "domain": "sbs.com.au",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "SBS News (AU, en); lean: left."
+    },
+    {
+      "id": "au-guardian",
+      "market": "AU",
+      "url": "https://www.theguardian.com/australia-news/rss",
+      "domain": "theguardian.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Guardian Australia (AU, en); lean: left."
+    },
+    {
+      "id": "au-smh",
+      "market": "AU",
+      "url": "https://www.smh.com.au/rss/feed.xml",
+      "domain": "smh.com.au",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Sydney Morning Herald (AU, en); lean: left."
+    },
+    {
+      "id": "au-theage",
+      "market": "AU",
+      "url": "https://www.theage.com.au/rss/feed.xml",
+      "domain": "theage.com.au",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Age (AU, en); lean: left."
+    },
+    {
+      "id": "nz-rnz",
+      "market": "NZ",
+      "url": "https://www.rnz.co.nz/rss/national.xml",
+      "domain": "rnz.co.nz",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "RNZ (NZ, en); lean: center."
+    },
+    {
+      "id": "nz-nzherald",
+      "market": "NZ",
+      "url": "https://www.nzherald.co.nz/arc/outboundfeeds/rss/curated/78/?outputType=xml",
+      "domain": "nzherald.co.nz",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The New Zealand Herald (NZ, en); lean: center."
+    },
+    {
+      "id": "nz-stuff",
+      "market": "NZ",
+      "url": "https://www.stuff.co.nz/rss",
+      "domain": "stuff.co.nz",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Stuff (NZ, en); lean: left."
+    },
+    {
+      "id": "nz-1news",
+      "market": "NZ",
+      "url": "https://www.1news.co.nz/arc/outboundfeeds/rss/?outputType=xml",
+      "domain": "1news.co.nz",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "1News (TVNZ) (NZ, en); lean: left."
+    },
+    {
+      "id": "nz-newsroom",
+      "market": "NZ",
+      "url": "https://www.newsroom.co.nz/feed",
+      "domain": "newsroom.co.nz",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Newsroom (NZ, en); lean: right."
+    },
+    {
+      "id": "apac-diplomat",
+      "market": "APAC",
+      "url": "https://thediplomat.com/feed/",
+      "domain": "thediplomat.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Diplomat (US, en); lean: center."
+    },
+    {
+      "id": "apac-asiatimes",
+      "market": "APAC",
+      "url": "https://asiatimes.com/feed/",
+      "domain": "asiatimes.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "Asia Times (HK, en); lean: center."
+    },
+    {
+      "id": "apac-scmp-asia",
+      "market": "APAC",
+      "url": "https://www.scmp.com/rss/3/feed",
+      "domain": "scmp.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "South China Morning Post (Asia) (HK, en); lean: left."
+    },
+    {
+      "id": "apac-lowy",
+      "market": "APAC",
+      "url": "https://www.lowyinstitute.org/the-interpreter/rss.xml",
+      "domain": "lowyinstitute.org",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "The Interpreter (Lowy Institute) (AU, en); lean: right."
+    },
+    {
+      "id": "apac-cna",
+      "market": "APAC",
+      "url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml&category=6511",
+      "domain": "channelnewsasia.com",
+      "type": "rss",
+      "enabled": true,
+      "seedsStory": false,
+      "note": "CNA (Channel NewsAsia) - Asia (SG, en); lean: center."
     }
   ]
 }

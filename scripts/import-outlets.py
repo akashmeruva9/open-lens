@@ -23,7 +23,8 @@ TODAY = date.today().isoformat()
 def rating_basis(o):
     if o.get("lens") in ("left", "center", "right") and o.get("rater"):
         url = f" {o['ratingUrl']}" if o.get("ratingUrl") else ""
-        return f"{o['rater']}: {o.get('raterLabel', o['lens'])} (checked {TODAY}){url}"
+        questionable = " · MBFC flags this source as Questionable" if "questionable" in (o.get("notes") or "").lower() else ""
+        return f"{o['rater']}: {o.get('raterLabel', o['lens'])} (checked {TODAY}){questionable}{url}"
     return f"No published rating found (AllSides, Ad Fontes Media, MBFC checked {TODAY})"
 
 
@@ -41,6 +42,10 @@ def main(paths):
                 continue
             if o.get("robotsOk") is False:
                 skipped.append(f"{o['publisher']}: robots.txt")
+                continue
+            if o.get("articleFetchOk") is False or o.get("articleFetchHttp") not in (None, 200):
+                # Bot challenge on article pages: we don't try to get around it.
+                skipped.append(f"{o['publisher']}: article pages blocked to OpenLensBot")
                 continue
             domain = o["domain"].lower().removeprefix("www.")
             lens = o.get("lens") if o.get("lens") in ("left", "center", "right") and o.get("rater") else "unrated"

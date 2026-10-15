@@ -54,7 +54,7 @@ test("creates a story once two independent permitted publishers cover an event; 
   ];
   const r = await ingestCycle(deps, cfg(), effects(leads, processed), new Date("2026-10-12T01:00:00Z"));
   assert.equal(r.newLeads, 4);
-  assert.equal(r.ingested, 3);
+  assert.equal(r.ingested, 2, "the single-outlet typhoon lead is not worth fetching yet");
   assert.equal(r.storiesCreated.length, 1);
   assert.deepEqual(processed, r.storiesCreated);
   const story = (await store.get(r.storiesCreated[0]!))!;

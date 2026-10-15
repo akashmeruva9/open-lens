@@ -104,13 +104,26 @@ async function limited<T>(max: number, fn: () => Promise<T>): Promise<T> {
   }
 }
 
+/** Story ids whose pipeline is running in this instance (lost on restart, which is the point). */
+const inFlight = new Set<string>();
+/** A wire story still drafting/researching this long after its last update was interrupted (e.g. a restart). */
+const STUCK_MS = 30 * 60_000;
+
 export function defaultEffects(deps: Deps, cfg: IngestConfig): IngestEffects {
   return {
     discoverFeed: (f) => fetchFeed(f),
     discoverGdelt: (m, min) => fetchGdelt(m, min),
     embed: (t) => embedTexts(t, MODELS.embed),
     intake: (u, s, id, a, l) => intakeUrl(u, s, id, a, fetch, l && { title: l.title, summary: l.summary, publishedAt: l.publishedAt }),
-    process: (id) => limited(cfg.maxConcurrentRuns, () => processStory(deps, cfg, id)),
+    process: async (id) => {
+      if (inFlight.has(id)) return;
+      inFlight.add(id);
+      try {
+        await limited(cfg.maxConcurrentRuns, () => processStory(deps, cfg, id));
+      } finally {
+        inFlight.delete(id);
+      }
+    },
     sleep,
   };
 }
@@ -122,17 +135,27 @@ export async function processStory(deps: Deps, cfg: IngestConfig, storyId: strin
   if (!rec) return;
   const scripts = rec.outputs.filter((o) => o.kind === "script" && cfg.autoMediaLangs.includes(o.lang)).map((o) => o.id);
   if (scripts.length) await renderMedia(deps, storyId, scripts).catch((e) => console.error(`media ${storyId}:`, e));
-  const fresh = (await deps.store.get(storyId))!;
+  await autoPublishIfEligible(deps, cfg, storyId);
+}
+
+/**
+ * Low-risk policy: a finished wire story with an assessment and no blocking QA flag goes live in
+ * OpenLens's own apps, labelled "auto-published · not editor-reviewed". Channel posts still need an editor.
+ */
+export async function autoPublishIfEligible(deps: Deps, cfg: IngestConfig, storyId: string): Promise<boolean> {
+  if (cfg.autoPublish !== "low_risk") return false;
+  const fresh = await deps.store.get(storyId);
+  if (!fresh || fresh.story.status !== "in_review") return false;
   const blocking = fresh.qaFlags.some((f) => f.severity === "block");
-  if (cfg.autoPublish === "low_risk" && fresh.story.riskTier === "low" && !blocking && fresh.assessment) {
-    fresh.story.status = fresh.corrections.length ? "corrected" : "published";
-    fresh.story.autoPublished = true;
-    // App-only media (video/audio/script) become visible; channel posts still need an editor.
-    fresh.outputs = fresh.outputs.map((o) => (o.channel === "app" && o.status === "draft" ? { ...o, status: "approved", approvedBy: "policy:auto-publish" } : o));
-    fresh.story.updatedAt = new Date().toISOString();
-    await deps.store.put(fresh);
-    emit(storyId, { type: "stage", stage: "approve", status: "done", detail: "auto-published (low risk)" });
-  }
+  if (fresh.story.riskTier !== "low" || blocking || !fresh.assessment) return false;
+  fresh.story.status = fresh.corrections.length ? "corrected" : "published";
+  fresh.story.autoPublished = true;
+  // App-only media (video/audio/script) become visible; channel posts still need an editor.
+  fresh.outputs = fresh.outputs.map((o) => (o.channel === "app" && o.status === "draft" ? { ...o, status: "approved", approvedBy: "policy:auto-publish" } : o));
+  fresh.story.updatedAt = new Date().toISOString();
+  await deps.store.put(fresh);
+  emit(storyId, { type: "stage", stage: "approve", status: "done", detail: "auto-published (low risk)" });
+  return true;
 }
 
 const slug = (s: string) =>
@@ -278,6 +301,18 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
 
     await store.putState("leads", leads);
     await store.putState("candidates", candidates);
+    // Catch-up: resume wire stories whose pipeline was interrupted (restart), and apply the
+    // auto-publish policy to ones that finished while it was off.
+    for (const st of await store.listStories()) {
+      if (toRun.includes(st.id) || inFlight.has(st.id) || st.origin !== "wire") continue;
+      const stuck = (st.status === "draft" || st.status === "researching") && now.getTime() - Date.parse(st.updatedAt) > STUCK_MS;
+      if (stuck && budget.runs < cfg.dailyRunBudget) {
+        budget.runs++;
+        toRun.push(st.id);
+      } else if (st.status === "in_review") {
+        await autoPublishIfEligible(deps, cfg, st.id);
+      }
+    }
     await store.putState("budget", budget);
     // 6) Pipelines run in the background (bounded concurrency); the cycle returns now.
     for (const id of toRun) fx.process(id).catch((e) => console.error(`wire pipeline ${id}:`, e));

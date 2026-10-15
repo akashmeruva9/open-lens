@@ -289,7 +289,9 @@ export function createApp(deps: Deps, wire?: WireOptions) {
     const ok = wire.token ? c.req.header("x-ingest-token") === wire.token : authMode === "dev";
     if (!ok) return c.json({ error: "forbidden" }, 403);
     if (ingestRunning()) return c.json({ error: "cycle already running" }, 409);
-    ingestCycle(deps, wire.config, wire.effects).catch((e) => console.error("ingest cycle failed:", e));
+    ingestCycle(deps, wire.config, wire.effects)
+      .then((r) => console.log(`[wire] ${r.id}: ${r.discovered} discovered, ${r.newLeads} new leads, ${r.ingested} ingested, +${r.storiesCreated.length} stories, ~${r.storiesUpdated.length} updated${r.errors.length ? `, errors: ${r.errors.join(" | ").slice(0, 400)}` : ""}`))
+      .catch((e) => console.error("ingest cycle failed:", e));
     return c.json({ accepted: true }, 202);
   });
   studio.get("/ingest", async (c) => {

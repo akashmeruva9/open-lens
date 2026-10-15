@@ -33,10 +33,11 @@ steps:
       - --timeout=3600
       - --no-cpu-throttling
       - --min-instances=0
-      - --max-instances=2
+      # One instance: the wire lock and in-flight pipeline set live in memory.
+      - --max-instances=1
       - --concurrency=40
       - --allow-unauthenticated
-      - --set-env-vars=STORE=firestore,AUTH_MODE=firebase,GEMINI_BACKEND=vertex,GOOGLE_CLOUD_LOCATION=global,ASSETS_BUCKET=$PROJECT_ID-openlens-media,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,AUTO_PUBLISH=off,AUTO_MEDIA_LANGS=en,INGEST_DAILY_RUNS=40
+      - --set-env-vars=STORE=firestore,AUTH_MODE=firebase,GEMINI_BACKEND=vertex,GOOGLE_CLOUD_LOCATION=global,ASSETS_BUCKET=$PROJECT_ID-openlens-media,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,AUTO_PUBLISH=low_risk,AUTO_MEDIA_LANGS=en,INGEST_DAILY_RUNS=40
       - --set-secrets=INGEST_TOKEN=ingest-token:latest
   # --- web (needs the api URL at build time) ---
   - id: api-url

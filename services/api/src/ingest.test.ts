@@ -111,3 +111,37 @@ test("alert feeds cannot start a story alone; stale backlog items are ignored", 
   assert.equal(r.newLeads, 1, "backlog item older than maxAgeHours dropped");
   assert.equal(r.storiesCreated.length, 0, "alert feed alone does not seed a story");
 });
+
+test("low-risk policy catches up on finished wire stories; sensitive or manual stories stay in review", async () => {
+  const { store, deps } = await setup();
+  const first = await ingestCycle(deps, cfg(), effects([lead("l1", "a.jp", "Metro fare to rise 20%"), lead("l2", "b.jp", "Metro fare hike approved")], []), new Date("2026-10-12T01:00:00Z"));
+  const id = first.storiesCreated[0]!;
+  // Pipeline finished while the policy was off.
+  const rec = (await store.get(id))!;
+  await store.put({ ...rec, story: { ...rec.story, status: "in_review" }, assessment: { headline: "h", neutralSummary: "s", sections: [] } as never });
+  const sensitive = { ...rec, story: { ...rec.story, id: "wire-sensitive", status: "in_review" as const, riskTier: "sensitive" as const }, assessment: { headline: "h", neutralSummary: "s", sections: [] } as never };
+  await store.put(sensitive);
+  const manual = { ...rec, story: { ...rec.story, id: "manual-1", status: "in_review" as const, origin: "manual" as const }, assessment: { headline: "h", neutralSummary: "s", sections: [] } as never };
+  await store.put(manual);
+
+  await ingestCycle(deps, cfg({ autoPublish: "low_risk" }), effects([], []), new Date("2026-10-12T01:15:00Z"));
+  const after = (await store.get(id))!;
+  assert.equal(after.story.status, "published");
+  assert.equal(after.story.autoPublished, true);
+  assert.equal((await store.get("wire-sensitive"))!.story.status, "in_review");
+  assert.equal((await store.get("manual-1"))!.story.status, "in_review");
+});
+
+test("wire stories interrupted mid-pipeline (e.g. by a restart) are resumed", async () => {
+  const { store, deps } = await setup();
+  const first = await ingestCycle(deps, cfg(), effects([lead("l1", "a.jp", "Metro fare to rise 20%"), lead("l2", "b.jp", "Metro fare hike approved")], []), new Date("2026-10-12T01:00:00Z"));
+  const id = first.storiesCreated[0]!;
+  const rec = (await store.get(id))!;
+  await store.put({ ...rec, story: { ...rec.story, status: "researching", updatedAt: "2026-10-12T01:01:00Z" } });
+  const soon: string[] = [];
+  await ingestCycle(deps, cfg(), effects([], soon), new Date("2026-10-12T01:15:00Z"));
+  assert.deepEqual(soon, [], "still within the stuck window");
+  const later: string[] = [];
+  await ingestCycle(deps, cfg(), effects([], later), new Date("2026-10-12T02:00:00Z"));
+  assert.deepEqual(later, [id]);
+});

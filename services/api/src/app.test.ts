@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { StoryBundle } from "@openlens/schemas";
 import { LocalAssets } from "./assets.js";
-import { createApp } from "./app.js";
+import { createApp, toFeedItem } from "./app.js";
 import { FileStore } from "./store.js";
 
 async function setup() {
@@ -87,4 +87,14 @@ test("feed items carry approved video details for cards", async () => {
   assert.ok(item.videos.length >= 1);
   assert.equal(item.videos[0].aspect, "9:16");
   assert.equal(typeof item.videos[0].durationSeconds, "number");
+});
+
+test("legacy local HLS playlists next to a GCS mp4 are served as the GCS sibling", async () => {
+  const fixture = JSON.parse(await readFile(new URL("./testdata/story-bundle.json", import.meta.url), "utf8")) as StoryBundle;
+  const gcs = "https://storage.googleapis.com/b/s/international-en/v1";
+  const rec = { ...fixture, qaFlags: [], runs: [], grounded: false, claimsDropped: 0,
+    outputs: fixture.outputs.map((o) => (o.kind === "video" ? { ...o, status: "approved" as const, payload: { ...o.payload, aspect: "9:16", mp4Url: `${gcs}/video-916.mp4`, hlsUrl: "/assets/s/international-en/v1/hls-916/index.m3u8" } } : o)) };
+  const item = toFeedItem(rec);
+  assert.ok(item.videos?.length);
+  for (const v of item.videos!) assert.equal(v.hlsUrl, `${gcs}/hls-916/index.m3u8`);
 });

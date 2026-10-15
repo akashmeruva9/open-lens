@@ -29,7 +29,24 @@ export function inMarket(storyRegion: string, filter: string): boolean {
 const httpError = (status: number, message: string) => Object.assign(new Error(message), { status });
 const userOf = (c: Context) => (c.get("user" as never) as string) ?? "unknown";
 
-export function toFeedItem(r: StoryRecord): FeedItem {
+/**
+ * Videos rendered before the hlsUrl fix stored a local /assets/... playlist next to a GCS mp4;
+ * point such playlists at the mp4's sibling so players don't 404.
+ */
+function fixMediaUrls(r: StoryRecord): StoryRecord {
+  let changed = false;
+  const outputs = r.outputs.map((o) => {
+    const p = o.payload as { mp4Url?: unknown; hlsUrl?: unknown };
+    if (o.kind !== "video" || typeof p.hlsUrl !== "string" || typeof p.mp4Url !== "string") return o;
+    if (!p.hlsUrl.startsWith("/assets/") || !/^https?:\/\//.test(p.mp4Url)) return o;
+    changed = true;
+    return { ...o, payload: { ...o.payload, hlsUrl: p.mp4Url.replace(/video-(\d+)\.mp4$/, "hls-$1/index.m3u8") } };
+  });
+  return changed ? { ...r, outputs } : r;
+}
+
+export function toFeedItem(rec: StoryRecord): FeedItem {
+  const r = fixMediaUrls(rec);
   const video = r.outputs.find((o) => o.kind === "video" && READER_OUTPUT_STATUSES.has(o.status) && (o.payload as { aspect?: string }).aspect === "9:16");
   const count = (s: string) => r.claims.filter((c) => c.state === s).length;
   return {
@@ -53,7 +70,8 @@ export function toFeedItem(r: StoryRecord): FeedItem {
 }
 
 /** Reader view: only approved media, no ops data. */
-export function toReaderBundle(r: StoryRecord): StoryBundle {
+export function toReaderBundle(rec: StoryRecord): StoryBundle {
+  const r = fixMediaUrls(rec);
   const { qaFlags: _q, runs: _r, grounded: _g, claimsDropped: _d, ...bundle } = r;
   return {
     ...bundle,

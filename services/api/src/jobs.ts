@@ -122,7 +122,8 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
         if (v.hls) {
           const hlsDir = v.hls.replace(/\/index\.m3u8$/, "");
           await uploadDir(deps.assets, hlsDir, `${base}/hls-${tag}`);
-          hlsUrl = deps.assets.localPath(mp4Url) ? `/assets/${base}/hls-${tag}/index.m3u8` : mp4Url.replace(/video-\d+\.mp4$/, `hls-${tag}/index.m3u8`);
+          // Sibling of the mp4 in whichever store holds it (/assets/... locally, GCS on Cloud Run).
+          hlsUrl = mp4Url.replace(/video-\d+\.mp4$/, `hls-${tag}/index.m3u8`);
         }
         made.push({ ...common, id: `video-${sfx}-${tag}`, kind: "video", channel: "app",
           payload: { aspect: v.aspect, mp4Url, hlsUrl, captionsVttUrl: captionsUrl, captionTracks: captionTrackUrls, thumbnailUrl, durationSeconds: v.durationSeconds, scriptOutputId: s.id } });

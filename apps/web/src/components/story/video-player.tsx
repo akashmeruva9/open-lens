@@ -39,8 +39,17 @@ export function VideoPlayer({
         h.attachMedia(video);
         destroy = () => h.destroy();
       });
+    } else if (hls) {
+      // Native HLS (Safari/iOS): if the playlist fails, fall back to the progressive MP4 once.
+      const onError = () => {
+        video.removeEventListener("error", onError);
+        video.src = mp4;
+      };
+      video.addEventListener("error", onError);
+      video.src = hls;
+      destroy = () => video.removeEventListener("error", onError);
     } else {
-      video.src = hls ?? mp4;
+      video.src = mp4;
     }
     return () => {
       cancelled = true;

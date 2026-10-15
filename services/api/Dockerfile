@@ -5,10 +5,10 @@ WORKDIR /app
 COPY package.json package-lock.json tsconfig.base.json ./
 COPY packages ./packages
 COPY services ./services
-RUN npm ci -w @openlens/api -w @openlens/agents -w @openlens/media-worker -w @openlens/schemas -w @openlens/config --include-workspace-root \
- && (npm ci -w @openlens/publisher --no-save 2>/dev/null || true) \
- && npm run build -w @openlens/schemas -w @openlens/config -w @openlens/agents -w @openlens/media-worker \
- && (npm run build -w @openlens/publisher 2>/dev/null || true) \
+# One npm ci for every workspace the api needs (a second npm ci would wipe node_modules).
+RUN npm ci -w @openlens/api -w @openlens/agents -w @openlens/media-worker -w @openlens/publisher \
+      -w @openlens/schemas -w @openlens/config --include-workspace-root \
+ && npm run build -w @openlens/schemas -w @openlens/config -w @openlens/agents -w @openlens/media-worker -w @openlens/publisher \
  && npm run build -w @openlens/api
 
 FROM node:24-bookworm-slim

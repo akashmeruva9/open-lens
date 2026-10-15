@@ -28,8 +28,8 @@ steps:
       - --region=${_REGION}
       - --service-account=openlens-api@$PROJECT_ID.iam.gserviceaccount.com
       # Pipeline + video rendering run after the request returns, so CPU stays allocated.
-      - --cpu=2
-      - --memory=4Gi
+      - --cpu=4
+      - --memory=8Gi
       - --timeout=3600
       - --no-cpu-throttling
       - --min-instances=0
@@ -37,7 +37,7 @@ steps:
       - --max-instances=1
       - --concurrency=40
       - --allow-unauthenticated
-      - --set-env-vars=STORE=firestore,AUTH_MODE=firebase,GEMINI_BACKEND=vertex,GOOGLE_CLOUD_LOCATION=global,ASSETS_BUCKET=$PROJECT_ID-openlens-media,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,AUTO_PUBLISH=all,AUTO_MEDIA_LANGS=en,INGEST_DAILY_RUNS=60,INGEST_MAX_NEW=5,INGEST_MAX_UPDATES=4,INGEST_MAX_FETCH=60,INGEST_GDELT=0,INGEST_MAX_AGE_HOURS=24
+      - --set-env-vars=STORE=firestore,AUTH_MODE=firebase,GEMINI_BACKEND=vertex,GOOGLE_CLOUD_LOCATION=global,ASSETS_BUCKET=$PROJECT_ID-openlens-media,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,AUTO_PUBLISH=all,AUTO_MEDIA_LANGS=en,INGEST_DAILY_RUNS=60,INGEST_MAX_NEW=5,INGEST_MAX_UPDATES=4,INGEST_MAX_FETCH=60,INGEST_GDELT=0,INGEST_MAX_AGE_HOURS=24,INGEST_CONCURRENCY=5
       - --set-secrets=INGEST_TOKEN=ingest-token:latest
   # --- web (needs the api URL at build time) ---
   - id: api-url

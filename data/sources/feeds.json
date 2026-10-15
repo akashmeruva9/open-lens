@@ -28,8 +28,8 @@
       "domain": "fsa.go.jp",
       "type": "rss",
       "enabled": true,
-      "seedsStory": true,
-      "note": "Financial Services Agency. Reuse: yes."
+      "seedsStory": false,
+      "note": "Financial Services Agency. Reuse: yes. Routine regulatory notices: enrich stories but never start one."
     },
     {
       "id": "jp-mhlw-news",

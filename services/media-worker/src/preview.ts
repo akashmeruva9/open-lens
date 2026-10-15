@@ -1,12 +1,14 @@
 // Free layout preview (no AI calls): renders one scene per language in both shapes into .data/preview/.
-//   node --import tsx src/preview.ts
+//   STORY=<story id> node --import tsx src/preview.ts
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { AI_DISCLOSURE, PRESENTERS, CHANNEL_PLAN } from "@openlens/config";
 import { registerDefaultFonts, fontFor } from "./fonts.js";
 import { renderSceneFrame, loadPresenter } from "./scenes.js";
 registerDefaultFonts();
 const ROOT = new URL("../../..", import.meta.url).pathname.replace(/\/$/, "");
-const rec = JSON.parse(readFileSync(`${ROOT}/.data/stories/sample-metro-fare.json`, "utf8"));
+const storyId = process.env.STORY;
+if (!storyId) throw new Error("set STORY=<story id> (a story in .data/stories)");
+const rec = JSON.parse(readFileSync(`${ROOT}/.data/stories/${storyId}.json`, "utf8"));
 const pub = new Map(rec.sources.map((s: any) => [s.id, s.publisher]));
 const src = (ids: string[]) => [...new Set(ids.flatMap((id) => rec.claims.find((c: any) => c.id === id)?.evidence.map((e: any) => pub.get(e.sourceId)) ?? []))].slice(0, 2) as string[];
 const out = `${ROOT}/.data/preview`; mkdirSync(out, { recursive: true });

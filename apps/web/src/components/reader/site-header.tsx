@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { IconSearch } from "@/components/ui/icons";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { USE_FIXTURES } from "@/lib/env";
 import { readEdition } from "@/lib/edition-server";
 import { CategoryNav } from "./category-nav";
 import { NAV_ITEMS } from "./category-icons";
@@ -15,12 +14,6 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-line bg-bg/95 backdrop-blur supports-[backdrop-filter]:bg-bg/85">
       <div className="page flex h-16 items-center gap-3">
         <Logo />
-        {USE_FIXTURES ? (
-          <span className="hidden rounded-full border border-dashed border-ink-3 px-2 py-0.5 text-[11px] font-semibold text-ink-3 2xl:inline"
-            title="Serving fictional fixture data (NEXT_PUBLIC_USE_FIXTURES=1)">
-            Demo data
-          </span>
-        ) : null}
         <div className="mx-auto hidden xl:block">
           <CategoryNav variant="inline" />
         </div>
@@ -92,7 +85,6 @@ export function SiteFooter() {
         <div className="page flex flex-col gap-2 py-6 text-xs leading-5 text-[#8c8c8c] sm:flex-row sm:items-center sm:justify-between">
           <p>
             OpenLens uses AI for research, drafting, translation and synthetic narration. Presenters are fictional and disclosed.
-            {USE_FIXTURES ? " This deployment shows fictional demo stories." : ""}
           </p>
           <p className="shrink-0">© 2026 OpenLens · Built for AI Builder Cup 2026</p>
         </div>

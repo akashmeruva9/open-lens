@@ -16,7 +16,7 @@ One story → one reviewed **Claim & Evidence Ledger** → our own web + mobile 
 | `apps/web` | Next.js reader + newsroom studio (PWA) |
 | `apps/mobile` | Expo Android + iOS reader |
 | `infra` | GCP setup script, Cloud Build, Firestore rules |
-| `data/seed`, `data/fixtures` | Source packs (sample story is **fictional**) and frontend fixtures |
+| `data/sources`, `data/seed` | Verified source allowlist + feeds; hand-built source packs (`npm run intake`) |
 
 ## Run locally
 
@@ -27,13 +27,12 @@ npm install
 npm run build -w @openlens/schemas -w @openlens/config -w @openlens/client -w @openlens/agents -w @openlens/media-worker
 cp .env.example .env            # add GEMINI_API_KEY
 
-# Seed data: instant fixture, or the full live AI pipeline (~5-10 min incl. TTS + video)
-npm run seed -w @openlens/api -- --fixture
-npm run seed -w @openlens/api                 # data/seed/sample-story
-npm run seed -w @openlens/api -- data/seed/<story> --stages scripts,channels,media
-
-npm run dev -w @openlens/api    # http://localhost:8080  (AUTH_MODE=dev locally)
+npm run dev -w @openlens/api    # http://localhost:8080  (AUTH_MODE=dev locally; INGEST_INTERVAL_MIN=15 runs the wire)
+npm run dev -w @openlens/web    # http://localhost:3000  (NEXT_PUBLIC_API_URL in apps/web/.env.local)
 ```
+There is no sample data: every story comes from the wire (verified official sources) or from a source pack you build with `npm run intake` (below). The web and mobile apps only read the API.
+
+**Deployed:** web https://openlens-web-42lefjl5bq-uc.a.run.app · api https://openlens-api-42lefjl5bq-uc.a.run.app (project `openlens-511713`, Gemini via Vertex AI). Point local apps at the cloud API by setting `NEXT_PUBLIC_API_URL` / `EXPO_PUBLIC_API_URL` to the api URL.
 
 ### Video factory
 Links in, videos out, in one command (sources must be on the allowlist):

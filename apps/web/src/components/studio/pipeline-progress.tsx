@@ -4,7 +4,7 @@ import { PIPELINE_STAGES, statusProgress } from "@/lib/data/derive";
 
 /**
  * Stage-by-stage progress. Uses live SSE stage events when present, otherwise
- * infers progress from the story status (fixture mode).
+ * infers progress from the story status.
  */
 export function PipelineProgress({ status, stages, compact = false }: { status: string; stages: Record<string, StageEvent>; compact?: boolean }) {
   const live = Object.keys(stages).length > 0;

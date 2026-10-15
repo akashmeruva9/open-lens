@@ -47,12 +47,12 @@ It writes `.data/assets/<storyId>/` (videos, captions, `manifest.json`). Add lan
 
 ### Or step by step
 ```bash
-# 1. Build a story (claims → scripts → channel packages → videos). Sample story is fictional.
-npm run seed -w @openlens/api -- data/seed/sample-story
+# 1. Build a story (claims → scripts → channel packages → videos) from a source pack made with `npm run intake`.
+npm run seed -w @openlens/api -- data/seed/<story-id>
 
 # 2. Render (or re-render) videos for any stored story, any languages, any shapes
 npm run render -w @openlens/api -- --list
-npm run render -w @openlens/api -- sample-metro-fare --langs en,hi --aspects 9:16,16:9
+npm run render -w @openlens/api -- <storyId> --langs en,hi --aspects 9:16,16:9
 ```
 Outputs are written to `.data/assets/<storyId>/<tier>-<lang>/v<N>/` (`video-916.mp4`, `video-169.mp4`, `captions.vtt`, HLS for 9:16).
 `render` only needs scripts to exist; asking for a language with no script tells you to run the scripts stage first:

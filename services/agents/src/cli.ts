@@ -3,7 +3,11 @@ import { SourceRecord } from "@openlens/schemas";
 import { z } from "zod";
 import { extractClaims, synthesizeAssessment, validateClaims, citationCoverage } from "./index.js";
 
-const storyDir = process.argv[2] ?? "data/seed/sample-story";
+const storyDir = process.argv[2];
+if (!storyDir) {
+  console.error("usage: cli <storyDir with sources.json>");
+  process.exit(1);
+}
 const sources = z
   .array(SourceRecord)
   .parse(JSON.parse(await readFile(`${storyDir}/sources.json`, "utf8")));

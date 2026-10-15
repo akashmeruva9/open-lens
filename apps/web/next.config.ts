@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   agentRules: false,
   // Cloud Run image (apps/web/Dockerfile) runs the traced standalone server.
   output: "standalone",
-  // Monorepo: fixtures live in /data and shared packages in /packages.
+  // Monorepo: shared packages live in /packages.
   turbopack: { root: repoRoot },
   outputFileTracingRoot: repoRoot,
   async headers() {

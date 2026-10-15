@@ -1,5 +1,5 @@
 // Read model for the video-first home: a FeedItem plus the video details a card needs.
-// Pure (no server/browser APIs) so the server render and the live fixture sync share it.
+// Pure (no server/browser APIs) so server and client components share it.
 import { MARKETS, isLang, marketOf, type MarketCode } from "@openlens/config";
 import type { FeedItem, StoryBundle, VideoPayload } from "@openlens/schemas";
 
@@ -19,8 +19,8 @@ export interface CardItem extends FeedItem {
 }
 
 /**
- * Build a card. With a bundle (fixture mode) every rendered video is listed with duration and
- * thumbnail; from a bare FeedItem (real API) we only know `videoUrl`.
+ * Build a card. With a bundle (story page) every rendered video is listed with duration and
+ * thumbnail; from a feed item we use `videos`, else `videoUrl`.
  */
 export function toCard(f: FeedItem, bundle?: StoryBundle): CardItem {
   let videos: CardVideo[] = [];

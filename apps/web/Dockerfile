@@ -4,13 +4,11 @@
 FROM node:24-bookworm-slim AS build
 ARG API_URL
 ARG SITE_URL=""
-ENV NEXT_PUBLIC_API_URL=$API_URL NEXT_PUBLIC_SITE_URL=$SITE_URL NEXT_PUBLIC_USE_FIXTURES=0 \
-    NEXT_PUBLIC_AUTH_MODE=firebase NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_API_URL=$API_URL NEXT_PUBLIC_SITE_URL=$SITE_URL NEXT_PUBLIC_AUTH_MODE=firebase NEXT_TELEMETRY_DISABLED=1
 WORKDIR /app
 COPY package.json package-lock.json tsconfig.base.json ./
 COPY packages ./packages
 COPY apps/web ./apps/web
-COPY data/fixtures ./data/fixtures
 RUN npm ci -w @openlens/web -w @openlens/config -w @openlens/schemas -w @openlens/client --include-workspace-root \
  && npm run build -w @openlens/web
 

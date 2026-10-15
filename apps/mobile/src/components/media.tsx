@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { assetUrl } from '@/lib/api';
-import { USE_FIXTURES } from '@/lib/env';
 import { formatDuration } from '@/lib/format';
 import { usePalette } from '@/lib/settings';
 import { onMedia, radius, space } from '@/theme';
@@ -33,7 +32,7 @@ export function Scrim({ height = '55%' }: { height?: `${number}%` | number }) {
 
 /**
  * Typographic poster: used for stories without video (PosterCard) and as the fallback frame
- * under every video until its first frame renders (fixture media mostly doesn't exist).
+ * under every video until its first frame renders.
  */
 export function Poster({
   title,
@@ -155,7 +154,7 @@ export function VideoPreview({
   );
 }
 
-/** Navy placeholder used when media can't be reached (offline fixtures, low-data mode, errors). */
+/** Navy placeholder used when media can't be reached (low-data mode, errors). */
 export function MediaPlaceholder({
   title,
   body,
@@ -185,7 +184,7 @@ export function MediaPlaceholder({
 
 /**
  * Full player with native controls. Tries HLS first (adaptive bitrate), then MP4.
- * On failure shows a poster with a retry (expected in fixture mode with no asset server).
+ * On failure shows a poster with a retry.
  */
 export function StoryVideo({
   hlsUrl,
@@ -217,7 +216,7 @@ export function StoryVideo({
         <Scrim height="40%" />
         <View style={styles.unavailable}>
           <Text style={styles.unavailableText}>
-            {USE_FIXTURES ? 'Offline demo: the rendered video lives on the media server.' : "We couldn't load this video right now."}
+            We couldn't load this video right now.
           </Text>
           <Pressable
             onPress={() => {
@@ -320,7 +319,7 @@ export function AudioBriefing({ url, durationSeconds, title }: { url: string; du
           Audio briefing
         </T>
         <T variant="caption" tone="muted">
-          {failed ? (USE_FIXTURES ? 'Audio not reachable in offline demo' : 'Audio unavailable') : `${formatDuration(durationSeconds)} · AI narration`}
+          {failed ? 'Audio unavailable' : `${formatDuration(durationSeconds)} · AI narration`}
         </T>
       </View>
     </View>

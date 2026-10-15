@@ -7,7 +7,7 @@ import { Banner, Button, Card, Chip, SectionHeader, T } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
 import { LANGUAGE_OPTIONS, NATIVE_LANGUAGE_NAMES, TOPIC_OPTIONS, regionName } from '@/lib/catalog';
 import { EDITIONS } from '@/lib/home';
-import { API_URL, USE_FIXTURES } from '@/lib/env';
+import { API_URL } from '@/lib/env';
 import { enablePush, pushSupported } from '@/lib/push';
 import { useSettings, type ThemePref } from '@/lib/settings';
 import { radius, space } from '@/theme';
@@ -33,7 +33,7 @@ export default function SettingsScreen() {
     setPushBusy(false);
     if (r.ok) {
       update({ notifications: true });
-      setPushMsg(USE_FIXTURES ? 'Device token obtained (demo mode: not sent to a server).' : 'You will get alerts for new and corrected stories.');
+      setPushMsg('You will get alerts for new and corrected stories.');
     } else {
       update({ notifications: false });
       setPushMsg(r.reason);
@@ -131,7 +131,7 @@ export default function SettingsScreen() {
               presenters and narration are AI-generated and labelled.
             </T>
             <T variant="caption" tone="faint" style={{ marginTop: space.sm }}>
-              Version {Constants.expoConfig?.version ?? '—'} · Data: {USE_FIXTURES ? 'offline demo fixtures' : API_URL}
+              Version {Constants.expoConfig?.version ?? '—'} · Data: {API_URL}
             </T>
           </Card>
         </Section>
@@ -158,7 +158,7 @@ function WhatsAppDigest() {
       update({ whatsappSubscribedAt: new Date().toISOString() });
       setPhone('');
       setConsent(false);
-      setMsg({ text: USE_FIXTURES ? 'Subscribed (demo mode: nothing was sent).' : 'Subscribed. Reply STOP on WhatsApp at any time to unsubscribe.', tone: 'info' });
+      setMsg({ text: 'Subscribed. Reply STOP on WhatsApp at any time to unsubscribe.', tone: 'info' });
     } catch (e) {
       setMsg({ text: errorMessage(e), tone: 'danger' });
     } finally {

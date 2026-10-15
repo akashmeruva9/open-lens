@@ -1,5 +1,5 @@
 // Free motion preview (no AI calls, silent): composites the presenter idle clip with the layouts into .data/preview/video/.
-//   node --import tsx src/previewvideo.ts [lang=en] [aspect=16:9]
+//   STORY=<story id> node --import tsx src/previewvideo.ts [lang=en] [aspect=16:9]
 import { readFileSync, mkdirSync, existsSync } from "node:fs";
 import { AI_DISCLOSURE, CHANNEL_PLAN, PRESENTERS, isLang } from "@openlens/config";
 import { fontFor, registerDefaultFonts } from "./fonts.js";
@@ -11,7 +11,9 @@ const ROOT = new URL("../../..", import.meta.url).pathname.replace(/\/$/, "");
 const lang = process.argv[2] ?? "en";
 const aspect = (process.argv[3] ?? "16:9") as Aspect;
 if (!isLang(lang)) throw new Error(`unknown language ${lang}`);
-const rec = JSON.parse(readFileSync(`${ROOT}/.data/stories/sample-metro-fare.json`, "utf8"));
+const storyId = process.env.STORY;
+if (!storyId) throw new Error("set STORY=<story id> (a story in .data/stories)");
+const rec = JSON.parse(readFileSync(`${ROOT}/.data/stories/${storyId}.json`, "utf8"));
 const script = rec.outputs.find((o: any) => o.kind === "script" && o.lang === lang);
 const pid = CHANNEL_PLAN[lang].presenter;
 const clip = `${ROOT}/data/presenters/${pid}.idle.mp4`;

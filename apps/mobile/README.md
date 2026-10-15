@@ -21,8 +21,7 @@ Screens:
   Corrections inbox · Search · Settings (language, edition, topics, low-data, alerts, theme,
   WhatsApp digest opt-in).
 
-Fixture mode loads `data/fixtures/feed.json` + `story-bundle.json` + `japac-feed.json` +
-`japac-bundles.json` (9 fictional JAPAC stories).
+All data comes from the OpenLens API (`EXPO_PUBLIC_API_URL`); there is no offline sample mode.
 
 ## Run
 
@@ -45,7 +44,6 @@ Checks: `npm run typecheck`, `npm run export:android`, `npm run doctor`.
 
 | Var | Default | Meaning |
 |---|---|---|
-| `EXPO_PUBLIC_USE_FIXTURES` | `1` | `1` = offline demo data from `data/fixtures/*.json`; `0` = call the API |
 | `EXPO_PUBLIC_API_URL` | `http://localhost:8080` | `services/api` origin; media paths (`/assets/...`) resolve against it. Use your LAN IP (or `10.0.2.2` on the Android emulator) when testing on a device |
 | `EXPO_PUBLIC_WEB_URL` | `https://openlens.app` | Origin used for share links / universal links |
 

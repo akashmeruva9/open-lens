@@ -6,7 +6,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { pcmToWav, wavDuration } from "./tts.js";
 
 const ROOT = new URL("../../..", import.meta.url).pathname;
-const storyId = process.argv[2] ?? "sample-metro-fare";
+const storyId = process.argv[2];
+if (!storyId) throw new Error("usage: voicetest.ts <storyId> [outDir]");
 const outDir = process.argv[3] ?? `${ROOT}.data/voicetest`;
 const MODEL = process.env.VOICETEST_MODEL ?? "gemini-3.1-flash-tts-preview";
 

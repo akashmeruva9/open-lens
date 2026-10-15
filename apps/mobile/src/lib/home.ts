@@ -1,11 +1,9 @@
 import { LANGUAGES, MARKET_CODES, MARKETS, isLang, marketOf, type MarketCode } from '@openlens/config';
 
-import { fixtureBundle } from './api';
-import { mediaItems } from './bundle';
 import { matchesRegion } from './catalog';
 import type { FeedItem } from './types';
 
-/** Video facts a card needs: from `FeedItem.videos` (live API) or the fixture bundle (demo mode). */
+/** Video facts a card needs, from `FeedItem.videos` (else the bare `videoUrl`). */
 export type CardVideo = {
   url: string;
   hlsUrl?: string;
@@ -29,21 +27,6 @@ export function toHomeItem(item: FeedItem): HomeItem {
     };
   }
   if (!item.videoUrl) return item;
-  const b = fixtureBundle(item.id);
-  const v = b ? mediaItems(b).find((m) => m.kind === 'video') : undefined;
-  if (v?.kind === 'video') {
-    return {
-      ...item,
-      video: {
-        url: v.payload.mp4Url,
-        hlsUrl: v.payload.hlsUrl,
-        durationSeconds: v.payload.durationSeconds,
-        lang: v.output.lang,
-        thumbnailUrl: v.payload.thumbnailUrl,
-        aiPresenter: v.output.aiDisclosure !== false,
-      },
-    };
-  }
   // Every OpenLens video uses a disclosed synthetic presenter.
   return { ...item, video: { url: item.videoUrl, aiPresenter: true } };
 }

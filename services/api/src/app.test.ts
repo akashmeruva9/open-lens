@@ -11,7 +11,7 @@ import { FileStore } from "./store.js";
 async function setup() {
   const dir = await mkdtemp(join(tmpdir(), "ol-api-"));
   const store = new FileStore(dir);
-  const fixture = JSON.parse(await readFile(new URL("../../../data/fixtures/story-bundle.json", import.meta.url), "utf8")) as StoryBundle;
+  const fixture = JSON.parse(await readFile(new URL("./testdata/story-bundle.json", import.meta.url), "utf8")) as StoryBundle;
   await store.put({ ...fixture, qaFlags: [], runs: [], grounded: false, claimsDropped: 0 });
   const app = createApp({ store, assets: new LocalAssets(join(dir, "assets")), workDir: join(dir, "work") });
   const req = (method: string, path: string, body?: unknown) =>

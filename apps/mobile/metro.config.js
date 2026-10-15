@@ -1,5 +1,5 @@
 // Metro config for the npm-workspaces monorepo: lets the app import
-// @openlens/schemas, @openlens/client, @openlens/config and data/fixtures/*.json.
+// @openlens/schemas, @openlens/client and @openlens/config.
 const { getDefaultConfig } = require('expo/metro-config');
 const path = require('path');
 

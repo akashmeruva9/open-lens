@@ -5,7 +5,7 @@ import type { StoryBundle } from "@openlens/schemas";
 import { applyClaimPatch, impactedOutputs } from "./corrections.js";
 import type { StoryRecord } from "./store.js";
 
-const fixture = JSON.parse(readFileSync(new URL("../../../data/fixtures/story-bundle.json", import.meta.url), "utf8")) as StoryBundle;
+const fixture = JSON.parse(readFileSync(new URL("./testdata/story-bundle.json", import.meta.url), "utf8")) as StoryBundle;
 const rec = (): StoryRecord => ({ ...structuredClone(fixture), qaFlags: [], runs: [], grounded: false, claimsDropped: 0 });
 
 test("impact follows claimIds and dependsOn transitively", () => {

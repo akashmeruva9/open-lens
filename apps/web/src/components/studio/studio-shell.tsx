@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { AuthProvider, canEdit, useAuth } from "@/lib/auth/auth-provider";
 import { DataProvider } from "@/lib/data/browser";
-import { getFixtureStore } from "@/lib/data/fixture-store";
-import { USE_FIXTURES } from "@/lib/env";
 
 export function StudioShell({ children }: { children: ReactNode }) {
   return (
@@ -35,12 +33,6 @@ function StudioHeader() {
           </nav>
         </div>
         <div className="flex items-center gap-2">
-          {USE_FIXTURES ? (
-            <Button size="sm" variant="ghost" title="Restore the original fixture data"
-              onClick={() => { if (confirm("Reset all demo edits?")) getFixtureStore().reset(); }}>
-              Reset demo
-            </Button>
-          ) : null}
           {user ? (
             <span className="hidden items-center gap-2 rounded-full border border-line px-2.5 py-1 text-xs text-ink-2 md:inline-flex">
               <span aria-hidden className="inline-flex size-5 items-center justify-center rounded-full bg-ink text-[10px] font-bold text-bg">
@@ -53,11 +45,6 @@ function StudioHeader() {
           <ThemeToggle />
         </div>
       </div>
-      {USE_FIXTURES ? (
-        <div className="border-t border-dashed border-line bg-surface-2 px-4 py-1 text-center text-[11px] text-ink-3">
-          Fixture mode: fictional data, in-browser store. Studio actions are simulated; no channels are contacted.
-        </div>
-      ) : null}
     </header>
   );
 }

@@ -6,7 +6,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CategoryNav, HomeHeader, HomeSkeleton, Rail, SpotlightHero, WireList, useEditionSheet } from '@/components/home';
 import { Banner, Button, CenteredState, T } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
-import { USE_FIXTURES } from '@/lib/env';
 import { buildSections, editionName, type CategoryKey } from '@/lib/home';
 import { useSettings } from '@/lib/settings';
 import type { FeedItem } from '@/lib/types';
@@ -80,7 +79,6 @@ export default function HomeScreen() {
         ))}
         <T variant="caption" tone="faint" style={styles.footer}>
           Every OpenLens story carries its evidence: claims, sources and corrections are one tap away. Presenters are AI-generated and labelled.
-          {USE_FIXTURES ? '\nOffline demo data (fictional stories).' : ''}
         </T>
       </>
     );

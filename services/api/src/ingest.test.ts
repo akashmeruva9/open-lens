@@ -145,3 +145,17 @@ test("wire stories interrupted mid-pipeline (e.g. by a restart) are resumed", as
   await ingestCycle(deps, cfg(), effects([], later), new Date("2026-10-12T02:00:00Z"));
   assert.deepEqual(later, [id]);
 });
+
+test("events skipped for the per-cycle cap become stories in a later cycle", async () => {
+  const { deps } = await setup();
+  const leads = [
+    lead("l1", "a.jp", "Metro fare to rise 20%"), lead("l2", "b.jp", "Metro fare hike approved"),
+    lead("l3", "a.jp", "Typhoon nears Okinawa"), lead("l4", "b.jp", "Typhoon warning for Okinawa"),
+  ];
+  const first = await ingestCycle(deps, cfg({ maxNewStoriesPerCycle: 1 }), effects(leads, []), new Date("2026-10-12T01:00:00Z"));
+  assert.equal(first.storiesCreated.length, 1);
+  assert.equal(first.skippedForBudget, 1);
+  const second = await ingestCycle(deps, cfg({ maxNewStoriesPerCycle: 1 }), effects([], []), new Date("2026-10-12T01:15:00Z"));
+  assert.equal(second.storiesCreated.length, 1);
+  assert.notEqual(second.storiesCreated[0], first.storiesCreated[0]);
+});

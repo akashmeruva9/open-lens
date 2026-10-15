@@ -226,9 +226,18 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     const { candidates, touched } = assignLeads(fresh, vectors, prior, { now });
     report.candidatesTouched = touched.size;
 
-    // 4) Ingest full text for permitted leads in touched candidates (widest-covered events first, capped).
+    // Candidates still owed work from earlier cycles (fetch cap or story budget hit) stay in play,
+    // otherwise an event that arrived in a busy cycle would never become a story.
+    const owed = (c: Candidate) =>
+      c.leadIds.some((id) => {
+        const l = leads[id];
+        return l && !c.processedLeadIds.includes(id) && (l.source || (!l.rejected && allowlistEntryFor(l.url, cfg.allowlist)));
+      });
+    const active = candidates.filter((c) => touched.has(c.id) || owed(c));
+
+    // 4) Ingest full text for permitted leads in active candidates (widest-covered events first, capped).
     let fetches = 0;
-    for (const c of candidates.filter((x) => touched.has(x.id)).sort((a, b) => b.domains.length - a.domains.length)) {
+    for (const c of [...active].sort((a, b) => b.domains.length - a.domains.length)) {
       for (const id of c.leadIds) {
         const l = leads[id];
         if (!l || l.source || l.rejected || !allowlistEntryFor(l.url, cfg.allowlist)) continue;
@@ -248,7 +257,8 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     const budget = await store.getState<{ day: string; runs: number }>("budget", { day: "", runs: 0 });
     const today = now.toISOString().slice(0, 10);
     if (budget.day !== today) Object.assign(budget, { day: today, runs: 0 });
-    const ranked = candidates.filter((c) => touched.has(c.id)).sort((a, b) => b.domains.length - a.domains.length);
+    // Widest-covered first; among equals, the newest event first.
+    const ranked = [...active].sort((a, b) => b.domains.length - a.domains.length || b.updatedAt.localeCompare(a.updatedAt));
     const toRun: string[] = [];
     let created = 0, updated = 0;
     for (const c of ranked) {

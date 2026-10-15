@@ -52,13 +52,15 @@ function AppNavigator() {
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: p.background },
-          headerTintColor: p.accent,
-          headerTitleStyle: { color: p.text },
+          headerTintColor: p.text,
+          headerTitleStyle: { color: p.text, fontWeight: '800' },
           headerShadowVisible: false,
           headerBackButtonDisplayMode: 'minimal',
           contentStyle: { backgroundColor: p.background },
         }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Feed' }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Home' }} />
+        <Stack.Screen name="watch" options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'slide_from_bottom', contentStyle: { backgroundColor: '#000' } }} />
+        <Stack.Screen name="search" options={{ title: 'Search' }} />
         <Stack.Screen name="story/[id]/index" options={{ title: '' }} />
         <Stack.Screen name="story/[id]/dossier" options={{ title: 'Research dossier' }} />
         <Stack.Screen name="story/[id]/assessment" options={{ title: 'AI assessment' }} />

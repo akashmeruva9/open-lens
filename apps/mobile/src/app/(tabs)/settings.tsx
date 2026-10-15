@@ -5,7 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Banner, Button, Card, Chip, SectionHeader, T } from '@/components/ui';
 import { api, errorMessage } from '@/lib/api';
-import { LANGUAGE_OPTIONS, NATIVE_LANGUAGE_NAMES, REGION_OPTIONS, TOPIC_OPTIONS, regionName } from '@/lib/catalog';
+import { LANGUAGE_OPTIONS, NATIVE_LANGUAGE_NAMES, TOPIC_OPTIONS, regionName } from '@/lib/catalog';
+import { EDITIONS } from '@/lib/home';
 import { API_URL, USE_FIXTURES } from '@/lib/env';
 import { enablePush, pushSupported } from '@/lib/push';
 import { useSettings, type ThemePref } from '@/lib/settings';
@@ -63,10 +64,16 @@ export default function SettingsScreen() {
           </View>
         </Section>
 
-        <Section title="Region">
+        <Section title="Edition" subtitle="Which market's stories Home shows. Region-wide stories appear in every edition.">
           <View style={styles.wrap}>
-            {REGION_OPTIONS.map((r) => (
-              <Chip key={r.code || 'all'} label={r.name} selected={settings.region === r.code} onPress={() => update({ region: r.code })} />
+            {EDITIONS.map((e) => (
+              <Chip
+                key={e.code || 'all'}
+                label={e.name}
+                accessibilityLabel={`${e.name}, ${e.native}`}
+                selected={settings.region === e.code}
+                onPress={() => update({ region: e.code })}
+              />
             ))}
           </View>
         </Section>
@@ -76,7 +83,7 @@ export default function SettingsScreen() {
             {TOPIC_OPTIONS.map((t) => (
               <Chip
                 key={t}
-                label={t}
+                label={t[0].toUpperCase() + t.slice(1)}
                 selected={settings.topics.includes(t)}
                 onPress={() => toggleTopic(t)}
                 accessibilityLabel={`${t} topic`}
@@ -106,7 +113,7 @@ export default function SettingsScreen() {
             <View style={{ paddingVertical: space.md, gap: space.sm }}>
               <T variant="bodyStrong">Appearance</T>
               <View style={styles.wrap}>
-                {(['system', 'dark', 'light'] as ThemePref[]).map((t) => (
+                {(['system', 'light', 'dark'] as ThemePref[]).map((t) => (
                   <Chip key={t} label={t[0].toUpperCase() + t.slice(1)} selected={settings.theme === t} onPress={() => update({ theme: t })} />
                 ))}
               </View>
@@ -270,7 +277,7 @@ function Divider() {
 }
 
 const styles = StyleSheet.create({
-  content: { padding: space.lg, gap: space.xl, paddingBottom: space.xxl * 3 },
+  content: { padding: space.lg, gap: space.xl + space.sm, paddingBottom: space.xxl * 3 },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   toggle: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.md },
   input: { borderWidth: 1, borderRadius: radius.md, paddingHorizontal: space.md, paddingVertical: space.md, fontSize: 17, minHeight: 48 },

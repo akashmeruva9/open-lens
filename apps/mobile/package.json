@@ -3,6 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
     "@openlens/client": "*",
     "@openlens/config": "*",
     "@openlens/schemas": "*",
@@ -14,6 +15,7 @@
     "expo-device": "~57.0.2",
     "expo-font": "~57.0.4",
     "expo-image": "~57.0.5",
+    "expo-linear-gradient": "~57.0.2",
     "expo-linking": "~57.0.12",
     "expo-localization": "~57.0.2",
     "expo-notifications": "~57.0.22",

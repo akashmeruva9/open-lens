@@ -8,14 +8,14 @@ export default function TabsLayout() {
   return (
     <NativeTabs
       backgroundColor={p.background}
-      indicatorColor={p.accentSoft}
-      iconColor={{ default: p.textFaint, selected: p.accent }}
-      labelStyle={{ default: { color: p.textFaint }, selected: { color: p.accent } }}
-      tintColor={p.accent}>
-      {/* Feed manages its own insets (snap-paged list sized to the visible area). */}
+      indicatorColor={p.surfaceAlt}
+      iconColor={{ default: p.textFaint, selected: p.text }}
+      labelStyle={{ default: { color: p.textFaint }, selected: { color: p.text, fontWeight: '700' } }}
+      tintColor={p.text}>
+      {/* Home manages its own top inset (sticky header). */}
       <NativeTabs.Trigger name="index" disableAutomaticContentInsets={Platform.OS === 'ios'}>
-        <NativeTabs.Trigger.Label>Feed</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf={{ default: 'newspaper', selected: 'newspaper.fill' }} md="newspaper" />
+        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf={{ default: 'play.square.stack', selected: 'play.square.stack.fill' }} md="home" />
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="corrections">
         <NativeTabs.Trigger.Label>Corrections</NativeTabs.Trigger.Label>

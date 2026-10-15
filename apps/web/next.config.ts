@@ -7,6 +7,8 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   agentRules: false,
+  // Cloud Run image (apps/web/Dockerfile) runs the traced standalone server.
+  output: "standalone",
   // Monorepo: fixtures live in /data and shared packages in /packages.
   turbopack: { root: repoRoot },
   outputFileTracingRoot: repoRoot,

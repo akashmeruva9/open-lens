@@ -1,0 +1,11 @@
+# Files Cloud Build never uploads (secrets, local data, build output).
+.git
+.gitignore
+**/node_modules
+**/dist
+**/.next
+**/.expo
+.data
+**/.env
+**/.env.*
+apps/mobile

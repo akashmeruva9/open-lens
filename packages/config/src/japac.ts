@@ -26,6 +26,8 @@ export const isLang = (s: string): s is LangCode => s in LANGUAGES;
  *  YouTube, X, Instagram, Facebook and WhatsApp are unavailable there. */
 export const MARKETS = {
   APAC: { name: "Asia-Pacific", languages: ["en"], timezone: "Asia/Singapore" },
+  /** International desk: world news from global outlets, in English. */
+  WORLD: { name: "World", languages: ["en"], timezone: "UTC" },
   IN: { name: "India", languages: ["hi", "en", "te", "ta"], timezone: "Asia/Kolkata" },
   JP: { name: "Japan", languages: ["ja"], timezone: "Asia/Tokyo" },
   KR: { name: "South Korea", languages: ["ko"], timezone: "Asia/Seoul" },

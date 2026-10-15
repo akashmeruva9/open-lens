@@ -1,5 +1,5 @@
 import { validateAssessment } from "@openlens/agents";
-import { languagesFor, marketOf, PUBLIC_WEB_URL } from "@openlens/config";
+import { languagesFor, marketOf, MAX_QUOTE_CHARS, PUBLIC_WEB_URL, QUOTE_ONLY_USAGE } from "@openlens/config";
 import { SourceRecord, type FeedItem, type OutputRecord, type Story, type StoryBundle } from "@openlens/schemas";
 import { createHash } from "node:crypto";
 import { Hono, type Context } from "hono";
@@ -69,12 +69,34 @@ export function toFeedItem(rec: StoryRecord): FeedItem {
   };
 }
 
-/** Reader view: only approved media, no ops data. */
+const clip = (s: string) => (s.length > MAX_QUOTE_CHARS ? `${s.slice(0, MAX_QUOTE_CHARS - 1).trimEnd()}…` : s);
+
+/**
+ * Quote-only outlets: readers get the cited passages (clipped), never the stored article text.
+ * The source's `text` becomes just those excerpts so the passage UI can still highlight them.
+ */
+export function quoteOnlyView(r: StoryRecord): Pick<StoryBundle, "sources" | "claims"> {
+  const quoteOnly = new Set(r.sources.filter((s) => s.rights.usage === QUOTE_ONLY_USAGE).map((s) => s.id));
+  if (!quoteOnly.size) return { sources: r.sources, claims: r.claims };
+  const claims = r.claims.map((c) => ({
+    ...c,
+    evidence: c.evidence.map((e) => (quoteOnly.has(e.sourceId) ? { ...e, passage: clip(e.passage) } : e)),
+  }));
+  const sources = r.sources.map((s) => {
+    if (!quoteOnly.has(s.id)) return s;
+    const quotes = [...new Set(claims.flatMap((c) => c.evidence.filter((e) => e.sourceId === s.id).map((e) => e.passage)))];
+    return { ...s, text: quotes.join("\n\n…\n\n") };
+  });
+  return { sources, claims };
+}
+
+/** Reader view: only approved media, no ops data, no stored text of quote-only outlets. */
 export function toReaderBundle(rec: StoryRecord): StoryBundle {
   const r = fixMediaUrls(rec);
   const { qaFlags: _q, runs: _r, grounded: _g, claimsDropped: _d, ...bundle } = r;
   return {
     ...bundle,
+    ...quoteOnlyView(r),
     outputs: r.outputs.filter((o) => READER_KINDS.has(o.kind) && READER_OUTPUT_STATUSES.has(o.status)),
     publications: r.publications.filter((p) => p.mode === "live"),
   };

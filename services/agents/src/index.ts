@@ -12,3 +12,4 @@ export * from "./validators.js";
 export * from "./discovery.js";
 export * from "./cluster.js";
 export * from "./intake.js";
+export * from "./robots.js";

@@ -62,7 +62,7 @@ export async function loadIngestConfig(root: string): Promise<IngestConfig> {
   return {
     feeds,
     allowlist,
-    markets: (env.INGEST_MARKETS ?? MARKET_CODES.filter((m) => m !== "APAC").join(",")).split(",").map((s) => s.trim()).filter(Boolean),
+    markets: (env.INGEST_MARKETS ?? MARKET_CODES.join(",")).split(",").map((s) => s.trim()).filter(Boolean),
     gdelt: env.INGEST_GDELT !== "0",
     lookbackMin: Number(env.INGEST_LOOKBACK_MIN ?? 30),
     maxAgeHours: Number(env.INGEST_MAX_AGE_HOURS ?? 48),
@@ -178,15 +178,22 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     // 1) Discover. Feeds: only enabled feeds of verified allowlisted domains.
     const found: Lead[] = [];
     const feeds = cfg.feeds.filter((f) => f.enabled && markets.has(f.market) && cfg.allowlist.some((a) => a.verified && (f.domain === a.domain || f.domain.endsWith(`.${a.domain}`))));
-    for (const f of feeds) {
-      try {
-        found.push(...(await fx.discoverFeed(f)));
-      } catch (e) {
-        report.errors.push(String(e).slice(0, 200));
-      }
-    }
+    // A few feeds at a time: ~100 outlet feeds sequentially would take minutes.
+    const queue = [...feeds];
+    await Promise.all(
+      Array.from({ length: Math.min(8, queue.length) }, async () => {
+        for (let f = queue.shift(); f; f = queue.shift()) {
+          try {
+            found.push(...(await fx.discoverFeed(f)));
+          } catch (e) {
+            report.errors.push(String(e).slice(0, 200));
+          }
+        }
+      }),
+    );
     if (cfg.gdelt) {
-      for (const m of markets) {
+      // GDELT is per country; the region-wide and world desks have none.
+      for (const m of [...markets].filter((x) => x !== "APAC" && x !== "WORLD")) {
         try {
           found.push(...(await fx.discoverGdelt(m, cfg.lookbackMin)));
         } catch (e) {

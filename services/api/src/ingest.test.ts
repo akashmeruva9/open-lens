@@ -159,3 +159,19 @@ test("events skipped for the per-cycle cap become stories in a later cycle", asy
   assert.equal(second.storiesCreated.length, 1);
   assert.notEqual(second.storiesCreated[0], first.storiesCreated[0]);
 });
+
+test("pickSources: one article per outlet, primary first, lanes balanced, capped", async () => {
+  const { pickSources } = await import("./ingest.js");
+  const src = (id: string, publisher: string, rating: "left" | "center" | "right" | "unrated", t: string, sourceType: "primary" | "reporting" = "reporting") =>
+    ({ id, storyId: "s", url: `https://${id}.example/a`, publisher, title: id, publishedAt: `2026-10-15T${t}:00Z`, language: "en", sourceType, lens: { rating, ratingBasis: "x" }, rights: { license: "x", usage: "x" }, text: "t" }) as never;
+  const all = [
+    src("l1", "Left A", "left", "10:00"), src("l2", "Left B", "left", "11:00"), src("l3", "Left C", "left", "12:00"),
+    src("l1b", "Left A", "left", "13:00"), // same outlet, newer: replaces l1
+    src("r1", "Right A", "right", "09:00"), src("c1", "Center A", "center", "08:00"), src("g1", "Gov", "unrated", "07:00", "primary"),
+  ];
+  const picked = pickSources(all, 4).map((s: { id: string }) => s.id);
+  assert.deepEqual(picked, ["g1", "l1b", "c1", "r1"]);
+  // Already-present outlets are not added again; cap counts existing sources.
+  const more = pickSources(all, 5, [all[4]!, all[5]!]).map((s: { id: string }) => s.id);
+  assert.deepEqual(more, ["g1", "l1b", "l3"]);
+});

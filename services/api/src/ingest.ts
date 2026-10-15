@@ -130,6 +130,14 @@ export function defaultEffects(deps: Deps, cfg: IngestConfig): IngestEffects {
 
 /** Pipeline + media for configured languages + auto-publish policy. */
 export async function processStory(deps: Deps, cfg: IngestConfig, storyId: string) {
+  // Stories created before the per-story cap may hold dozens of sources: trim before the run
+  // (the pipeline re-extracts claims from scratch, so source ids can be renumbered).
+  const before = await deps.store.get(storyId);
+  if (before?.story.origin === "wire" && before.sources.length > MAX_SOURCES_PER_STORY) {
+    before.sources = pickSources(before.sources).map((s, i) => ({ ...s, id: `s${i + 1}` }));
+    before.claims = [];
+    await deps.store.put(before);
+  }
   await runStory(deps, storyId, [...STAGES]);
   const rec = await deps.store.get(storyId);
   if (!rec) return;
@@ -156,6 +164,26 @@ export async function autoPublishIfEligible(deps: Deps, cfg: IngestConfig, story
   await deps.store.put(fresh);
   emit(storyId, { type: "stage", stage: "approve", status: "done", detail: "auto-published (low risk)" });
   return true;
+}
+
+/** Most sources one story reads: more mostly repeats the same facts and slows every stage. */
+export const MAX_SOURCES_PER_STORY = 8;
+
+/**
+ * Pick sources for a story: one article per outlet, primary documents first, then round-robin
+ * across lean lanes (left / center / right / unrated) so no side dominates, newest first in each.
+ */
+export function pickSources(candidates: SourceRecord[], max = MAX_SOURCES_PER_STORY, have: SourceRecord[] = []): SourceRecord[] {
+  const seen = new Set(have.map((s) => s.publisher));
+  const byPublisher = new Map<string, SourceRecord>();
+  for (const s of [...candidates].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))) {
+    if (!seen.has(s.publisher) && !byPublisher.has(s.publisher)) byPublisher.set(s.publisher, s);
+  }
+  const pool = [...byPublisher.values()];
+  const out: SourceRecord[] = pool.filter((s) => s.sourceType === "primary");
+  const lanes = (["left", "center", "right", "unrated"] as const).map((l) => pool.filter((s) => s.sourceType !== "primary" && s.lens.rating === l));
+  for (let i = 0; lanes.some((l) => i < l.length); i++) for (const l of lanes) if (l[i]) out.push(l[i]!);
+  return out.slice(0, Math.max(0, max - have.length));
 }
 
 const slug = (s: string) =>
@@ -301,7 +329,7 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
           id, title: c.title, summary: "", region: c.market, topics: [], languages: languagesFor([c.market]).filter((l) => isLang(l) && CHANNEL_PLAN[l]),
           riskTier: "low", status: "draft", version: 1, createdAt: t, updatedAt: t, origin: "wire",
         });
-        rec.sources = allSources.map((s, i) => ({ ...s, id: `s${i + 1}`, storyId: id }));
+        rec.sources = pickSources(allSources).map((s, i) => ({ ...s, id: `s${i + 1}`, storyId: id }));
         await store.put(rec);
         c.storyId = id;
         report.storiesCreated.push(id);
@@ -310,8 +338,13 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
         const rec = await store.get(c.storyId!);
         if (!rec) continue;
         const known = new Set(rec.sources.map((s) => s.url));
-        const add = pending.map((l) => l.source!).filter((s) => !known.has(s.url));
-        if (!add.length) continue;
+        const add = pickSources(pending.map((l) => l.source!).filter((s) => !known.has(s.url)), MAX_SOURCES_PER_STORY, rec.sources);
+        if (!add.length) {
+          // Nothing new worth adding (same outlets, or the story already has enough sources).
+          c.processedLeadIds.push(...pending.map((l) => l.id));
+          for (const l of pending) l.source = { ...l.source!, text: "" };
+          continue;
+        }
         rec.sources = [...rec.sources, ...add.map((s, i) => ({ ...s, id: `s${rec.sources.length + i + 1}`, storyId: rec.story.id }))];
         rec.story.version += 1;
         if (rec.story.status === "published" || rec.story.status === "corrected") rec.story.status = "stale";

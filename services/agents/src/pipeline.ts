@@ -110,7 +110,7 @@ export async function runPipeline(state: PipelineState, sink: PipelineSink, only
     return [r.meta];
   });
   await step("synthesize", async () => {
-    const r = await synthesizeAssessment(id, state.claims, state.sources, state.story.version);
+    const r = await synthesizeAssessment(id, state.claims, state.sources, state.story.version, { lanes: state.lanes, context: state.context });
     state.assessment = r.assessment;
     if (r.assessment.headline && !state.story.summary) state.story.summary = r.assessment.neutralSummary;
     // Wire stories start with the source's headline (often not English); the English desk headline replaces it.
@@ -121,7 +121,7 @@ export async function runPipeline(state: PipelineState, sink: PipelineSink, only
     return [r.meta];
   });
   await step("qa", async () => {
-    const r = await qaCheck(state.story.title, state.claims, state.sources, state.assessment, { grounded: state.grounded });
+    const r = await qaCheck(state.story.title, state.claims, state.sources, state.assessment, { grounded: state.grounded, context: state.context });
     state.qaFlags = r.flags;
     state.story.riskTier = r.riskTier;
     state.story.status = "in_review";

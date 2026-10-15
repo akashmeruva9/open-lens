@@ -13,6 +13,7 @@ import { useLiveBundle } from "@/lib/data/live";
 import { API_URL } from "@/lib/env";
 import { langNative, regionName } from "@/lib/format";
 import { EVIDENCE } from "@/lib/meta";
+import { ExplainerView } from "./explainer-view";
 import { AssessmentView } from "./assessment-view";
 import { CorrectionBanner } from "./correction-banner";
 import { Dossier } from "./dossier";
@@ -154,6 +155,7 @@ export function StoryView({ initial, more, edition = "APAC" }: { initial: StoryB
 
         <div className="page">
           <div className="max-w-[880px]">
+            {assessment?.explainer ? <ExplainerView explainer={assessment.explainer} /> : null}
             <LensLanes lanes={bundle.lanes} />
             {assessment ? <AssessmentView assessment={assessment} stale={assessment.ledgerVersion < story.version} /> : null}
             <Dossier

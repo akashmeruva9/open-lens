@@ -69,6 +69,7 @@ export default function StoryScreen() {
   const video = videos.find((v) => v.output.lang === lang);
   const latestCorrection = [...b.corrections].sort((a, z) => z.at.localeCompare(a.at))[0];
   const knows = (b.assessment?.sections ?? []).filter((x) => KNOW[x.kind]);
+  const ex = b.assessment?.explainer;
   const go = (screen: 'dossier' | 'assessment' | 'watch', params: Record<string, string> = {}) =>
     router.push({ pathname: `/story/[id]/${screen}`, params: { id: story.id, ...params } });
   const market = marketName(story.region);
@@ -169,6 +170,48 @@ export default function StoryScreen() {
             </T>
           </View>
 
+          {ex ? (
+            <>
+              <Section title="What happened">
+                <T variant="body">{ex.whatHappened.text}</T>
+                <View style={{ marginTop: space.sm }}>
+                  <ClaimChips ids={ex.whatHappened.claimIds} claims={s.claims} onPress={sheet.open} />
+                </View>
+              </Section>
+              <Section title="The background">
+                <T variant="body" tone="muted">{ex.background.text}</T>
+              </Section>
+              <Section title="What each side says">
+                <View style={{ gap: space.md }}>
+                  {ex.perspectives.map((side, i) => (
+                    <View key={i} style={[styles.know, { borderLeftColor: p.textFaint }]}>
+                      <T variant="headline">{side.side}</T>
+                      <T variant="body" style={{ marginTop: 4, marginBottom: space.sm }}>
+                        {side.view}
+                      </T>
+                      <ClaimChips ids={side.claimIds} claims={s.claims} onPress={sheet.open} />
+                    </View>
+                  ))}
+                </View>
+              </Section>
+              <Section
+                title="What we think"
+                subtitle={`AI analysis · ${ex.take.confidence} confidence. OpenLens's own reading of the evidence, not an endorsement of any side.`}>
+                <View style={[styles.know, { borderLeftColor: p.accent }]}>
+                  <T variant="body" style={{ marginBottom: space.sm }}>
+                    {ex.take.text}
+                  </T>
+                  <ClaimChips ids={ex.take.claimIds} claims={s.claims} onPress={sheet.open} />
+                </View>
+                {ex.whatsNext ? (
+                  <T variant="body" tone="muted" style={{ marginTop: space.md }}>
+                    What to watch next: {ex.whatsNext}
+                  </T>
+                ) : null}
+              </Section>
+            </>
+          ) : null}
+
           {b.lanes.length ? (
             <Section title="How outlets framed it" subtitle="Swipe between lenses">
               <LensPager lanes={b.lanes} claims={s.claims} sources={s.sources} onClaim={sheet.open} />
@@ -176,7 +219,7 @@ export default function StoryScreen() {
           ) : null}
 
           {knows.length ? (
-            <Section title="What we know" subtitle="AI-drafted, editor-approved; every sentence cites the ledger. No truth score.">
+            <Section title="What we know" subtitle="AI-written, not editor-reviewed; every sentence cites the ledger. No truth score.">
               <View style={{ gap: space.md }}>
                 {knows.map((k, i) => {
                   const meta = KNOW[k.kind]!;

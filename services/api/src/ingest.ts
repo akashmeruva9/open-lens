@@ -370,7 +370,8 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     // auto-publish policy to ones that finished while it was off.
     for (const st of await store.listStories()) {
       if (toRun.includes(st.id) || inFlight.has(st.id)) continue;
-      const stuck = st.origin === "wire" && (st.status === "draft" || st.status === "researching") && now.getTime() - Date.parse(st.updatedAt) > STUCK_MS;
+      // Stuck mid-run (restart), or stale (sources changed / format upgraded) and not yet re-run.
+      const stuck = st.origin === "wire" && (st.status === "draft" || st.status === "researching" || st.status === "stale") && now.getTime() - Date.parse(st.updatedAt) > STUCK_MS;
       if (stuck && budget.runs < cfg.dailyRunBudget) {
         budget.runs++;
         toRun.push(st.id);

@@ -1,7 +1,7 @@
 import { MODELS } from "@openlens/config";
 import { ContextItem, TimelineEvent, type Claim, type SourceRecord } from "@openlens/schemas";
 import { z } from "zod";
-import { ENGLISH_DESK } from "./desk.js";
+import { ENGLISH_DESK, PLAIN_ENGLISH } from "./desk.js";
 import { generateStructured, type RunMeta } from "./gemini.js";
 
 const ResearchOut = z.object({
@@ -13,7 +13,8 @@ const SYSTEM = `You are the Research Agent of a transparent newsroom.
 Find background a reader needs: relevant laws/regulations, official orders, prior government or institutional actions, datasets, and comparable past cases.
 Also build a chronological timeline of the event using the claims (cite claimIds) and any context you add (cite context ids).
 Rules: prefer primary/official sources and include their URL when you have one. Never invent URLs, document names or dates. If unsure, omit.
-${ENGLISH_DESK}`;
+${ENGLISH_DESK}
+${PLAIN_ENGLISH}`;
 
 export interface ResearchResult {
   context: ContextItem[];

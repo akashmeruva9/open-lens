@@ -127,8 +127,9 @@ export default function SettingsScreen() {
         <Section title="About">
           <Card style={{ gap: space.xs }}>
             <T variant="caption" tone="muted">
-              OpenLens builds each story from a reviewed Claim & Evidence Ledger. Lens framing and assessments are AI-drafted and editor-approved;
-              presenters and narration are AI-generated and labelled.
+              OpenLens reads what outlets across the political spectrum report, researches the story, and explains it: what happened, the background,
+              what each side says, and its own evidence-based view. Everything is AI-written and published automatically, every point cites its
+              source, and presenters and narration are AI-generated and labelled.
             </T>
             <T variant="caption" tone="faint" style={{ marginTop: space.sm }}>
               Version {Constants.expoConfig?.version ?? '—'} · Data: {API_URL}

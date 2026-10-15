@@ -17,10 +17,10 @@ export function AssessmentView({ assessment, stale }: { assessment: Assessment; 
   const sections = [...assessment.sections].sort((a, b) => ASSESSMENT_ORDER.indexOf(a.kind) - ASSESSMENT_ORDER.indexOf(b.kind));
   return (
     <section id="assessment" aria-labelledby="assessment-title" className="mt-16 scroll-mt-24">
-      <p className="eyebrow">Assessment</p>
+      <p className="eyebrow">The evidence</p>
       <h2 id="assessment-title" className="display mt-1 text-[24px] leading-[28px]">What we know</h2>
       <p className="mt-2 flex items-center gap-1.5 text-xs text-ink-3">
-        <IconSparkle size={12} /> AI-drafted, editor-reviewed. Every statement cites ledger claims. No numeric truth score.
+        <IconSparkle size={12} /> AI-written, not editor-reviewed. Every statement cites ledger claims. No numeric truth score.
         {stale ? <span className="font-semibold text-[var(--st-warn)]"> · Ledger updated since this was written</span> : null}
       </p>
       <dl className="mt-4 grid gap-3 sm:grid-cols-2">

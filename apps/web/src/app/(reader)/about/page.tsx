@@ -4,6 +4,14 @@ export const metadata: Metadata = { title: "About OpenLens" };
 
 const SECTIONS = [
   {
+    id: "mission",
+    title: "Why OpenLens",
+    body: [
+      "Most news reaches us through outlets and feeds that lean one way and push one side's story. OpenLens reads what outlets across the spectrum report, does its own research, and explains the whole picture in plain English.",
+      "Every story answers the same questions: what happened, what's the background, what does each side say, and what do we think the evidence shows. Our view is labelled as AI analysis, comes with a confidence level, and never tells you whom to support.",
+    ],
+  },
+  {
     id: "verify",
     title: "How we verify",
     body: [

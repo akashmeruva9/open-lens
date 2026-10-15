@@ -190,3 +190,14 @@ test("publish-all policy: sensitive, manual and QA-flagged stories go live, flag
   assert.equal((await store.get("flagged"))!.story.checksFlagged, true);
   assert.equal((await store.get("sensitive"))!.story.checksFlagged, undefined);
 });
+
+test("stale wire stories (e.g. marked for a format upgrade) are re-run once quiet for 30 min", async () => {
+  const { store, deps } = await setup();
+  const first = await ingestCycle(deps, cfg(), effects([lead("l1", "a.jp", "Metro fare to rise 20%"), lead("l2", "b.jp", "Metro fare hike approved")], []), new Date("2026-10-12T01:00:00Z"));
+  const id = first.storiesCreated[0]!;
+  const rec = (await store.get(id))!;
+  await store.put({ ...rec, story: { ...rec.story, status: "stale", updatedAt: "2026-10-12T00:00:00Z" } });
+  const ran: string[] = [];
+  await ingestCycle(deps, cfg(), effects([], ran), new Date("2026-10-12T02:00:00Z"));
+  assert.deepEqual(ran, [id]);
+});

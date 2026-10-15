@@ -1,5 +1,6 @@
 import { MODELS } from "@openlens/config";
 import { ExtractedClaims, type Claim, type SourceRecord } from "@openlens/schemas";
+import { ENGLISH_DESK } from "./desk.js";
 import { generateStructured, type RunMeta } from "./gemini.js";
 import { passageInSource } from "./validators.js";
 
@@ -9,7 +10,8 @@ Rules:
 - One fact/allegation/opinion/forecast per claim. Resolve pronouns so each claim stands alone.
 - "passage" MUST be copied verbatim from the given source text. Never paraphrase it.
 - If a person or organization asserts something, set attributedTo and use claimType "allegation" or "opinion" as appropriate. Do not state attributed assertions as fact.
-- Never add information that is not in the source.`;
+- Never add information that is not in the source.
+${ENGLISH_DESK}`;
 
 export async function extractClaims(
   storyId: string,

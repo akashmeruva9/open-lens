@@ -1,5 +1,6 @@
 import { MODELS } from "@openlens/config";
 import { Assessment, type Claim, type SourceRecord } from "@openlens/schemas";
+import { ENGLISH_DESK } from "./desk.js";
 import { generateStructured, type RunMeta } from "./gemini.js";
 import { validateAssessment, type Violation } from "./validators.js";
 
@@ -10,7 +11,8 @@ Rules:
 - Every section lists the claimIds it relies on. Use only ids given to you. Every section needs at least one claimId.
 - Never introduce numbers that are not in the claims.
 - Never present attributed allegations or opinions as established fact.
-- No numeric truth scores. State uncertainty plainly. Neutral tone.`;
+- No numeric truth scores. State uncertainty plainly. Neutral tone.
+${ENGLISH_DESK}`;
 
 export async function synthesizeAssessment(
   storyId: string,

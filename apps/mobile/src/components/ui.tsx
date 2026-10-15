@@ -14,18 +14,12 @@ import {
 
 import { usePalette } from '@/lib/settings';
 import type { EvidenceState, Lens } from '@/lib/types';
-import { evidenceTone, fonts, lensTone, radius, space } from '@/theme';
+import { evidenceTone, fonts, lensTone, radius, space, type } from '@/theme';
 
-type Variant = 'display' | 'title' | 'headline' | 'body' | 'bodyStrong' | 'caption' | 'label' | 'mono';
+type Variant = 'hero' | 'display' | 'rail' | 'title' | 'headline' | 'card' | 'body' | 'bodyStrong' | 'dek' | 'caption' | 'label' | 'mono';
 
 const variants: Record<Variant, TextStyle> = {
-  display: { fontSize: 28, lineHeight: 34, fontWeight: '700', fontFamily: fonts.serif },
-  title: { fontSize: 22, lineHeight: 28, fontWeight: '700', fontFamily: fonts.serif },
-  headline: { fontSize: 17, lineHeight: 23, fontWeight: '600' },
-  body: { fontSize: 16, lineHeight: 24 },
-  bodyStrong: { fontSize: 16, lineHeight: 24, fontWeight: '600' },
-  caption: { fontSize: 13, lineHeight: 18 },
-  label: { fontSize: 12, lineHeight: 16, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase' },
+  ...type,
   mono: { fontSize: 12, lineHeight: 16, fontFamily: fonts.mono },
 };
 
@@ -34,9 +28,9 @@ export function T({
   tone = 'text',
   style,
   ...rest
-}: TextProps & { variant?: Variant; tone?: 'text' | 'muted' | 'faint' | 'accent' | 'danger' }) {
+}: TextProps & { variant?: Variant; tone?: 'text' | 'muted' | 'faint' | 'accent' | 'danger' | 'live' }) {
   const p = usePalette();
-  const color = { text: p.text, muted: p.textMuted, faint: p.textFaint, accent: p.accent, danger: p.danger }[tone];
+  const color = { text: p.text, muted: p.textMuted, faint: p.textFaint, accent: p.accent, danger: p.danger, live: p.live }[tone];
   return <Text {...rest} style={[variants[variant], { color }, style]} />;
 }
 
@@ -49,9 +43,7 @@ export function SectionHeader({ title, subtitle, right }: { title: string; subti
   return (
     <View style={styles.sectionHeader} accessibilityRole="header">
       <View style={{ flex: 1 }}>
-        <T variant="label" tone="accent">
-          {title}
-        </T>
+        <T variant="title">{title}</T>
         {subtitle ? (
           <T variant="caption" tone="muted" style={{ marginTop: 2 }}>
             {subtitle}
@@ -137,12 +129,12 @@ export function Chip({
       style={({ pressed }) => [
         styles.chip,
         {
-          backgroundColor: selected ? p.accent : p.surfaceAlt,
-          borderColor: selected ? p.accent : p.border,
+          backgroundColor: selected ? p.ink : p.surface,
+          borderColor: selected ? p.ink : p.border,
           opacity: pressed ? 0.75 : 1,
         },
       ]}>
-      <Text maxFontSizeMultiplier={1.6} style={[styles.chipText, { color: selected ? p.accentText : p.text }]}>
+      <Text maxFontSizeMultiplier={1.6} style={[styles.chipText, { color: selected ? p.inkText : p.text }]}>
         {label}
       </Text>
     </Pressable>
@@ -161,7 +153,7 @@ export function Button({
 }: {
   label: string;
   onPress?: PressableProps['onPress'];
-  kind?: 'primary' | 'secondary' | 'ghost';
+  kind?: 'primary' | 'ink' | 'outline' | 'secondary' | 'ghost';
   disabled?: boolean;
   loading?: boolean;
   icon?: string;
@@ -169,8 +161,9 @@ export function Button({
   style?: StyleProp<ViewStyle>;
 }) {
   const p = usePalette();
-  const bg = kind === 'primary' ? p.accent : kind === 'secondary' ? p.surfaceAlt : 'transparent';
-  const fg = kind === 'primary' ? p.accentText : kind === 'secondary' ? p.text : p.accent;
+  const bg = { primary: p.accent, ink: p.ink, outline: 'transparent', secondary: p.surface, ghost: 'transparent' }[kind];
+  const fg = { primary: p.accentText, ink: p.inkText, outline: p.text, secondary: p.text, ghost: p.accent }[kind];
+  const border = kind === 'outline' ? p.text : kind === 'secondary' ? p.border : 'transparent';
   return (
     <Pressable
       onPress={onPress}
@@ -181,7 +174,7 @@ export function Button({
       accessibilityState={{ disabled: !!(disabled || loading), busy: !!loading }}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: bg, borderColor: kind === 'secondary' ? p.border : 'transparent', opacity: disabled ? 0.45 : pressed ? 0.8 : 1 },
+        { backgroundColor: bg, borderColor: border, borderWidth: kind === 'outline' ? 1.5 : StyleSheet.hairlineWidth, opacity: disabled ? 0.45 : pressed ? 0.8 : 1 },
         style,
       ]}>
       {loading ? <ActivityIndicator color={fg} /> : null}
@@ -200,8 +193,8 @@ export function Disclosure({ text, icon = 'ⓘ' }: { text: string; icon?: string
       accessible
       accessibilityRole="text"
       accessibilityLabel={text}
-      style={[styles.disclosure, { backgroundColor: p.accentSoft, borderColor: p.accent }]}>
-      <Text style={{ color: p.accent, fontWeight: '700' }}>{icon}</Text>
+      style={[styles.disclosure, { backgroundColor: p.surface, borderColor: p.border }]}>
+      <Text style={{ color: p.textMuted, fontWeight: '700' }}>{icon}</Text>
       <T variant="caption" style={{ flex: 1, color: p.text }}>
         {text}
       </T>
@@ -251,8 +244,8 @@ export function Banner({
   accessibilityHint?: string;
 }) {
   const p = usePalette();
-  const fg = tone === 'danger' ? p.danger : p.accent;
-  const bg = tone === 'danger' ? p.dangerSoft : p.accentSoft;
+  const fg = tone === 'danger' ? p.live : p.accent;
+  const bg = tone === 'danger' ? p.liveSoft : p.accentSoft;
   return (
     <Pressable
       disabled={!onPress}
@@ -269,11 +262,37 @@ export function Banner({
   );
 }
 
+/** Static placeholder block (no shimmer, so nothing to disable for reduced motion). */
+export function Skeleton({ style }: { style?: StyleProp<ViewStyle> }) {
+  const p = usePalette();
+  return <View importantForAccessibility="no-hide-descendants" style={[styles.skeleton, { backgroundColor: p.surfaceAlt }, style]} />;
+}
+
+/** Outline chip for "Auto-published · not editor-reviewed" (spec §3 Chips). */
+export function AutoPublishedChip() {
+  const p = usePalette();
+  return (
+    <Pill
+      label="Auto-published · not editor-reviewed"
+      fg={p.textFaint}
+      bg="transparent"
+      style={{ borderWidth: 1, borderColor: p.textFaint }}
+      accessibilityLabel="Auto-published, not yet reviewed by an editor"
+    />
+  );
+}
+
+/** LIVE / Developing / Corrected chip (spec: --live). */
+export function LiveChip({ label, icon }: { label: string; icon?: string }) {
+  const p = usePalette();
+  return <Pill label={label} icon={icon} fg="#FFFFFF" bg={p.live} />;
+}
+
 export const styles = StyleSheet.create({
   card: { borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, padding: space.lg },
   sectionHeader: { flexDirection: 'row', alignItems: 'flex-end', marginBottom: space.md, gap: space.md },
   pill: { borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 4, alignSelf: 'flex-start' },
-  pillText: { fontSize: 12, fontWeight: '700' },
+  pillText: { fontSize: 12, lineHeight: 16, fontWeight: '600' },
   chip: {
     borderRadius: radius.pill,
     borderWidth: StyleSheet.hairlineWidth,
@@ -283,9 +302,10 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chipText: { fontSize: 14, fontWeight: '600' },
+  skeleton: { borderRadius: radius.md },
   button: {
     minHeight: 48,
-    borderRadius: radius.md,
+    borderRadius: radius.pill,
     paddingHorizontal: space.lg,
     paddingVertical: space.md,
     alignItems: 'center',

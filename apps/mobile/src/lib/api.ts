@@ -2,6 +2,8 @@ import { matchesRegion } from './catalog';
 import { createClient, type FeedQuery } from '@openlens/client';
 
 import feedFixture from '../../../../data/fixtures/feed.json';
+import japacBundlesFixture from '../../../../data/fixtures/japac-bundles.json';
+import japacFeedFixture from '../../../../data/fixtures/japac-feed.json';
 import bundleFixture from '../../../../data/fixtures/story-bundle.json';
 
 import { API_URL, USE_FIXTURES } from './env';
@@ -12,10 +14,18 @@ export const client = createClient({ baseUrl: API_URL });
 /** Resolve a relative media path (/assets/...) against the API origin. */
 export const assetUrl = (path: string) => client.assetUrl(path);
 
-const fixtureFeed = feedFixture as unknown as FeedItem[];
-const fixtureBundles: Record<string, StoryBundle> = {
-  [(bundleFixture as unknown as StoryBundle).story.id]: bundleFixture as unknown as StoryBundle,
-};
+// Fixture mode: the original sample story plus 9 fictional JAPAC stories, newest first.
+const fixtureFeed = [...(japacFeedFixture as unknown as FeedItem[]), ...(feedFixture as unknown as FeedItem[])]
+  .filter((item, i, all) => all.findIndex((x) => x.id === item.id) === i)
+  .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+const fixtureBundles: Record<string, StoryBundle> = Object.fromEntries(
+  [bundleFixture as unknown as StoryBundle, ...(japacBundlesFixture as unknown as StoryBundle[])].map((b) => [b.story.id, b]),
+);
+
+/** Offline bundle lookup (fixture mode only); used to enrich feed cards with video duration/language. */
+export function fixtureBundle(id: string): StoryBundle | undefined {
+  return USE_FIXTURES ? fixtureBundles[id] : undefined;
+}
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 

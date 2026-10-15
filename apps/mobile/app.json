@@ -7,8 +7,8 @@
     "icon": "./assets/images/icon.png",
     "scheme": "openlens",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#0B1426",
-    "primaryColor": "#38BDF8",
+    "backgroundColor": "#080808",
+    "primaryColor": "#2F5BFF",
     "description": "OpenLens reader: every story backed by an inspectable claim & evidence ledger.",
     "ios": {
       "bundleIdentifier": "app.openlens.reader",
@@ -22,7 +22,7 @@
     "android": {
       "package": "app.openlens.reader",
       "adaptiveIcon": {
-        "backgroundColor": "#0B1426",
+        "backgroundColor": "#080808",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -48,7 +48,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0B1426",
+          "backgroundColor": "#080808",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 96
         }
@@ -64,7 +64,7 @@
       [
         "expo-notifications",
         {
-          "color": "#38BDF8"
+          "color": "#2F5BFF"
         }
       ]
     ],

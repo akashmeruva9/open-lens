@@ -76,9 +76,9 @@ export default function CorrectionsScreen() {
           accessibilityRole="button"
           accessibilityLabel={`Corrected: ${row.item.title}. ${row.latest ? row.latest.reason : ''}`}
           accessibilityHint="Opens the corrected story"
-          style={({ pressed }) => [styles.row, { backgroundColor: p.surface, borderColor: p.border, borderLeftColor: p.danger, opacity: pressed ? 0.85 : 1 }]}>
+          style={({ pressed }) => [styles.row, { backgroundColor: p.surface, borderLeftColor: p.live, opacity: pressed ? 0.85 : 1 }]}>
           <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
-            <Pill label="Corrected" icon="↺" fg={p.danger} bg={p.dangerSoft} />
+            <Pill label="Corrected" icon="↺" fg="#FFFFFF" bg={p.live} />
             <T variant="caption" tone="faint">
               {row.latest ? formatDate(row.latest.at) : relativeTime(row.item.updatedAt)} · {regionName(row.item.region)}
             </T>
@@ -106,6 +106,6 @@ export default function CorrectionsScreen() {
 
 const styles = StyleSheet.create({
   list: { padding: space.lg, paddingBottom: space.xxl * 3 },
-  row: { borderRadius: radius.lg, borderWidth: StyleSheet.hairlineWidth, borderLeftWidth: 4, padding: space.lg },
+  row: { borderRadius: radius.md, borderLeftWidth: 3, padding: space.lg },
   empty: { borderWidth: 1, borderStyle: 'dashed', borderRadius: radius.lg, padding: space.xl },
 });

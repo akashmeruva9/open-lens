@@ -3,10 +3,26 @@
 Native Android + iOS **reader** app for OpenLens (Expo SDK 57, React Native, Expo Router, TypeScript).
 Reader only: the newsroom Studio stays web-only.
 
-Screens: Feed (vertical snap-scroll, language/region filters) → Story (lens pager) → Research dossier
-(claims → highlighted source passage, timeline, context, sources) → AI assessment (cited sections) →
-Watch & listen (expo-video, language switcher, transcript, AI disclosure) · Corrections inbox · Settings
-(language, region, topics, low-data, alerts, WhatsApp digest opt-in).
+Video-first newsroom design (spec: `docs/design-system.md`; tokens in `src/theme/index.ts`).
+
+Screens:
+- **Home**: wordmark, edition switcher (JAPAC markets with native-language subtitles, persisted as
+  `settings.region`), search, icon category row (Top · Politics · Economy · Climate & Disasters · Tech ·
+  Health · Society · Sport · Wire), spotlight hero (4:5, muted preview only when in view, not low-data,
+  not reduce-motion) + spotlight list, rails: Latest videos (9:16), Explainers (3:2), one rail per
+  market (or per topic in a single edition), Corrected & updated. Empty rails are hidden.
+- **Watch** (`/watch`): Shorts-style vertical pager over the tapped rail's videos: muted autoplay,
+  tap to unmute, captions (script lines timed to playback) and transcript sheet, AI-presenter
+  disclosure, "Open the research". Falls back to a poster when media can't load.
+- **Story**: media/poster on top with language pills, title, dek, evidence chips, corrections banner,
+  auto-published note, then How outlets framed it (lens pager), What we know, Open the research,
+  Sources, More from {market}; sticky Watch / Research / Share bar.
+- Research dossier · AI assessment · Watch & listen (language switcher, transcript, audio) ·
+  Corrections inbox · Search · Settings (language, edition, topics, low-data, alerts, theme,
+  WhatsApp digest opt-in).
+
+Fixture mode loads `data/fixtures/feed.json` + `story-bundle.json` + `japac-feed.json` +
+`japac-bundles.json` (9 fictional JAPAC stories).
 
 ## Run
 

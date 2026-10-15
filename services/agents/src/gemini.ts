@@ -8,14 +8,15 @@ let client: GoogleGenAI | undefined;
 
 export function getClient(): GoogleGenAI {
   if (client) return client;
-  if (process.env.GEMINI_API_KEY) {
+  if (process.env.GEMINI_API_KEY && process.env.GEMINI_BACKEND !== "vertex") {
     client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   } else if (process.env.GOOGLE_CLOUD_PROJECT) {
-    // Vertex AI with Application Default Credentials (Cloud Run)
+    // Vertex AI with Application Default Credentials (Cloud Run, or local after
+    // `gcloud auth application-default login`). The 3.8 models are served from "global".
     client = new GoogleGenAI({
       vertexai: true,
       project: process.env.GOOGLE_CLOUD_PROJECT,
-      location: process.env.GOOGLE_CLOUD_LOCATION ?? "us-central1",
+      location: process.env.GOOGLE_CLOUD_LOCATION ?? "global",
     });
   } else {
     throw new Error("Set GEMINI_API_KEY (local) or GOOGLE_CLOUD_PROJECT (Vertex AI).");
@@ -156,16 +157,28 @@ export async function generateStructured<S extends z.ZodType>(opts: {
 export async function embedTexts(texts: string[], model: string, dims = 256): Promise<number[][]> {
   if (!texts.length) return [];
   const ai = getClient();
+  const embed = (batch: string[]) =>
+    withResilience(model, (m) =>
+      // One Content per text: a bare string[] is treated as a single multi-part input (one embedding).
+      ai.models.embedContent({
+        model: m,
+        contents: batch.map((text) => ({ role: "user", parts: [{ text }] })),
+        config: { taskType: "CLUSTERING", outputDimensionality: dims },
+      }),
+    ).then((r) => r.embeddings ?? []);
+  let embeddings: Awaited<ReturnType<typeof embed>>;
+  if (ai.vertexai) {
+    // Vertex embeds one content per call: run them a few at a time.
+    embeddings = [];
+    for (let i = 0; i < texts.length; i += 8) {
+      const chunk = await Promise.all(texts.slice(i, i + 8).map((t) => embed([t])));
+      embeddings.push(...chunk.flat());
+    }
+  } else {
+    embeddings = await embed(texts);
+  }
   // Small vectors (rounded) keep cluster state compact enough for a Firestore document.
-  const res = await withResilience(model, (m) =>
-    // One Content per text: a bare string[] is treated as a single multi-part input (one embedding).
-    ai.models.embedContent({
-      model: m,
-      contents: texts.map((text) => ({ role: "user", parts: [{ text }] })),
-      config: { taskType: "CLUSTERING", outputDimensionality: dims },
-    }),
-  );
-  const out = (res.embeddings ?? []).map((e) => (e.values ?? []).map((v) => Math.round(v * 1e4) / 1e4));
+  const out = embeddings.map((e) => (e.values ?? []).map((v) => Math.round(v * 1e4) / 1e4));
   if (out.length !== texts.length) throw new Error(`embedding count mismatch: ${out.length}/${texts.length}`);
   return out;
 }

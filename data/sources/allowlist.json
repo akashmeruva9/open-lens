@@ -14,8 +14,9 @@
         "license": "Content licensed under Japan's Public Data License v1.0 (公共データ利用規約 第1.0版, PDL1.0; successor to Government Standard Terms v2.0): credit the source (出典を記載), mark edits, don't present edits as government",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
-      "termsUrl": "https://www.kantei.go.jp/jp/terms.html"
+      "verified": true,
+      "termsUrl": "https://www.kantei.go.jp/jp/terms.html",
+      "verifiedNote": "Approved by project owner 2026-10-15 after reviewing docs/sources-research.md"
     },
     {
       "domain": "jma.go.jp",
@@ -30,8 +31,9 @@
         "license": "As JMA extra: PDL1.0 with attribution.",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
-      "termsUrl": "https://www.jma.go.jp/jma/kishou/info/coment.html"
+      "verified": true,
+      "termsUrl": "https://www.jma.go.jp/jma/kishou/info/coment.html",
+      "verifiedNote": "Approved by project owner 2026-10-15 after reviewing docs/sources-research.md"
     },
     {
       "domain": "fsa.go.jp",
@@ -46,8 +48,9 @@
         "license": "Content licensed under Japan's Public Data License v1.0 (公共データ利用規約 第1.0版, PDL1.0; successor to Government Standard Terms v2.0): credit the source (出典を記載), mark edits, don't present edits as government",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
-      "termsUrl": "https://www.fsa.go.jp/rules/index.html"
+      "verified": true,
+      "termsUrl": "https://www.fsa.go.jp/rules/index.html",
+      "verifiedNote": "Approved by project owner 2026-10-15 after reviewing docs/sources-research.md"
     },
     {
       "domain": "mhlw.go.jp",
@@ -62,8 +65,9 @@
         "license": "Content licensed under Japan's Public Data License v1.0 (公共データ利用規約 第1.0版, PDL1.0; successor to Government Standard Terms v2.0): credit the source (出典を記載), mark edits, don't present edits as government",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
-      "termsUrl": "https://www.mhlw.go.jp/chosakuken/index.html"
+      "verified": true,
+      "termsUrl": "https://www.mhlw.go.jp/chosakuken/index.html",
+      "verifiedNote": "Approved by project owner 2026-10-15 after reviewing docs/sources-research.md"
     },
     {
       "domain": "bok.or.kr",
@@ -78,8 +82,9 @@
         "license": "Copyright policy: content is BoK copyright; when using it 'must state the source is the Bank of Korea' and clearly mark modifications (출처 명시, 수정·가공 시 명시). Commercial terms not stated.",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
-      "termsUrl": "https://www.bok.or.kr/portal/main/contents.do?menuNo=200228"
+      "verified": true,
+      "termsUrl": "https://www.bok.or.kr/portal/main/contents.do?menuNo=200228",
+      "verifiedNote": "Approved by project owner 2026-10-15 after reviewing docs/sources-research.md"
     },
     {
       "domain": "kma.go.kr",
@@ -94,8 +99,9 @@
         "license": "Copyright Act Art. 24-2: KMA-owned works free to use without permission, opened under KOGL Type 1 (공공누리 제1유형, attribution only); source must be cited; KOGL types 2–4 items carry extra limits. HTTP-onl",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
-      "termsUrl": "https://www.kma.go.kr/kma/guide/copyright.jsp"
+      "verified": true,
+      "termsUrl": "https://www.kma.go.kr/kma/guide/copyright.jsp",
+      "verifiedNote": "Approved by project owner 2026-10-15 after reviewing docs/sources-research.md"
     },
     {
       "domain": "ey.gov.tw",
@@ -110,8 +116,9 @@
         "license": "Open Government Data License v1 (政府資料開放授權條款-第1版): free, non-exclusive, sublicensable, irrevocable; reproduce/adapt/commercial use allowed; '使用時應註明出處' (must cite source); excludes items specially marke",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
-      "termsUrl": "https://www.ey.gov.tw/Page/2EADDBFEDDB6357E"
+      "verified": true,
+      "termsUrl": "https://www.ey.gov.tw/Page/2EADDBFEDDB6357E",
+      "verifiedNote": "Approved by project owner 2026-10-15 after reviewing docs/sources-research.md"
     },
     {
       "domain": "cwa.gov.tw",
@@ -126,8 +133,9 @@
         "license": "Site data offered free, non-exclusive, sublicensable, irrevocable for reproduce/adapt/public transmission incl. products & services; '使用時應註明出處' (cite source); specially-marked works excluded.",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
-      "termsUrl": "https://www.cwa.gov.tw/V8/C/information.html"
+      "verified": true,
+      "termsUrl": "https://www.cwa.gov.tw/V8/C/information.html",
+      "verifiedNote": "Approved by project owner 2026-10-15 after reviewing docs/sources-research.md"
     },
     {
       "domain": "pagasa.dost.gov.ph",
@@ -142,8 +150,9 @@
         "license": "No site terms found. IP Code (RA 8293) s.176: no copyright subsists in Philippine Government works, but prior approval of the agency is needed for exploitation 'for profit'.",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
-      "termsUrl": "https://lawphil.net/statutes/repacts/ra1997/ra_8293_1997.html"
+      "verified": true,
+      "termsUrl": "https://lawphil.net/statutes/repacts/ra1997/ra_8293_1997.html",
+      "verifiedNote": "Approved by project owner 2026-10-15 after reviewing docs/sources-research.md"
     },
     {
       "domain": "rba.gov.au",
@@ -158,8 +167,9 @@
         "license": "CC BY 4.0 for most material; attribute 'Source: Reserve Bank of Australia [year]'; no implied endorsement; logo, banknotes, multimedia, third-party excluded. Feed blocked to curl (Akamai 403) but veri",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
-      "termsUrl": "https://www.rba.gov.au/copyright/"
+      "verified": true,
+      "termsUrl": "https://www.rba.gov.au/copyright/",
+      "verifiedNote": "Approved by project owner 2026-10-15 after reviewing docs/sources-research.md"
     },
     {
       "domain": "pm.gov.au",
@@ -174,8 +184,9 @@
         "license": "CC BY 4.0 (except Coat of Arms, photos and graphics); preferred credit 'Licensed from the Commonwealth of Australia under a Creative Commons Attribution 4.0 International Licence'.",
         "usage": "excerpt + summarize with attribution and link"
       },
-      "verified": false,
-      "termsUrl": "https://www.pm.gov.au/copyright"
+      "verified": true,
+      "termsUrl": "https://www.pm.gov.au/copyright",
+      "verifiedNote": "Approved by project owner 2026-10-15 after reviewing docs/sources-research.md"
     },
     {
       "domain": "gdacs.org",

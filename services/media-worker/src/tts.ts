@@ -7,9 +7,9 @@ import { join, resolve } from "node:path";
 let ai: GoogleGenAI | undefined;
 function client() {
   if (ai) return ai;
-  ai = process.env.GEMINI_API_KEY
+  ai = process.env.GEMINI_API_KEY && process.env.GEMINI_BACKEND !== "vertex"
     ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
-    : new GoogleGenAI({ vertexai: true, project: process.env.GOOGLE_CLOUD_PROJECT, location: process.env.TTS_LOCATION ?? "us-central1" });
+    : new GoogleGenAI({ vertexai: true, project: process.env.GOOGLE_CLOUD_PROJECT, location: process.env.TTS_LOCATION ?? "global" });
   return ai;
 }
 

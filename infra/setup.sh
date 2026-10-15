@@ -21,8 +21,12 @@ gcloud storage buckets describe "gs://$BUCKET" >/dev/null 2>&1 || {
   gcloud storage buckets create "gs://$BUCKET" --location="$REGION" --uniform-bucket-level-access
   # Published media must be publicly readable (Instagram/Facebook fetch video by URL).
   gcloud storage buckets add-iam-policy-binding "gs://$BUCKET" --member=allUsers --role=roles/storage.objectViewer
-  gcloud storage buckets update "gs://$BUCKET" --cors-file=<(echo '[{"origin":["*"],"method":["GET","HEAD"],"responseHeader":["Content-Type","Range"],"maxAgeSeconds":3600}]')
 }
+# gcloud cannot read /dev/fd process substitution, so CORS goes through a temp file.
+CORS_FILE="$(mktemp)"
+echo '[{"origin":["*"],"method":["GET","HEAD"],"responseHeader":["Content-Type","Range"],"maxAgeSeconds":3600}]' > "$CORS_FILE"
+gcloud storage buckets update "gs://$BUCKET" --cors-file="$CORS_FILE" >/dev/null
+rm -f "$CORS_FILE"
 
 gcloud iam service-accounts describe "$SA" >/dev/null 2>&1 || \
   gcloud iam service-accounts create openlens-api --display-name="OpenLens API"

@@ -36,8 +36,8 @@ steps:
       - --max-instances=2
       - --concurrency=40
       - --allow-unauthenticated
-      - --set-env-vars=STORE=firestore,AUTH_MODE=firebase,ASSETS_BUCKET=$PROJECT_ID-openlens-media,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,AUTO_PUBLISH=off,AUTO_MEDIA_LANGS=en,INGEST_DAILY_RUNS=40
-      - --set-secrets=GEMINI_API_KEY=gemini-api-key:latest,INGEST_TOKEN=ingest-token:latest
+      - --set-env-vars=STORE=firestore,AUTH_MODE=firebase,GEMINI_BACKEND=vertex,GOOGLE_CLOUD_LOCATION=global,ASSETS_BUCKET=$PROJECT_ID-openlens-media,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,AUTO_PUBLISH=off,AUTO_MEDIA_LANGS=en,INGEST_DAILY_RUNS=40
+      - --set-secrets=INGEST_TOKEN=ingest-token:latest
   # --- web (needs the api URL at build time) ---
   - id: api-url
     name: gcr.io/google.com/cloudsdktool/cloud-sdk

@@ -29,7 +29,7 @@ export default function WatchScreen() {
 
   const items = mediaItems(b);
   const langs = [...new Set([...items.map((m) => m.output.lang), ...scriptLanguages(b)])];
-  if (!langs.length) return <CenteredState title="No briefings yet" body="Video and audio briefings appear here after editor approval." />;
+  if (!langs.length) return <CenteredState title="No briefings yet" body="Video and audio briefings appear here once they are rendered." />;
 
   const lang = picked && langs.includes(picked) ? picked : langs.includes(settings.lang) ? settings.lang : langs[0];
   const videos = items.filter((m) => m.kind === 'video' && m.output.lang === lang);
@@ -67,7 +67,7 @@ export default function WatchScreen() {
           </View>
         </View>
 
-        {disclose ? <Disclosure icon="✦" text="AI-generated presenter / narration. A fictional OpenLens presenter reads an editor-approved, cited script." /> : null}
+        {disclose ? <Disclosure icon="✦" text="AI-generated presenter / narration. A fictional OpenLens presenter reads an AI-written script in which every line cites the evidence." /> : null}
 
         {videos.length > 1 ? (
           <View style={styles.row}>

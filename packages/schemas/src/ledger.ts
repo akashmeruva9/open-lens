@@ -110,12 +110,39 @@ export const AssessmentSection = z.object({
 });
 export type AssessmentSection = z.infer<typeof AssessmentSection>;
 
+/** One side of the story: who holds the view, what they say, and the claims it rests on. */
+export const Perspective = z.object({
+  side: z.string().describe("Who holds this view, in plain words, e.g. 'Ukraine's government', 'Critics of the plan', 'Right-leaning outlets'"),
+  view: z.string().describe("What they say and why, 2-3 short plain sentences, attributed"),
+  claimIds: z.array(z.string()).min(1),
+});
+export type Perspective = z.infer<typeof Perspective>;
+
+/**
+ * The reader-facing explainer (OpenLens's core format): what happened, the background, what each
+ * side says, and OpenLens's own evidence-based take. Plain English throughout.
+ */
+export const Explainer = z.object({
+  whatHappened: z.object({ text: z.string(), claimIds: z.array(z.string()).min(1) }),
+  background: z.object({ text: z.string(), claimIds: z.array(z.string()) }).describe("Context a newcomer needs: history, why it matters"),
+  perspectives: z.array(Perspective).min(1).max(4),
+  take: z.object({
+    text: z.string().describe("OpenLens's own reasoned view of the situation, based on the evidence"),
+    confidence: z.enum(["high", "medium", "low"]),
+    claimIds: z.array(z.string()).min(1),
+  }),
+  whatsNext: z.string().describe("What to watch for next, one or two sentences"),
+});
+export type Explainer = z.infer<typeof Explainer>;
+
 export const Assessment = z.object({
   storyId: z.string(),
   ledgerVersion: z.number().int(),
   headline: z.string(),
   neutralSummary: z.string(),
   sections: z.array(AssessmentSection),
+  /** Present on stories written since the explainer format; older stories only have sections. */
+  explainer: Explainer.optional(),
 });
 export type Assessment = z.infer<typeof Assessment>;
 
@@ -142,8 +169,10 @@ export const Story = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   heroImage: z.string().optional(),
-  /** Published by policy (low-risk, no blocking QA flags) before an editor reviewed it. */
+  /** Published automatically by policy, without editor review. */
   autoPublished: z.boolean().optional(),
+  /** Published although an automated QA check raised a blocking issue (shown to readers). */
+  checksFlagged: z.boolean().optional(),
   /** Set when the story was created by the automatic wire (ingest cycle). */
   origin: z.enum(["manual", "wire"]).optional(),
 });

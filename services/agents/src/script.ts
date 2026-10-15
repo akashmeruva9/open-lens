@@ -4,15 +4,38 @@ import { z } from "zod";
 import { generateStructured, type RunMeta } from "./gemini.js";
 import { numbersIn } from "@openlens/config";
 
-const SCRIPT_SYSTEM = `You write 45-60 second vertical news video scripts for a transparent newsroom, to be SPOKEN aloud by a TV presenter, not read as an article.
-Structure (4-7 lines): what happened; why / stated reasons; what different sources emphasize; what is established; what remains unknown; call to action "Open the research in the OpenLens app".
+const SCRIPT_SYSTEM = `You write the script for an OpenLens explainer video (vertical, about 90-120 seconds), SPOKEN by a presenter the way good YouTube news explainers talk: friendly, clear, curious, never preachy.
+OpenLens's promise: news sites push one side; we show the whole picture, then give our own evidence-based view.
+Structure, one or two lines per part, 8-12 lines in total:
+1. HOOK: one line that makes people want to know more (a question or the surprising fact), no clickbait.
+2. WHAT HAPPENED: the news in plain words.
+3. BACKGROUND: why this is happening, how we got here, why it matters.
+4. One line per side (2-3 sides): what this side says and why, attributed ("Ukraine says...", "Critics say..."). Fair to each side.
+5. WHAT WE KNOW: what is actually confirmed by independent sources, and what is still unclear.
+6. OUR TAKE: OpenLens's view from the explainer's take, said honestly with its confidence ("Our read: ..."). Never tell people whom to vote for.
+7. CLOSE: what to watch next, then "Tap Open the research in the OpenLens app to see every source."
 Rules:
-- Use ONLY the approved claims. Every line lists the claimIds it states (CTA line may cite the main claim).
-- Attributed claims must keep attribution ("the Authority says", "critics argue").
-- Never state contested or unverified claims as fact. No sensational language.
-- Each line is 1-2 short spoken sentences, at most about 18 words each, about 110-140 words in total.
-- Write for the ear: plain conversational newsreader English ("The Metro Authority has approved...", not "resolved to"), contractions where natural, one idea per sentence, no semicolons, no parentheses, no abbreviations or jargon. Write numbers as digits with the unit spelled out ("20 percent", "January 1").
-- Never start two lines the same way. "label" is a 1-3 word on-screen header in CAPS.`;
+- Use ONLY the claims, explainer and context given. Every line lists the claimIds it states (background, take and close lines may cite the main claim).
+- Attributed claims keep their attribution. Never state contested or unverified claims as fact.
+- Each line is 1-3 short spoken sentences, at most about 18 words per sentence; about 220-280 words in total.
+- Write for the ear in simple English a 14-year-old follows: contractions, one idea per sentence, no semicolons, no parentheses, no jargon or acronyms without explanation. Numbers as digits with units spelled out ("20 percent").
+- Never start two lines the same way. "label" is a 1-3 word on-screen header in CAPS (e.g. WHAT HAPPENED, BACKGROUND, UKRAINE SAYS, CRITICS SAY, WHAT WE KNOW, OUR TAKE, WHAT'S NEXT).`;
+
+/** The explainer as prompt text (absent on stories written before the explainer format). */
+function explainerText(a: Assessment): string {
+  const e = a.explainer;
+  if (!e) return "";
+  return [
+    "EXPLAINER:",
+    `What happened: ${e.whatHappened.text} (${e.whatHappened.claimIds.join(",")})`,
+    `Background: ${e.background.text}`,
+    ...e.perspectives.map((p) => `Side - ${p.side}: ${p.view} (${p.claimIds.join(",")})`),
+    `OpenLens take (${e.take.confidence} confidence): ${e.take.text} (${e.take.claimIds.join(",")})`,
+    `What's next: ${e.whatsNext}`,
+    "",
+    "",
+  ].join("\n");
+}
 
 export async function buildScript(
   assessment: Assessment,
@@ -25,7 +48,7 @@ export async function buildScript(
     system: SCRIPT_SYSTEM,
     schema: ScriptPayload.omit({ backTranslation: true, presenter: true }),
     temperature: 0.4,
-    prompt: `HEADLINE: ${assessment.headline}\nSUMMARY: ${assessment.neutralSummary}\n\nASSESSMENT:\n${assessment.sections
+    prompt: `HEADLINE: ${assessment.headline}\nSUMMARY: ${assessment.neutralSummary}\n\n${explainerText(assessment)}ASSESSMENT:\n${assessment.sections
       .map((s) => `[${s.kind}] ${s.text} (${s.claimIds.join(",")})`)
       .join("\n")}\n\nAPPROVED CLAIMS:\n${usable.map((c) => `${c.id} [${c.state}] ${c.attributedTo ? `(${c.attributedTo}) ` : ""}${c.text}`).join("\n")}`,
   });

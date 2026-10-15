@@ -72,6 +72,12 @@ export function parseFeedDate(raw: string): Date | null {
   // Zone-less numeric dates first, as UTC, so results don't depend on the server's timezone.
   let m = /^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/.exec(s);
   if (m) return new Date(Date.UTC(+m[1]!, +m[2]! - 1, +m[3]!, +(m[4] ?? 0), +(m[5] ?? 0), +(m[6] ?? 0)));
+  // US-style "10/15/2026 10:58:00 PM" (e.g. Tuoi Tre), zone-less: also UTC.
+  m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([AP]M)$/i.exec(s);
+  if (m) {
+    const h = (+m[4]! % 12) + (m[7]!.toUpperCase() === "PM" ? 12 : 0);
+    return new Date(Date.UTC(+m[3]!, +m[1]! - 1, +m[2]!, h, +m[5]!, +(m[6] ?? 0)));
+  }
   const direct = new Date(s);
   if (!Number.isNaN(direct.getTime())) return direct;
   // "Fri Oct 02 09:18:39 KST 2026" (Java Date.toString)

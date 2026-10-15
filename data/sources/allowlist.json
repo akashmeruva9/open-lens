@@ -235,6 +235,1574 @@
       },
       "verified": false,
       "termsUrl": "https://www.adb.org/terms-use"
+    },
+    {
+      "domain": "bbc.co.uk",
+      "publisher": "BBC News",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "Media Bias/Fact Check: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/bbc/"
+      },
+      "rights": {
+        "license": "Third-party copyright (BBC News). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "theguardian.com",
+      "publisher": "The Guardian",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/the-guardian/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Guardian). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "foxnews.com",
+      "publisher": "Fox News",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right (checked 2026-10-15) · MBFC flags this source as Questionable https://mediabiasfactcheck.com/fox-news-bias/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Fox News). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "nypost.com",
+      "publisher": "New York Post",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/new-york-post/"
+      },
+      "rights": {
+        "license": "Third-party copyright (New York Post). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "aljazeera.com",
+      "publisher": "Al Jazeera English",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/al-jazeera/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Al Jazeera English). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "dw.com",
+      "publisher": "Deutsche Welle (DW)",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/dw-news/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Deutsche Welle (DW)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "france24.com",
+      "publisher": "France 24",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "Media Bias/Fact Check: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/france24/"
+      },
+      "rights": {
+        "license": "Third-party copyright (France 24). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "euronews.com",
+      "publisher": "Euronews",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/euronews/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Euronews). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "abcnews.com",
+      "publisher": "ABC News (US)",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/abc-news/"
+      },
+      "rights": {
+        "license": "Third-party copyright (ABC News (US)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "cbsnews.com",
+      "publisher": "CBS News",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/cbs-news/"
+      },
+      "rights": {
+        "license": "Third-party copyright (CBS News). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "nbcnews.com",
+      "publisher": "NBC News",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/nbc-news/"
+      },
+      "rights": {
+        "license": "Third-party copyright (NBC News). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "newsweek.com",
+      "publisher": "Newsweek",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/newsweek/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Newsweek). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "independent.co.uk",
+      "publisher": "The Independent",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/the-independent/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Independent). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "dailymail.com",
+      "publisher": "Daily Mail",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right (checked 2026-10-15) · MBFC flags this source as Questionable https://mediabiasfactcheck.com/daily-mail/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Daily Mail). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "breitbart.com",
+      "publisher": "Breitbart News",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right (checked 2026-10-15) · MBFC flags this source as Questionable https://mediabiasfactcheck.com/breitbart/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Breitbart News). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "dailywire.com",
+      "publisher": "The Daily Wire",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right (checked 2026-10-15) https://mediabiasfactcheck.com/the-daily-wire/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Daily Wire). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "thefederalist.com",
+      "publisher": "The Federalist",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right (checked 2026-10-15) · MBFC flags this source as Questionable https://mediabiasfactcheck.com/the-federalist/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Federalist). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "dailycaller.com",
+      "publisher": "The Daily Caller",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right (checked 2026-10-15) https://mediabiasfactcheck.com/daily-caller/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Daily Caller). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "gbnews.com",
+      "publisher": "GB News",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right (checked 2026-10-15) · MBFC flags this source as Questionable https://mediabiasfactcheck.com/gb-news-uk-bias/"
+      },
+      "rights": {
+        "license": "Third-party copyright (GB News). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "csmonitor.com",
+      "publisher": "The Christian Science Monitor",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "Media Bias/Fact Check: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/christian-science-monitor/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Christian Science Monitor). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "arabnews.com",
+      "publisher": "Arab News",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right-Center (checked 2026-10-15) · MBFC flags this source as Questionable https://mediabiasfactcheck.com/arab-news/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Arab News). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "jpost.com",
+      "publisher": "The Jerusalem Post",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/the-jerusalem-post/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Jerusalem Post). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "africanews.com",
+      "publisher": "Africanews",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/africa-news/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Africanews). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "allafrica.com",
+      "publisher": "AllAfrica",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "Media Bias/Fact Check: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/allafrica/"
+      },
+      "rights": {
+        "license": "Third-party copyright (AllAfrica). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "mercopress.com",
+      "publisher": "MercoPress",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) · MBFC flags this source as Questionable https://mediabiasfactcheck.com/mercopress/"
+      },
+      "rights": {
+        "license": "Third-party copyright (MercoPress). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "batimes.com.ar",
+      "publisher": "Buenos Aires Times",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/buenos-aires-times/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Buenos Aires Times). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "time.com",
+      "publisher": "TIME",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/time/"
+      },
+      "rights": {
+        "license": "Third-party copyright (TIME). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "vox.com",
+      "publisher": "Vox",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left (checked 2026-10-15) https://mediabiasfactcheck.com/vox/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Vox). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "huffpost.com",
+      "publisher": "HuffPost",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left (checked 2026-10-15) https://mediabiasfactcheck.com/huffington-post/"
+      },
+      "rights": {
+        "license": "Third-party copyright (HuffPost). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "latimes.com",
+      "publisher": "Los Angeles Times",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "Media Bias/Fact Check: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/la-times/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Los Angeles Times). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "pbs.org",
+      "publisher": "PBS NewsHour",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/pbs-news-hour/"
+      },
+      "rights": {
+        "license": "Third-party copyright (PBS NewsHour). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "lemonde.fr",
+      "publisher": "Le Monde (English)",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/le-monde/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Le Monde (English)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "irishtimes.com",
+      "publisher": "The Irish Times",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/the-irish-times/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Irish Times). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "upi.com",
+      "publisher": "UPI",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "Media Bias/Fact Check: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/united-press-international-upi/"
+      },
+      "rights": {
+        "license": "Third-party copyright (UPI). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "reason.com",
+      "publisher": "Reason",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "Media Bias/Fact Check: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/reason/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Reason). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "cnbc.com",
+      "publisher": "CNBC",
+      "market": "WORLD",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "Media Bias/Fact Check: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/cnbc/"
+      },
+      "rights": {
+        "license": "Third-party copyright (CNBC). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "thehindu.com",
+      "publisher": "The Hindu",
+      "market": "IN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/the-hindu/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Hindu). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "indianexpress.com",
+      "publisher": "The Indian Express",
+      "market": "IN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/the-indian-express/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Indian Express). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "indiatimes.com",
+      "publisher": "The Times of India",
+      "market": "IN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/times-of-india/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Times of India). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "scroll.in",
+      "publisher": "Scroll.in",
+      "market": "IN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/scroll-in/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Scroll.in). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "theprint.in",
+      "publisher": "ThePrint",
+      "market": "IN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/theprint-bias/"
+      },
+      "rights": {
+        "license": "Third-party copyright (ThePrint). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "bhaskar.com",
+      "publisher": "Dainik Bhaskar",
+      "market": "IN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (Dainik Bhaskar). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "sakshi.com",
+      "publisher": "Sakshi",
+      "market": "IN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (Sakshi). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "channelnewsasia.com",
+      "publisher": "CNA (Channel NewsAsia)",
+      "market": "SG",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "MBFC: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/channel-news-asia-cna"
+      },
+      "rights": {
+        "license": "Third-party copyright (CNA (Channel NewsAsia)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "mothership.sg",
+      "publisher": "Mothership",
+      "market": "SG",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/mothership-singapore/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Mothership). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "freemalaysiatoday.com",
+      "publisher": "Free Malaysia Today",
+      "market": "MY",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/free-malaysia-today-bias-and-credibility/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Free Malaysia Today). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "nst.com.my",
+      "publisher": "New Straits Times",
+      "market": "MY",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "MBFC: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/new-straits-times/"
+      },
+      "rights": {
+        "license": "Third-party copyright (New Straits Times). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "utusan.com.my",
+      "publisher": "Utusan Malaysia",
+      "market": "MY",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (Utusan Malaysia). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "antaranews.com",
+      "publisher": "Antara",
+      "market": "ID",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (Antara). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "detik.com",
+      "publisher": "detikNews",
+      "market": "ID",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "MBFC: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/detik-com/"
+      },
+      "rights": {
+        "license": "Third-party copyright (detikNews). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "cnnindonesia.com",
+      "publisher": "CNN Indonesia",
+      "market": "ID",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (CNN Indonesia). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "liputan6.com",
+      "publisher": "Liputan6",
+      "market": "ID",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/liputan6-bias-and-credibility/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Liputan6). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "republika.co.id",
+      "publisher": "Republika",
+      "market": "ID",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (Republika). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "bangkokpost.com",
+      "publisher": "Bangkok Post",
+      "market": "TH",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/the-bangkok-post"
+      },
+      "rights": {
+        "license": "Third-party copyright (Bangkok Post). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "prachataienglish.com",
+      "publisher": "Prachatai English",
+      "market": "TH",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (Prachatai English). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "thairath.co.th",
+      "publisher": "Thairath",
+      "market": "TH",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/thairath-bias-and-credibility/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Thairath). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "vnexpress.net",
+      "publisher": "VnExpress International",
+      "market": "VN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (VnExpress International). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "tuoitre.vn",
+      "publisher": "Tuoi Tre",
+      "market": "VN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (Tuoi Tre). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "thanhnien.vn",
+      "publisher": "Thanh Nien",
+      "market": "VN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (Thanh Nien). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "vietnamplus.vn",
+      "publisher": "VietnamPlus (VNA)",
+      "market": "VN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (VietnamPlus (VNA)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "vietnamnet.vn",
+      "publisher": "VietNamNet",
+      "market": "VN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (VietNamNet). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "nhandan.vn",
+      "publisher": "Nhan Dan",
+      "market": "VN",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (Nhan Dan). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "rappler.com",
+      "publisher": "Rappler",
+      "market": "PH",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/rappler"
+      },
+      "rights": {
+        "license": "Third-party copyright (Rappler). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "philstar.com",
+      "publisher": "The Philippine Star",
+      "market": "PH",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/philippine-star-bias/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Philippine Star). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "gmanetwork.com",
+      "publisher": "GMA News",
+      "market": "PH",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/gma-network-bias/"
+      },
+      "rights": {
+        "license": "Third-party copyright (GMA News). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "manilatimes.net",
+      "publisher": "The Manila Times",
+      "market": "PH",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/the-manila-times"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Manila Times). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "asahi.com",
+      "publisher": "The Asahi Shimbun",
+      "market": "JP",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/the-asahi-shimbun/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Asahi Shimbun). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "mainichi.jp",
+      "publisher": "The Mainichi Shimbun",
+      "market": "JP",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/mainichi-shimbun-bias-credibility/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Mainichi Shimbun). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "web.nhk",
+      "publisher": "NHK News",
+      "market": "JP",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (NHK / Nippon Hoso Kyokai) (checked 2026-10-15) https://mediabiasfactcheck.com/nhk-nippon-hoso-kyokai/"
+      },
+      "rights": {
+        "license": "Third-party copyright (NHK News). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "japantoday.com",
+      "publisher": "Japan Today",
+      "market": "JP",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/japan-today/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Japan Today). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "koreaherald.com",
+      "publisher": "The Korea Herald",
+      "market": "KR",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/korean-herald/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Korea Herald). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "koreatimes.co.kr",
+      "publisher": "The Korea Times",
+      "market": "KR",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/the-korea-times/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Korea Times). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "yna.co.kr",
+      "publisher": "Yonhap News Agency (English)",
+      "market": "KR",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/yonhap-news-agency-bias/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Yonhap News Agency (English)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "chosun.com",
+      "publisher": "The Chosun Ilbo",
+      "market": "KR",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (Mixed factual) (checked 2026-10-15) https://mediabiasfactcheck.com/the-chosun-ilbo/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Chosun Ilbo). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "khan.co.kr",
+      "publisher": "The Kyunghyang Shinmun",
+      "market": "KR",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Kyunghyang Shinmun). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "donga.com",
+      "publisher": "The Dong-A Ilbo",
+      "market": "KR",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Dong-A Ilbo). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "taipeitimes.com",
+      "publisher": "Taipei Times",
+      "market": "TW",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/taipei-times/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Taipei Times). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "focustaiwan.tw",
+      "publisher": "Focus Taiwan (CNA)",
+      "market": "TW",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/central-news-agency-cna-focus-taiwan/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Focus Taiwan (CNA)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "ltn.com.tw",
+      "publisher": "Liberty Times (自由時報)",
+      "market": "TW",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/liberty-times-taiwan-bias/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Liberty Times (自由時報)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "pts.org.tw",
+      "publisher": "PTS News (公視新聞網)",
+      "market": "TW",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "MBFC: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/pts-news-bias-and-credibility/"
+      },
+      "rights": {
+        "license": "Third-party copyright (PTS News (公視新聞網)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "ettoday.net",
+      "publisher": "ETtoday (東森新聞雲)",
+      "market": "TW",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (ETtoday (東森新聞雲)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "scmp.com",
+      "publisher": "South China Morning Post (Hong Kong)",
+      "market": "HK",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (Mixed factual) (checked 2026-10-15) https://mediabiasfactcheck.com/south-china-morning-post/"
+      },
+      "rights": {
+        "license": "Third-party copyright (South China Morning Post (Hong Kong)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "hongkongfp.com",
+      "publisher": "Hong Kong Free Press",
+      "market": "HK",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/hong-kong-free-press-bias/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Hong Kong Free Press). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "rthk.hk",
+      "publisher": "RTHK News (English)",
+      "market": "HK",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (RTHK News (English)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "stheadline.com",
+      "publisher": "Sing Tao Headline (星島頭條)",
+      "market": "HK",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (Sing Tao Headline (星島頭條)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "thewitnesshk.com",
+      "publisher": "The Witness (法庭線)",
+      "market": "HK",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "unrated",
+        "ratingBasis": "No published rating found (AllSides, Ad Fontes Media, MBFC checked 2026-10-15)"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Witness (法庭線)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "abc.net.au",
+      "publisher": "ABC News (Australia)",
+      "market": "AU",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/abc-news-australia/"
+      },
+      "rights": {
+        "license": "Third-party copyright (ABC News (Australia)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "sbs.com.au",
+      "publisher": "SBS News",
+      "market": "AU",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/special-broadcasting-service-sbs/"
+      },
+      "rights": {
+        "license": "Third-party copyright (SBS News). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "smh.com.au",
+      "publisher": "The Sydney Morning Herald",
+      "market": "AU",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/the-sydney-morning-herald/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Sydney Morning Herald). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "theage.com.au",
+      "publisher": "The Age",
+      "market": "AU",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/the-age/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Age). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "rnz.co.nz",
+      "publisher": "RNZ",
+      "market": "NZ",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "MBFC: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/rnz-radio-new-zealand-bias/"
+      },
+      "rights": {
+        "license": "Third-party copyright (RNZ). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "nzherald.co.nz",
+      "publisher": "The New Zealand Herald",
+      "market": "NZ",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "MBFC: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/new-zealand-herald/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The New Zealand Herald). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "stuff.co.nz",
+      "publisher": "Stuff",
+      "market": "NZ",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/stuff/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Stuff). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "1news.co.nz",
+      "publisher": "1News (TVNZ)",
+      "market": "NZ",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "left",
+        "ratingBasis": "MBFC: Left-Center (checked 2026-10-15) https://mediabiasfactcheck.com/1news-new-zealand/"
+      },
+      "rights": {
+        "license": "Third-party copyright (1News (TVNZ)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "newsroom.co.nz",
+      "publisher": "Newsroom",
+      "market": "NZ",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (checked 2026-10-15) https://mediabiasfactcheck.com/newsroom-new-zealand-bias/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Newsroom). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "thediplomat.com",
+      "publisher": "The Diplomat",
+      "market": "APAC",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "MBFC: Least Biased (checked 2026-10-15) https://mediabiasfactcheck.com/the-diplomat/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Diplomat). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "asiatimes.com",
+      "publisher": "Asia Times",
+      "market": "APAC",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "center",
+        "ratingBasis": "MBFC: Least Biased (Mostly Factual) (checked 2026-10-15) https://mediabiasfactcheck.com/asia-times/"
+      },
+      "rights": {
+        "license": "Third-party copyright (Asia Times). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
+    },
+    {
+      "domain": "lowyinstitute.org",
+      "publisher": "The Interpreter (Lowy Institute)",
+      "market": "APAC",
+      "sourceType": "reporting",
+      "lens": {
+        "rating": "right",
+        "ratingBasis": "MBFC: Right-Center (Lowy Institute) (checked 2026-10-15) https://mediabiasfactcheck.com/lowy-institute-bias/"
+      },
+      "rights": {
+        "license": "Third-party copyright (The Interpreter (Lowy Institute)). Read for fact extraction only; never republished.",
+        "usage": "link-and-short-quote"
+      },
+      "verified": true,
+      "verifiedNote": "Open-web aggregation approved by project owner 2026-10-15: attribution + link + short quotes; robots.txt respected."
     }
   ]
 }

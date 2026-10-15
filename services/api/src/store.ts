@@ -29,6 +29,9 @@ export interface Store {
   putState<T>(key: string, value: T): Promise<void>;
 }
 
+/** Characters per Firestore state part: worst case 3 bytes/char (CJK) stays under the 1 MiB doc limit. */
+const STATE_PART_CHARS = 300_000;
+
 export function emptyRecord(story: Story): StoryRecord {
   return {
     story, sources: [], claims: [], lanes: [], context: [], timeline: [], assessment: null,
@@ -156,12 +159,28 @@ export class FirestoreStore implements Store {
     await this.db.collection("devices").doc(d.id).set(d);
   }
   async getState<T>(key: string, fallback: T): Promise<T> {
-    const doc = await this.db.collection("state").doc(key).get();
-    return doc.exists ? (JSON.parse(doc.data()!.json as string) as T) : fallback;
+    const ref = this.db.collection("state").doc(key);
+    const doc = await ref.get();
+    if (!doc.exists) return fallback;
+    const d = doc.data()!;
+    if (typeof d.json === "string") return JSON.parse(d.json) as T;
+    const parts = await Promise.all(Array.from({ length: d.parts as number }, (_, i) => ref.collection("parts").doc(String(i)).get()));
+    return JSON.parse(parts.map((p) => p.data()!.json as string).join("")) as T;
   }
   async putState<T>(key: string, value: T) {
-    // Stored as a JSON string: avoids Firestore's nested-array limits (embedding centroids).
-    await this.db.collection("state").doc(key).set({ json: JSON.stringify(value), at: new Date().toISOString() });
+    // Stored as a JSON string (avoids Firestore's nested-array limits for embedding centroids),
+    // split across part documents: one Firestore document holds at most 1 MiB.
+    const ref = this.db.collection("state").doc(key);
+    const json = JSON.stringify(value);
+    const at = new Date().toISOString();
+    if (json.length <= STATE_PART_CHARS) {
+      await ref.set({ json, at });
+      return;
+    }
+    const n = Math.ceil(json.length / STATE_PART_CHARS);
+    for (let i = 0; i < n; i++) await ref.collection("parts").doc(String(i)).set({ json: json.slice(i * STATE_PART_CHARS, (i + 1) * STATE_PART_CHARS) });
+    // Readers follow `parts`, so publish the count only after every part is written.
+    await ref.set({ parts: n, at });
   }
   async removeSubscriber(phone: string) {
     const snap = await this.db.collection("subscribers").where("phone", "==", phone).get();

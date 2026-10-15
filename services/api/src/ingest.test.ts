@@ -54,7 +54,7 @@ test("creates a story once two independent permitted publishers cover an event; 
   ];
   const r = await ingestCycle(deps, cfg(), effects(leads, processed), new Date("2026-10-12T01:00:00Z"));
   assert.equal(r.newLeads, 4);
-  assert.equal(r.ingested, 3);
+  assert.equal(r.ingested, 2, "the single-outlet typhoon lead is not worth fetching yet");
   assert.equal(r.storiesCreated.length, 1);
   assert.deepEqual(processed, r.storiesCreated);
   const story = (await store.get(r.storiesCreated[0]!))!;
@@ -144,4 +144,60 @@ test("wire stories interrupted mid-pipeline (e.g. by a restart) are resumed", as
   const later: string[] = [];
   await ingestCycle(deps, cfg(), effects([], later), new Date("2026-10-12T02:00:00Z"));
   assert.deepEqual(later, [id]);
+});
+
+test("events skipped for the per-cycle cap become stories in a later cycle", async () => {
+  const { deps } = await setup();
+  const leads = [
+    lead("l1", "a.jp", "Metro fare to rise 20%"), lead("l2", "b.jp", "Metro fare hike approved"),
+    lead("l3", "a.jp", "Typhoon nears Okinawa"), lead("l4", "b.jp", "Typhoon warning for Okinawa"),
+  ];
+  const first = await ingestCycle(deps, cfg({ maxNewStoriesPerCycle: 1 }), effects(leads, []), new Date("2026-10-12T01:00:00Z"));
+  assert.equal(first.storiesCreated.length, 1);
+  assert.equal(first.skippedForBudget, 1);
+  const second = await ingestCycle(deps, cfg({ maxNewStoriesPerCycle: 1 }), effects([], []), new Date("2026-10-12T01:15:00Z"));
+  assert.equal(second.storiesCreated.length, 1);
+  assert.notEqual(second.storiesCreated[0], first.storiesCreated[0]);
+});
+
+test("pickSources: one article per outlet, primary first, lanes balanced, capped", async () => {
+  const { pickSources } = await import("./ingest.js");
+  const src = (id: string, publisher: string, rating: "left" | "center" | "right" | "unrated", t: string, sourceType: "primary" | "reporting" = "reporting") =>
+    ({ id, storyId: "s", url: `https://${id}.example/a`, publisher, title: id, publishedAt: `2026-10-15T${t}:00Z`, language: "en", sourceType, lens: { rating, ratingBasis: "x" }, rights: { license: "x", usage: "x" }, text: "t" }) as never;
+  const all = [
+    src("l1", "Left A", "left", "10:00"), src("l2", "Left B", "left", "11:00"), src("l3", "Left C", "left", "12:00"),
+    src("l1b", "Left A", "left", "13:00"), // same outlet, newer: replaces l1
+    src("r1", "Right A", "right", "09:00"), src("c1", "Center A", "center", "08:00"), src("g1", "Gov", "unrated", "07:00", "primary"),
+  ];
+  const picked = pickSources(all, 4).map((s: { id: string }) => s.id);
+  assert.deepEqual(picked, ["g1", "l1b", "c1", "r1"]);
+  // Already-present outlets are not added again; cap counts existing sources.
+  const more = pickSources(all, 5, [all[4]!, all[5]!]).map((s: { id: string }) => s.id);
+  assert.deepEqual(more, ["g1", "l1b", "l3"]);
+});
+
+test("publish-all policy: sensitive, manual and QA-flagged stories go live, flagged ones labelled", async () => {
+  const { store, deps } = await setup();
+  const first = await ingestCycle(deps, cfg(), effects([lead("l1", "a.jp", "Metro fare to rise 20%"), lead("l2", "b.jp", "Metro fare hike approved")], []), new Date("2026-10-12T01:00:00Z"));
+  const rec = (await store.get(first.storiesCreated[0]!))!;
+  const a = { headline: "h", neutralSummary: "s", sections: [] } as never;
+  await store.put({ ...rec, story: { ...rec.story, id: "sensitive", status: "in_review", riskTier: "sensitive" }, assessment: a });
+  await store.put({ ...rec, story: { ...rec.story, id: "manual", status: "in_review", origin: "manual" }, assessment: a });
+  await store.put({ ...rec, story: { ...rec.story, id: "flagged", status: "in_review" }, assessment: a,
+    qaFlags: [{ severity: "block", kind: "unsupported_established", detail: "x", target: "assessment:established" }] });
+  await ingestCycle(deps, cfg({ autoPublish: "all" }), effects([], []), new Date("2026-10-12T01:15:00Z"));
+  for (const id of ["sensitive", "manual", "flagged"]) assert.equal((await store.get(id))!.story.status, "published", id);
+  assert.equal((await store.get("flagged"))!.story.checksFlagged, true);
+  assert.equal((await store.get("sensitive"))!.story.checksFlagged, undefined);
+});
+
+test("stale wire stories (e.g. marked for a format upgrade) are re-run once quiet for 30 min", async () => {
+  const { store, deps } = await setup();
+  const first = await ingestCycle(deps, cfg(), effects([lead("l1", "a.jp", "Metro fare to rise 20%"), lead("l2", "b.jp", "Metro fare hike approved")], []), new Date("2026-10-12T01:00:00Z"));
+  const id = first.storiesCreated[0]!;
+  const rec = (await store.get(id))!;
+  await store.put({ ...rec, story: { ...rec.story, status: "stale", updatedAt: "2026-10-12T00:00:00Z" } });
+  const ran: string[] = [];
+  await ingestCycle(deps, cfg(), effects([], ran), new Date("2026-10-12T02:00:00Z"));
+  assert.deepEqual(ran, [id]);
 });

@@ -277,7 +277,7 @@ export function AutoPublishedChip() {
       fg={p.textFaint}
       bg="transparent"
       style={{ borderWidth: 1, borderColor: p.textFaint }}
-      accessibilityLabel="Auto-published, not yet reviewed by an editor"
+      accessibilityLabel="Auto-published, not reviewed by an editor"
     />
   );
 }

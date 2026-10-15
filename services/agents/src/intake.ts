@@ -4,6 +4,7 @@ import { SourceRecord, SourceType, Lens } from "@openlens/schemas";
 import { createHash } from "node:crypto";
 import { parseHTML } from "linkedom";
 import { z } from "zod";
+import { robotsAllows } from "./robots.js";
 
 /** A domain we are permitted to ingest, with its documented lens rating and usage rights. */
 export const AllowlistEntry = z.object({
@@ -64,6 +65,7 @@ export async function intakeUrl(
 ): Promise<IntakeResult> {
   const entry = allowlistEntryFor(url, allowlist);
   if (!entry) return { rejected: `${new URL(url).hostname} is not a verified entry in data/sources/allowlist.json (add it with rights + rating basis, then set verified: true)` };
+  if (!(await robotsAllows(url, fetchImpl))) return { rejected: `robots.txt of ${new URL(url).hostname} does not allow OpenLensBot to fetch this page` };
   const res = await fetchImpl(url, { headers: { "user-agent": "OpenLensBot/0.1 (+https://openlens.app/bot)", accept: "text/html" }, signal: AbortSignal.timeout(20000) });
   if (!res.ok) return { rejected: `HTTP ${res.status}` };
   const ctype = res.headers.get("content-type") ?? "";

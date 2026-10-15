@@ -29,7 +29,7 @@ export default function AssessmentScreen() {
   if (!s.data) return <CenteredState title="Assessment unavailable" body={errorMessage(s.error)} action={{ label: 'Try again', onPress: s.reload }} />;
   const b = s.data;
   const a = b.assessment;
-  if (!a) return <CenteredState title="Assessment pending" body="An editor hasn't approved the assessment for this story yet." />;
+  if (!a) return <CenteredState title="Assessment pending" body="The assessment for this story is still being written." />;
   const stale = a.ledgerVersion < b.story.version;
 
   return (
@@ -42,7 +42,7 @@ export default function AssessmentScreen() {
         <T variant="body" tone="muted">
           {a.neutralSummary}
         </T>
-        <Disclosure text={`AI-drafted, editor-approved. Every sentence cites claims from the evidence ledger (v${a.ledgerVersion}). Tap a citation to see the source passage. No numeric truth score.`} />
+        <Disclosure text={`AI-written, not editor-reviewed. Every sentence cites claims from the evidence ledger (v${a.ledgerVersion}). Tap a citation to see the source passage. No numeric truth score.`} />
         {stale ? (
           <Disclosure icon="!" text={`The ledger has changed since this assessment (now v${b.story.version}); it is being re-reviewed.`} />
         ) : null}

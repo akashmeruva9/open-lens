@@ -1,7 +1,7 @@
 import { MODELS } from "@openlens/config";
 import { LensLane, type Claim, type Lens, type SourceRecord } from "@openlens/schemas";
 import { z } from "zod";
-import { ENGLISH_DESK } from "./desk.js";
+import { ENGLISH_DESK, PLAIN_ENGLISH } from "./desk.js";
 import { generateStructured, type RunMeta } from "./gemini.js";
 
 const LaneDraft = LensLane.omit({ lens: true, sourceIds: true, modelGenerated: true });
@@ -11,7 +11,8 @@ const SYSTEM = `You are the Lens Analysis Agent. You describe how a group of out
 - emphasizes: 2-4 short phrases.
 - doesNotEstablish: 1-3 things this coverage asserts or implies without evidence in the claims given.
 - claimIds: the claims this coverage relies on (only ids provided).
-${ENGLISH_DESK}`;
+${ENGLISH_DESK}
+${PLAIN_ENGLISH}`;
 
 /** Lens ratings come from the documented outlet table on each source; the model only writes framing text. */
 export async function analyzeLenses(

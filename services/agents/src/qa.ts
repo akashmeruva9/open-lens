@@ -29,7 +29,7 @@ export async function qaCheck(
   claims: Claim[],
   sources: SourceRecord[],
   assessment: Assessment | null,
-  opts: { grounded: boolean },
+  opts: { grounded: boolean; context?: { title: string; summary: string }[] },
 ): Promise<{ flags: QaFlag[]; riskTier: "low" | "sensitive"; metas: RunMeta[] }> {
   const flags: QaFlag[] = [];
   const metas: RunMeta[] = [];
@@ -43,6 +43,19 @@ export async function qaCheck(
       const bad = unknownNumbers(s.text, ref);
       if (bad.length) flags.push({ severity: "block", kind: "number_mismatch", detail: `${s.kind}: ${bad.join(", ")}`, target: `assessment:${s.kind}` });
     }
+    // Explainer: numbers must come from the claims or the research context (background may use context).
+    const e = assessment.explainer;
+    if (e) {
+      const withContext = [...ref, ...(opts.context ?? []).flatMap((c) => [c.title, c.summary])];
+      const parts: [string, string][] = [
+        ["whatHappened", e.whatHappened.text], ["background", e.background.text], ["take", e.take.text], ["whatsNext", e.whatsNext],
+        ...e.perspectives.map((p, i): [string, string] => [`perspective${i + 1}`, p.view]),
+      ];
+      for (const [part, text] of parts) {
+        const bad = unknownNumbers(text, withContext);
+        if (bad.length) flags.push({ severity: "block", kind: "number_mismatch", detail: `explainer ${part}: ${bad.join(", ")}`, target: `explainer:${part}` });
+      }
+    }
   }
   if (!opts.grounded)
     flags.push({ severity: "warn", kind: "ungrounded_research", detail: "Research ran without Search grounding; context limited to the source pack." });
@@ -50,7 +63,7 @@ export async function qaCheck(
   const risk = await generateStructured({ model: MODELS.fast, system: RISK_SYSTEM, schema: Risk, prompt: `${storyTitle}\n\n${claims.map((c) => c.text).join("\n")}` });
   metas.push(risk.meta);
   if (risk.data.riskTier === "sensitive")
-    flags.push({ severity: "info", kind: "sensitive_story", detail: `Mandatory human approval: ${risk.data.reasons.join("; ")}` });
+    flags.push({ severity: "info", kind: "sensitive_story", detail: `Sensitive topic: ${risk.data.reasons.join("; ")}` });
 
   const support = await generateStructured({
     model: MODELS.reasoning,

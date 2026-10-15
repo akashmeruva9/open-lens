@@ -79,6 +79,7 @@ export const FeedItem = z.object({
   corrected: z.boolean(),
   lastCorrection: z.object({ at: z.string(), reason: z.string() }).optional(),
   autoPublished: z.boolean().optional(),
+  checksFlagged: z.boolean().optional(),
   /** Approved/published videos for cards (vertical first): lets clients show duration, language and thumbnail. */
   videos: z
     .array(

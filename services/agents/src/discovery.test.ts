@@ -57,6 +57,8 @@ test("lenient dates for JAPAC government feeds", async () => {
   const { parseFeedDate } = await import("./discovery.js");
   assert.equal(parseFeedDate("Fri, 09 Oct 2026 18:00:00 JST")!.toISOString(), "2026-10-09T09:00:00.000Z");
   assert.equal(parseFeedDate("Fri Oct 02 09:18:39 KST 2026")!.toISOString(), "2026-10-02T00:18:39.000Z");
+  assert.equal(parseFeedDate("10/15/2026 10:58:00 PM")!.toISOString(), "2026-10-15T22:58:00.000Z");
+  assert.equal(parseFeedDate("1/2/2026 12:05:00 AM")!.toISOString(), "2026-01-02T00:05:00.000Z");
   assert.equal(parseFeedDate("2026/10/09 18:00")!.toISOString(), "2026-10-09T18:00:00.000Z");
   assert.equal(parseFeedDate("Sat, 10 Oct 2026 10:31:00 GMT")!.toISOString(), "2026-10-10T10:31:00.000Z");
   assert.equal(parseFeedDate("nonsense"), null);

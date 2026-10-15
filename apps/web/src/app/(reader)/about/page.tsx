@@ -4,11 +4,28 @@ export const metadata: Metadata = { title: "About OpenLens" };
 
 const SECTIONS = [
   {
+    id: "mission",
+    title: "Why OpenLens",
+    body: [
+      "Most news reaches us through outlets and feeds that lean one way and push one side's story. OpenLens reads what outlets across the spectrum report, does its own research, and explains the whole picture in plain English.",
+      "Every story answers the same questions: what happened, what's the background, what does each side say, and what do we think the evidence shows. Our view is labelled as AI analysis, comes with a confidence level, and never tells you whom to support.",
+    ],
+  },
+  {
     id: "verify",
     title: "How we verify",
     body: [
       "Every story starts as a ledger of atomic claims. Each claim quotes the exact passage from its source, records who said it, and carries an evidence state: supported, contested, attributed or unverified.",
       "Every sentence we publish, in every language and format, cites ledger claims. Tap any claim chip to see the highlighted passage in the original source.",
+    ],
+  },
+  {
+    id: "sources",
+    title: "Where the news comes from",
+    body: [
+      "Every 15 minutes the OpenLens wire reads the public news feeds of about a hundred outlets worldwide and official government sources. An event becomes a story when at least two independent outlets report it, or an official source announces it.",
+      "We read each article only to extract facts. What you see is OpenLens's own writing, with every outlet credited and linked, and at most a short quote from it. We respect each site's robots.txt and skip paywalled articles.",
+      "Stories are researched, written and published automatically, without editor review, and are labelled that way. If an automated check finds a problem, the story says so.",
     ],
   },
   {
@@ -31,6 +48,7 @@ const SECTIONS = [
     title: "Lenses, not verdicts",
     body: [
       "Lens lanes summarise how outlets with different documented ratings frame a story. They are model-generated framing, not a truth meter. Left/centre/right is not a universal axis across Asia-Pacific; ratings must cite a per-market basis or stay unrated.",
+      "Each outlet's left / centre / right label comes from a published media-bias rater (Media Bias/Fact Check or AllSides), named with a link on every source. Outlets no rater covers stay unrated.",
     ],
   },
 ];

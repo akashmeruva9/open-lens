@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { StoryBundle } from "@openlens/schemas";
 import { LocalAssets } from "./assets.js";
-import { createApp, toFeedItem } from "./app.js";
+import { createApp, toFeedItem, toReaderBundle } from "./app.js";
 import { FileStore } from "./store.js";
 
 async function setup() {
@@ -97,4 +97,24 @@ test("legacy local HLS playlists next to a GCS mp4 are served as the GCS sibling
   const item = toFeedItem(rec);
   assert.ok(item.videos?.length);
   for (const v of item.videos!) assert.equal(v.hlsUrl, `${gcs}/hls-916/index.m3u8`);
+});
+
+test("readers never get the stored article text of quote-only outlets, only clipped cited passages", async () => {
+  const fixture = JSON.parse(await readFile(new URL("./testdata/story-bundle.json", import.meta.url), "utf8")) as StoryBundle;
+  const s0 = fixture.sources[0]!;
+  const article = `${"Lead paragraph. ".repeat(40)}The board approved a 20 percent fare rise. ${"Background. ".repeat(80)}`;
+  const longQuote = "x".repeat(500);
+  const rec = {
+    ...fixture, qaFlags: [], runs: [], grounded: false, claimsDropped: 0,
+    sources: fixture.sources.map((s) => (s.id === s0.id ? { ...s, text: article, rights: { license: "third-party", usage: "link-and-short-quote" } } : s)),
+    claims: fixture.claims.map((c, i) => ({ ...c, evidence: [{ sourceId: s0.id, passage: i === 0 ? "The board approved a 20 percent fare rise." : longQuote }] })),
+  };
+  const b = toReaderBundle(rec);
+  const src = b.sources.find((s) => s.id === s0.id)!;
+  assert.ok(!src.text.includes("Lead paragraph"), "article text must not be exposed");
+  assert.match(src.text, /20 percent fare rise/);
+  assert.ok(b.claims.every((c) => c.evidence.every((e) => e.passage.length <= 300)));
+  // Open-licence sources keep their full text.
+  const other = b.sources.find((s) => s.id !== s0.id);
+  if (other) assert.equal(other.text, fixture.sources.find((s) => s.id === other.id)!.text);
 });

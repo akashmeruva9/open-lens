@@ -26,4 +26,13 @@ export const LENS_TABLE_PATH = "data/seed/outlet-ratings.json";
 /** @deprecated use CHANNEL_PLAN — kept for older callers. */
 export const YT_TIERS = Object.entries(CHANNEL_PLAN).map(([lang, p]) => ({ tier: p.tier, lang, presenter: p.presenter }));
 
+/**
+ * rights.usage for third-party news outlets: OpenLens reads the article to extract facts, then
+ * publishes only its own writing plus attribution, a link and short quotes. Readers never get the
+ * stored article text for these sources.
+ */
+export const QUOTE_ONLY_USAGE = "link-and-short-quote";
+/** Longest verbatim quote shown to readers from a quote-only source. */
+export const MAX_QUOTE_CHARS = 300;
+
 export const PUBLIC_WEB_URL = process.env.PUBLIC_WEB_URL ?? "https://openlens.app";

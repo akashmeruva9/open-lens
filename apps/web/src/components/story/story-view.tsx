@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { Rail } from "@/components/reader/rail";
 import { StoryCard } from "@/components/reader/story-card";
 import { buttonClass } from "@/components/ui/button";
-import { AutoPublishedChip, EvidenceChip, LiveChip } from "@/components/ui/chips";
+import { AutoPublishedChip, ChecksFlaggedChip, EvidenceChip, LiveChip } from "@/components/ui/chips";
 import { IconBook, IconChevronLeft, IconPin, IconPlayFilled, IconSources } from "@/components/ui/icons";
 import { RelTime } from "@/components/ui/time";
 import { primaryCategory, type CardItem } from "@/lib/cards";
@@ -13,6 +13,7 @@ import { useLiveBundle } from "@/lib/data/live";
 import { API_URL } from "@/lib/env";
 import { langNative, regionName } from "@/lib/format";
 import { EVIDENCE } from "@/lib/meta";
+import { ExplainerView } from "./explainer-view";
 import { AssessmentView } from "./assessment-view";
 import { CorrectionBanner } from "./correction-banner";
 import { Dossier } from "./dossier";
@@ -100,7 +101,8 @@ export function StoryView({ initial, more, edition = "APAC" }: { initial: StoryB
               <CorrectionBanner corrections={bundle.corrections} />
               {story.autoPublished ? (
                 <p role="note" className="mb-5 rounded-lg border border-ink-3 px-3 py-2 text-sm text-ink-2">
-                  Auto-published by the OpenLens wire under the low-risk policy. Every fact links to its source below, but an editor has not reviewed this story yet.
+                  Auto-published by the OpenLens wire. Every fact links to its source below; no editor has reviewed this story.
+                  {story.checksFlagged ? " Automated checks flagged an issue with this story: some points may not be as well supported as they read." : ""}
                 </p>
               ) : null}
 
@@ -116,6 +118,7 @@ export function StoryView({ initial, more, edition = "APAC" }: { initial: StoryB
               <div className="mt-5 flex flex-wrap gap-1.5" aria-label="Evidence summary">
                 {story.status === "corrected" ? <LiveChip>Corrected</LiveChip> : null}
                 {story.autoPublished ? <AutoPublishedChip /> : null}
+                {story.checksFlagged ? <ChecksFlaggedChip /> : null}
                 {stateCounts.map(([s, n]) => (
                   <EvidenceChip key={s} state={s} count={n} />
                 ))}
@@ -152,6 +155,7 @@ export function StoryView({ initial, more, edition = "APAC" }: { initial: StoryB
 
         <div className="page">
           <div className="max-w-[880px]">
+            {assessment?.explainer ? <ExplainerView explainer={assessment.explainer} /> : null}
             <LensLanes lanes={bundle.lanes} />
             {assessment ? <AssessmentView assessment={assessment} stale={assessment.ledgerVersion < story.version} /> : null}
             <Dossier

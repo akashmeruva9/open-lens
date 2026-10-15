@@ -27,7 +27,8 @@ export interface IngestConfig {
   maxConcurrentRuns: number;
   /** Independent publishers needed before a story is created (a primary document counts on its own). */
   minPublishers: number;
-  autoPublish: "off" | "low_risk";
+  /** off: editors approve; low_risk: low-risk clean stories go live; all: every finished story goes live. */
+  autoPublish: "off" | "low_risk" | "all";
   autoMediaLangs: string[];
 }
 
@@ -62,7 +63,7 @@ export async function loadIngestConfig(root: string): Promise<IngestConfig> {
   return {
     feeds,
     allowlist,
-    markets: (env.INGEST_MARKETS ?? MARKET_CODES.filter((m) => m !== "APAC").join(",")).split(",").map((s) => s.trim()).filter(Boolean),
+    markets: (env.INGEST_MARKETS ?? MARKET_CODES.join(",")).split(",").map((s) => s.trim()).filter(Boolean),
     gdelt: env.INGEST_GDELT !== "0",
     lookbackMin: Number(env.INGEST_LOOKBACK_MIN ?? 30),
     maxAgeHours: Number(env.INGEST_MAX_AGE_HOURS ?? 48),
@@ -72,7 +73,7 @@ export async function loadIngestConfig(root: string): Promise<IngestConfig> {
     dailyRunBudget: Number(env.INGEST_DAILY_RUNS ?? 40),
     maxConcurrentRuns: Number(env.INGEST_CONCURRENCY ?? 2),
     minPublishers: Number(env.INGEST_MIN_PUBLISHERS ?? 2),
-    autoPublish: env.AUTO_PUBLISH === "low_risk" ? "low_risk" : "off",
+    autoPublish: env.AUTO_PUBLISH === "all" ? "all" : env.AUTO_PUBLISH === "low_risk" ? "low_risk" : "off",
     autoMediaLangs: (env.AUTO_MEDIA_LANGS ?? "en").split(",").map((s) => s.trim()).filter(Boolean),
   };
 }
@@ -130,6 +131,14 @@ export function defaultEffects(deps: Deps, cfg: IngestConfig): IngestEffects {
 
 /** Pipeline + media for configured languages + auto-publish policy. */
 export async function processStory(deps: Deps, cfg: IngestConfig, storyId: string) {
+  // Stories created before the per-story cap may hold dozens of sources: trim before the run
+  // (the pipeline re-extracts claims from scratch, so source ids can be renumbered).
+  const before = await deps.store.get(storyId);
+  if (before?.story.origin === "wire" && before.sources.length > MAX_SOURCES_PER_STORY) {
+    before.sources = pickSources(before.sources).map((s, i) => ({ ...s, id: `s${i + 1}` }));
+    before.claims = [];
+    await deps.store.put(before);
+  }
   await runStory(deps, storyId, [...STAGES]);
   const rec = await deps.store.get(storyId);
   if (!rec) return;
@@ -139,23 +148,46 @@ export async function processStory(deps: Deps, cfg: IngestConfig, storyId: strin
 }
 
 /**
- * Low-risk policy: a finished wire story with an assessment and no blocking QA flag goes live in
- * OpenLens's own apps, labelled "auto-published · not editor-reviewed". Channel posts still need an editor.
+ * Auto-publish policy for OpenLens's own apps (channel posts are never auto-published):
+ * - low_risk: a finished story with an assessment, low risk and no blocking QA flag goes live;
+ * - all: every finished story goes live; a blocking QA flag is shown to readers (checksFlagged).
+ * Both are labelled "auto-published · not editor-reviewed".
  */
 export async function autoPublishIfEligible(deps: Deps, cfg: IngestConfig, storyId: string): Promise<boolean> {
-  if (cfg.autoPublish !== "low_risk") return false;
+  if (cfg.autoPublish === "off") return false;
   const fresh = await deps.store.get(storyId);
   if (!fresh || fresh.story.status !== "in_review") return false;
   const blocking = fresh.qaFlags.some((f) => f.severity === "block");
-  if (fresh.story.riskTier !== "low" || blocking || !fresh.assessment) return false;
+  if (cfg.autoPublish === "low_risk" && (fresh.story.riskTier !== "low" || blocking || !fresh.assessment)) return false;
   fresh.story.status = fresh.corrections.length ? "corrected" : "published";
   fresh.story.autoPublished = true;
+  fresh.story.checksFlagged = blocking || undefined;
   // App-only media (video/audio/script) become visible; channel posts still need an editor.
   fresh.outputs = fresh.outputs.map((o) => (o.channel === "app" && o.status === "draft" ? { ...o, status: "approved", approvedBy: "policy:auto-publish" } : o));
   fresh.story.updatedAt = new Date().toISOString();
   await deps.store.put(fresh);
   emit(storyId, { type: "stage", stage: "approve", status: "done", detail: "auto-published (low risk)" });
   return true;
+}
+
+/** Most sources one story reads: more mostly repeats the same facts and slows every stage. */
+export const MAX_SOURCES_PER_STORY = 8;
+
+/**
+ * Pick sources for a story: one article per outlet, primary documents first, then round-robin
+ * across lean lanes (left / center / right / unrated) so no side dominates, newest first in each.
+ */
+export function pickSources(candidates: SourceRecord[], max = MAX_SOURCES_PER_STORY, have: SourceRecord[] = []): SourceRecord[] {
+  const seen = new Set(have.map((s) => s.publisher));
+  const byPublisher = new Map<string, SourceRecord>();
+  for (const s of [...candidates].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))) {
+    if (!seen.has(s.publisher) && !byPublisher.has(s.publisher)) byPublisher.set(s.publisher, s);
+  }
+  const pool = [...byPublisher.values()];
+  const out: SourceRecord[] = pool.filter((s) => s.sourceType === "primary");
+  const lanes = (["left", "center", "right", "unrated"] as const).map((l) => pool.filter((s) => s.sourceType !== "primary" && s.lens.rating === l));
+  for (let i = 0; lanes.some((l) => i < l.length); i++) for (const l of lanes) if (l[i]) out.push(l[i]!);
+  return out.slice(0, Math.max(0, max - have.length));
 }
 
 const slug = (s: string) =>
@@ -178,15 +210,22 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     // 1) Discover. Feeds: only enabled feeds of verified allowlisted domains.
     const found: Lead[] = [];
     const feeds = cfg.feeds.filter((f) => f.enabled && markets.has(f.market) && cfg.allowlist.some((a) => a.verified && (f.domain === a.domain || f.domain.endsWith(`.${a.domain}`))));
-    for (const f of feeds) {
-      try {
-        found.push(...(await fx.discoverFeed(f)));
-      } catch (e) {
-        report.errors.push(String(e).slice(0, 200));
-      }
-    }
+    // A few feeds at a time: ~100 outlet feeds sequentially would take minutes.
+    const queue = [...feeds];
+    await Promise.all(
+      Array.from({ length: Math.min(8, queue.length) }, async () => {
+        for (let f = queue.shift(); f; f = queue.shift()) {
+          try {
+            found.push(...(await fx.discoverFeed(f)));
+          } catch (e) {
+            report.errors.push(String(e).slice(0, 200));
+          }
+        }
+      }),
+    );
     if (cfg.gdelt) {
-      for (const m of markets) {
+      // GDELT is per country; the region-wide and world desks have none.
+      for (const m of [...markets].filter((x) => x !== "APAC" && x !== "WORLD")) {
         try {
           found.push(...(await fx.discoverGdelt(m, cfg.lookbackMin)));
         } catch (e) {
@@ -226,9 +265,27 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     const { candidates, touched } = assignLeads(fresh, vectors, prior, { now });
     report.candidatesTouched = touched.size;
 
-    // 4) Ingest full text for permitted leads in touched candidates (widest-covered events first, capped).
+    // Only events that could become stories are worth fetching: an existing story, coverage by
+    // enough independent outlets, or a primary document that may start a story on its own
+    // (same rule as promotion below; alert feeds never seed).
+    const seedFeeds = new Set(cfg.feeds.filter((f) => f.seedsStory).map((f) => f.id));
+    const canSeed = (l: StoredLead | undefined) =>
+      Boolean(l) && allowlistEntryFor(l!.url, cfg.allowlist)?.sourceType === "primary" && (!l!.feedId || seedFeeds.has(l!.feedId));
+    const promising = (c: Candidate) =>
+      Boolean(c.storyId) || new Set(c.domains).size >= cfg.minPublishers || c.leadIds.some((id) => canSeed(leads[id]));
+    // Candidates still owed work from earlier cycles (fetch cap or story budget hit) stay in play,
+    // otherwise an event that arrived in a busy cycle would never become a story.
+    const owed = (c: Candidate) =>
+      promising(c) &&
+      c.leadIds.some((id) => {
+        const l = leads[id];
+        return l && !c.processedLeadIds.includes(id) && (l.source || (!l.rejected && allowlistEntryFor(l.url, cfg.allowlist)));
+      });
+    const active = candidates.filter((c) => (touched.has(c.id) && promising(c)) || owed(c));
+
+    // 4) Ingest full text for permitted leads in active candidates (widest-covered events first, capped).
     let fetches = 0;
-    for (const c of candidates.filter((x) => touched.has(x.id)).sort((a, b) => b.domains.length - a.domains.length)) {
+    for (const c of [...active].sort((a, b) => b.domains.length - a.domains.length)) {
       for (const id of c.leadIds) {
         const l = leads[id];
         if (!l || l.source || l.rejected || !allowlistEntryFor(l.url, cfg.allowlist)) continue;
@@ -248,7 +305,8 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     const budget = await store.getState<{ day: string; runs: number }>("budget", { day: "", runs: 0 });
     const today = now.toISOString().slice(0, 10);
     if (budget.day !== today) Object.assign(budget, { day: today, runs: 0 });
-    const ranked = candidates.filter((c) => touched.has(c.id)).sort((a, b) => b.domains.length - a.domains.length);
+    // Widest-covered first; among equals, the newest event first.
+    const ranked = [...active].sort((a, b) => b.domains.length - a.domains.length || b.updatedAt.localeCompare(a.updatedAt));
     const toRun: string[] = [];
     let created = 0, updated = 0;
     for (const c of ranked) {
@@ -275,7 +333,7 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
           id, title: c.title, summary: "", region: c.market, topics: [], languages: languagesFor([c.market]).filter((l) => isLang(l) && CHANNEL_PLAN[l]),
           riskTier: "low", status: "draft", version: 1, createdAt: t, updatedAt: t, origin: "wire",
         });
-        rec.sources = allSources.map((s, i) => ({ ...s, id: `s${i + 1}`, storyId: id }));
+        rec.sources = pickSources(allSources).map((s, i) => ({ ...s, id: `s${i + 1}`, storyId: id }));
         await store.put(rec);
         c.storyId = id;
         report.storiesCreated.push(id);
@@ -284,8 +342,13 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
         const rec = await store.get(c.storyId!);
         if (!rec) continue;
         const known = new Set(rec.sources.map((s) => s.url));
-        const add = pending.map((l) => l.source!).filter((s) => !known.has(s.url));
-        if (!add.length) continue;
+        const add = pickSources(pending.map((l) => l.source!).filter((s) => !known.has(s.url)), MAX_SOURCES_PER_STORY, rec.sources);
+        if (!add.length) {
+          // Nothing new worth adding (same outlets, or the story already has enough sources).
+          c.processedLeadIds.push(...pending.map((l) => l.id));
+          for (const l of pending) l.source = { ...l.source!, text: "" };
+          continue;
+        }
         rec.sources = [...rec.sources, ...add.map((s, i) => ({ ...s, id: `s${rec.sources.length + i + 1}`, storyId: rec.story.id }))];
         rec.story.version += 1;
         if (rec.story.status === "published" || rec.story.status === "corrected") rec.story.status = "stale";
@@ -295,6 +358,8 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
         updated++;
       }
       c.processedLeadIds.push(...pending.map((l) => l.id));
+      // The story now holds these sources; keep only metadata in wire state (Firestore doc size).
+      for (const l of pending) l.source = { ...l.source!, text: "" };
       budget.runs++;
       toRun.push(c.storyId!);
     }
@@ -304,12 +369,13 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     // Catch-up: resume wire stories whose pipeline was interrupted (restart), and apply the
     // auto-publish policy to ones that finished while it was off.
     for (const st of await store.listStories()) {
-      if (toRun.includes(st.id) || inFlight.has(st.id) || st.origin !== "wire") continue;
-      const stuck = (st.status === "draft" || st.status === "researching") && now.getTime() - Date.parse(st.updatedAt) > STUCK_MS;
+      if (toRun.includes(st.id) || inFlight.has(st.id)) continue;
+      // Stuck mid-run (restart), or stale (sources changed / format upgraded) and not yet re-run.
+      const stuck = st.origin === "wire" && (st.status === "draft" || st.status === "researching" || st.status === "stale") && now.getTime() - Date.parse(st.updatedAt) > STUCK_MS;
       if (stuck && budget.runs < cfg.dailyRunBudget) {
         budget.runs++;
         toRun.push(st.id);
-      } else if (st.status === "in_review") {
+      } else if (st.status === "in_review" && (cfg.autoPublish === "all" || st.origin === "wire")) {
         await autoPublishIfEligible(deps, cfg, st.id);
       }
     }

@@ -12,6 +12,15 @@ const SECTIONS = [
     ],
   },
   {
+    id: "sources",
+    title: "Where the news comes from",
+    body: [
+      "Every 15 minutes the OpenLens wire reads the public news feeds of about a hundred outlets worldwide and official government sources. An event becomes a story when at least two independent outlets report it, or an official source announces it.",
+      "We read each article only to extract facts. What you see is OpenLens's own writing, with every outlet credited and linked, and at most a short quote from it. We respect each site's robots.txt and skip paywalled articles.",
+      "Stories are researched, written and published automatically, without editor review, and are labelled that way. If an automated check finds a problem, the story says so.",
+    ],
+  },
+  {
     id: "ai-disclosure",
     title: "AI disclosure policy",
     body: [
@@ -31,6 +40,7 @@ const SECTIONS = [
     title: "Lenses, not verdicts",
     body: [
       "Lens lanes summarise how outlets with different documented ratings frame a story. They are model-generated framing, not a truth meter. Left/centre/right is not a universal axis across Asia-Pacific; ratings must cite a per-market basis or stay unrated.",
+      "Each outlet's left / centre / right label comes from a published media-bias rater (Media Bias/Fact Check or AllSides), named with a link on every source. Outlets no rater covers stay unrated.",
     ],
   },
 ];

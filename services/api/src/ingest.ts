@@ -27,7 +27,8 @@ export interface IngestConfig {
   maxConcurrentRuns: number;
   /** Independent publishers needed before a story is created (a primary document counts on its own). */
   minPublishers: number;
-  autoPublish: "off" | "low_risk";
+  /** off: editors approve; low_risk: low-risk clean stories go live; all: every finished story goes live. */
+  autoPublish: "off" | "low_risk" | "all";
   autoMediaLangs: string[];
 }
 
@@ -72,7 +73,7 @@ export async function loadIngestConfig(root: string): Promise<IngestConfig> {
     dailyRunBudget: Number(env.INGEST_DAILY_RUNS ?? 40),
     maxConcurrentRuns: Number(env.INGEST_CONCURRENCY ?? 2),
     minPublishers: Number(env.INGEST_MIN_PUBLISHERS ?? 2),
-    autoPublish: env.AUTO_PUBLISH === "low_risk" ? "low_risk" : "off",
+    autoPublish: env.AUTO_PUBLISH === "all" ? "all" : env.AUTO_PUBLISH === "low_risk" ? "low_risk" : "off",
     autoMediaLangs: (env.AUTO_MEDIA_LANGS ?? "en").split(",").map((s) => s.trim()).filter(Boolean),
   };
 }
@@ -147,17 +148,20 @@ export async function processStory(deps: Deps, cfg: IngestConfig, storyId: strin
 }
 
 /**
- * Low-risk policy: a finished wire story with an assessment and no blocking QA flag goes live in
- * OpenLens's own apps, labelled "auto-published · not editor-reviewed". Channel posts still need an editor.
+ * Auto-publish policy for OpenLens's own apps (channel posts are never auto-published):
+ * - low_risk: a finished story with an assessment, low risk and no blocking QA flag goes live;
+ * - all: every finished story goes live; a blocking QA flag is shown to readers (checksFlagged).
+ * Both are labelled "auto-published · not editor-reviewed".
  */
 export async function autoPublishIfEligible(deps: Deps, cfg: IngestConfig, storyId: string): Promise<boolean> {
-  if (cfg.autoPublish !== "low_risk") return false;
+  if (cfg.autoPublish === "off") return false;
   const fresh = await deps.store.get(storyId);
   if (!fresh || fresh.story.status !== "in_review") return false;
   const blocking = fresh.qaFlags.some((f) => f.severity === "block");
-  if (fresh.story.riskTier !== "low" || blocking || !fresh.assessment) return false;
+  if (cfg.autoPublish === "low_risk" && (fresh.story.riskTier !== "low" || blocking || !fresh.assessment)) return false;
   fresh.story.status = fresh.corrections.length ? "corrected" : "published";
   fresh.story.autoPublished = true;
+  fresh.story.checksFlagged = blocking || undefined;
   // App-only media (video/audio/script) become visible; channel posts still need an editor.
   fresh.outputs = fresh.outputs.map((o) => (o.channel === "app" && o.status === "draft" ? { ...o, status: "approved", approvedBy: "policy:auto-publish" } : o));
   fresh.story.updatedAt = new Date().toISOString();
@@ -365,12 +369,12 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     // Catch-up: resume wire stories whose pipeline was interrupted (restart), and apply the
     // auto-publish policy to ones that finished while it was off.
     for (const st of await store.listStories()) {
-      if (toRun.includes(st.id) || inFlight.has(st.id) || st.origin !== "wire") continue;
-      const stuck = (st.status === "draft" || st.status === "researching") && now.getTime() - Date.parse(st.updatedAt) > STUCK_MS;
+      if (toRun.includes(st.id) || inFlight.has(st.id)) continue;
+      const stuck = st.origin === "wire" && (st.status === "draft" || st.status === "researching") && now.getTime() - Date.parse(st.updatedAt) > STUCK_MS;
       if (stuck && budget.runs < cfg.dailyRunBudget) {
         budget.runs++;
         toRun.push(st.id);
-      } else if (st.status === "in_review") {
+      } else if (st.status === "in_review" && (cfg.autoPublish === "all" || st.origin === "wire")) {
         await autoPublishIfEligible(deps, cfg, st.id);
       }
     }

@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { buttonClass } from "@/components/ui/button";
-import { AutoPublishedChip, EvidenceChip, LiveChip } from "@/components/ui/chips";
+import { AutoPublishedChip, ChecksFlaggedChip, EvidenceChip, LiveChip } from "@/components/ui/chips";
 import { IconBook, IconPlayFilled } from "@/components/ui/icons";
 import { RelTime } from "@/components/ui/time";
 import { pickVideo, type CardItem, type CardVideo } from "@/lib/cards";
@@ -83,6 +83,7 @@ export function SpotlightHero({ card, edition }: { card: CardItem; edition: stri
         <div className="mt-4 flex flex-wrap items-center gap-1.5">
           {card.corrected ? <LiveChip>Corrected</LiveChip> : null}
           {card.autoPublished ? <AutoPublishedChip /> : null}
+          {card.checksFlagged ? <ChecksFlaggedChip /> : null}
           {card.evidence.supported ? <EvidenceChip state="supported" count={card.evidence.supported} /> : null}
           {card.evidence.contested ? <EvidenceChip state="contested" count={card.evidence.contested} /> : null}
           {card.evidence.unverified ? <EvidenceChip state="unverified" count={card.evidence.unverified} /> : null}

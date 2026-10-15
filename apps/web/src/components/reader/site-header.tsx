@@ -24,9 +24,6 @@ export async function SiteHeader() {
             <IconSearch size={20} />
           </Link>
           <ThemeToggle />
-          <Link href="/studio" className="hidden h-10 items-center rounded-full px-3 text-sm font-semibold text-ink-2 hover:bg-surface hover:text-ink sm:inline-flex">
-            Studio
-          </Link>
         </div>
       </div>
       <div className="border-t border-line xl:hidden">
@@ -41,7 +38,6 @@ const ABOUT = [
   { href: "/about#ai-disclosure", label: "AI disclosure policy" },
   { href: "/about#corrections", label: "Corrections" },
   { href: "/about#lenses", label: "Lenses, not verdicts" },
-  { href: "/studio", label: "Newsroom studio" },
 ];
 
 export function SiteFooter() {

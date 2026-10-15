@@ -142,8 +142,10 @@ export const Story = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   heroImage: z.string().optional(),
-  /** Published by policy (low-risk, no blocking QA flags) before an editor reviewed it. */
+  /** Published automatically by policy, without editor review. */
   autoPublished: z.boolean().optional(),
+  /** Published although an automated QA check raised a blocking issue (shown to readers). */
+  checksFlagged: z.boolean().optional(),
   /** Set when the story was created by the automatic wire (ingest cycle). */
   origin: z.enum(["manual", "wire"]).optional(),
 });

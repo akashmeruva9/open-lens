@@ -58,6 +58,7 @@ export function toFeedItem(rec: StoryRecord): FeedItem {
     videoUrl: (video?.payload as { mp4Url?: string } | undefined)?.mp4Url,
     corrected: r.corrections.length > 0,
     autoPublished: r.story.autoPublished,
+    checksFlagged: r.story.checksFlagged,
     videos: r.outputs
       .filter((o) => o.kind === "video" && READER_OUTPUT_STATUSES.has(o.status))
       .map((o) => {

@@ -142,8 +142,8 @@ export default function StoryScreen() {
             <View style={[styles.note, { borderColor: p.textFaint }]} accessibilityRole="text">
               <AutoPublishedChip />
               <T variant="caption" tone="muted">
-                Auto-published by the OpenLens wire under the low-risk policy. Every fact links to its source below, but an editor has not reviewed
-                this story yet.
+                Auto-published by the OpenLens wire. Every fact links to its source below; no editor has reviewed this story.
+                {story.checksFlagged ? ' Automated checks flagged an issue: some points may not be as well supported as they read.' : ''}
               </T>
             </View>
           ) : null}
@@ -280,7 +280,7 @@ export default function StoryScreen() {
 
         <T variant="caption" tone="faint" style={{ textAlign: 'center', paddingHorizontal: gutter.page, marginTop: space.xl }}>
           Produced by OpenLens agents from {plural(b.sources.length, 'source')}
-          {story.autoPublished ? ', not yet editor-reviewed' : ' and reviewed by an editor'}. No numeric truth scores, ever.
+          {story.autoPublished ? ', not editor-reviewed' : ' and reviewed by an editor'}. No numeric truth scores, ever.
         </T>
       </ScrollView>
 

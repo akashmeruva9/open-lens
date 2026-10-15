@@ -38,8 +38,17 @@ export function LiveChip({ children, title }: { children: ReactNode; title?: str
 /** Auto-published · not editor-reviewed: outline in --ink-3. */
 export function AutoPublishedChip() {
   return (
-    <span className={`${base} border border-ink-3 text-ink-2`} title="Published automatically under the low-risk policy; an editor has not reviewed it yet.">
+    <span className={`${base} border border-ink-3 text-ink-2`} title="Published automatically by the OpenLens wire; no editor has reviewed it.">
       Auto-published · not editor-reviewed
+    </span>
+  );
+}
+
+/** An automated QA check raised a blocking issue; the story is shown anyway, with this warning. */
+export function ChecksFlaggedChip() {
+  return (
+    <span className={`${base} border border-live text-live`} title="An automated check found a problem, e.g. a claim listed as established without enough support. Read the evidence below with care.">
+      Automated checks flagged issues
     </span>
   );
 }

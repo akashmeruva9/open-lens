@@ -175,3 +175,18 @@ test("pickSources: one article per outlet, primary first, lanes balanced, capped
   const more = pickSources(all, 5, [all[4]!, all[5]!]).map((s: { id: string }) => s.id);
   assert.deepEqual(more, ["g1", "l1b", "l3"]);
 });
+
+test("publish-all policy: sensitive, manual and QA-flagged stories go live, flagged ones labelled", async () => {
+  const { store, deps } = await setup();
+  const first = await ingestCycle(deps, cfg(), effects([lead("l1", "a.jp", "Metro fare to rise 20%"), lead("l2", "b.jp", "Metro fare hike approved")], []), new Date("2026-10-12T01:00:00Z"));
+  const rec = (await store.get(first.storiesCreated[0]!))!;
+  const a = { headline: "h", neutralSummary: "s", sections: [] } as never;
+  await store.put({ ...rec, story: { ...rec.story, id: "sensitive", status: "in_review", riskTier: "sensitive" }, assessment: a });
+  await store.put({ ...rec, story: { ...rec.story, id: "manual", status: "in_review", origin: "manual" }, assessment: a });
+  await store.put({ ...rec, story: { ...rec.story, id: "flagged", status: "in_review" }, assessment: a,
+    qaFlags: [{ severity: "block", kind: "unsupported_established", detail: "x", target: "assessment:established" }] });
+  await ingestCycle(deps, cfg({ autoPublish: "all" }), effects([], []), new Date("2026-10-12T01:15:00Z"));
+  for (const id of ["sensitive", "manual", "flagged"]) assert.equal((await store.get(id))!.story.status, "published", id);
+  assert.equal((await store.get("flagged"))!.story.checksFlagged, true);
+  assert.equal((await store.get("sensitive"))!.story.checksFlagged, undefined);
+});

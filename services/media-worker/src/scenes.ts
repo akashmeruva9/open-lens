@@ -1,5 +1,8 @@
 import { createCanvas, GlobalFonts, loadImage, type Image, type SKRSContext2D } from "@napi-rs/canvas";
-import { uiStrings, wrapText } from "@openlens/config";
+import { uiStrings } from "@openlens/config";
+import type { Beat } from "./beats.js";
+import { drawCover, fitWidth, roundRect, wrap } from "./draw.js";
+import { explainerLayout, renderExplainerFrame } from "./explainer.js";
 
 export type Aspect = "9:16" | "16:9";
 export const SIZES: Record<Aspect, { w: number; h: number }> = {
@@ -18,8 +21,15 @@ export interface Scene {
   label?: string;
   /** Outlet names behind the claims (shown in the source chip instead of raw ids). */
   sources?: string[];
-  /** "anchor": presenter full-frame with a TV headline bar. "split": presenter beside a fact card. */
-  layout?: "anchor" | "split";
+  /** "beat": social explainer (beat card + captions + presenter picture-in-picture); the default whenever `beat` is set.
+   *  "anchor": presenter full-frame with a TV headline bar. "split": presenter beside a fact card (older TV look). */
+  layout?: "beat" | "anchor" | "split";
+  /** What the main card shows for this line (see beats.ts / pickBeat). */
+  beat?: Beat;
+  /** Optional supplied illustration for this line (e.g. an AI image). Drawn full-bleed with a scrim and an
+   *  "AI-generated illustration" label when `beat.kind === "illustration"`. `image` is loaded from `imagePath` by renderVideo. */
+  imagePath?: string;
+  image?: Image;
 }
 
 export interface Branding {
@@ -50,21 +60,6 @@ export async function loadPresenter(path: string | undefined): Promise<Image | u
   }
 }
 
-function wrap(ctx: SKRSContext2D, text: string, maxWidth: number, lang = "en") {
-  return wrapText(text, lang, maxWidth, (t) => ctx.measureText(t).width);
-}
-
-/** Truncate to a pixel width on grapheme boundaries (safe for CJK width and Thai combining marks). */
-function fitWidth(ctx: SKRSContext2D, text: string, maxWidth: number): string {
-  if (ctx.measureText(text).width <= maxWidth) return text;
-  let out = "";
-  for (const { segment } of new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(text)) {
-    if (ctx.measureText(`${out}${segment}…`).width > maxWidth) break;
-    out += segment;
-  }
-  return `${out}…`;
-}
-
 const C = {
   navy: "#0b1220",
   navy2: "#16243f",
@@ -76,29 +71,12 @@ const C = {
 };
 
 /** Where the presenter sits for each layout/shape (also used to place the idle video in ffmpeg). */
-export function portraitBox(layout: "anchor" | "split", aspect: Aspect): { x: number; y: number; w: number; h: number } {
+export function portraitBox(layout: "beat" | "anchor" | "split" | "hook", aspect: Aspect): { x: number; y: number; w: number; h: number } {
   const { w: W, h: H } = SIZES[aspect];
+  if (layout === "beat") return explainerLayout(aspect).pip;
+  if (layout === "hook") return explainerLayout(aspect).hook;
   if (aspect === "9:16") return layout === "anchor" ? { x: 0, y: 0, w: W, h: 1260 } : { x: 0, y: 0, w: W, h: 1040 };
   return layout === "anchor" ? { x: (W - 1100) / 2, y: 0, w: 1100, h: H } : { x: 0, y: 0, w: 1040, h: H };
-}
-
-/** Draw an image to cover a box (centre-top crop so faces stay in frame). */
-function drawCover(ctx: SKRSContext2D, img: Image, x: number, y: number, w: number, h: number) {
-  const s = Math.max(w / img.width, h / img.height);
-  const sw = w / s, sh = h / s;
-  const sx = (img.width - sw) / 2;
-  const sy = Math.max(0, (img.height - sh) * 0.15);
-  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
-}
-
-function roundRect(ctx: SKRSContext2D, x: number, y: number, w: number, h: number, r: number) {
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r);
-  ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r);
-  ctx.arcTo(x, y, x + w, y, r);
-  ctx.closePath();
 }
 
 /** Draw a wrapped line, highlighting numbers (digits, %, currency) in the accent colour. */
@@ -162,7 +140,13 @@ function background(ctx: SKRSContext2D, brand: Branding, W: number, H: number, v
 
 /** overlay=true renders a transparent text/graphics layer (no base, no portrait) to composite over the presenter video. */
 export function renderSceneFrame(scene: Scene, brand: Branding, index: number, total: number, aspect: Aspect = "9:16", overlay = false): Buffer {
+  if (sceneLayout(scene) === "beat") return renderExplainerFrame(scene, brand, index, total, aspect, overlay);
   return scene.layout === "anchor" ? renderAnchor(scene, brand, index, total, aspect, overlay) : renderSplit(scene, brand, index, total, aspect, overlay);
+}
+
+/** Effective layout: explicit `layout`, else "beat" when a beat is set, else the older split card. */
+export function sceneLayout(scene: Scene): "beat" | "anchor" | "split" {
+  return scene.layout ?? (scene.beat ? "beat" : "split");
 }
 
 /** First sentence of a scene as a TV headline (works for । and 。 too). */

@@ -1,10 +1,11 @@
-import { AI_DISCLOSURE, CHANNEL_PLAN, LANGUAGES, PRESENTERS, isLang, type PresenterId } from "@openlens/config";
+import { AI_DISCLOSURE, CHANNEL_PLAN, LANGUAGES, PRESENTERS, isLang, uiStrings, type PresenterId } from "@openlens/config";
 import type { ScriptPayload } from "@openlens/schemas";
 import { mkdir, rename, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fontFor, registerDefaultFonts } from "./fonts.js";
-import { run, renderVideo } from "./render.js";
+import { pickBeat, type Beat, type BeatClaim, type BeatHint, type BeatKind } from "./beats.js";
+import { run, renderVideo, type HookClip } from "./render.js";
 import { loadPresenter, type Aspect, type Scene } from "./scenes.js";
 import { synthesizeToFile } from "./tts.js";
 
@@ -22,6 +23,28 @@ export interface MediaJob {
   sourceLabels?: Record<string, string[]>;
   /** lang -> line texts (same line order as `script`), for extra subtitle tracks timed to this video. */
   captionTracks?: Record<string, string[]>;
+  /** "explainer" (default): beat cards + captions + presenter picture-in-picture. "tv": the older anchor/split look. */
+  style?: "explainer" | "tv";
+  /** Ledger claims (claimId -> text/attribution/state). Number and attributed-statement cards are only possible with
+   *  these: a figure is shown only if its digits appear in one of the line's own safe claims. */
+  claims?: Record<string, BeatClaim>;
+  /** Story timeline (for timeline cards). */
+  timeline?: { date: string; text: string; claimIds?: string[] }[];
+  /** Language the ledger/timeline text is written in (default "en"); timeline text is only shown in that language. */
+  ledgerLang?: string;
+  /** End-card QR/link target. Defaults to OPENLENS_PUBLIC_URL; without either the end card shows a placeholder. */
+  ctaUrl?: string;
+  /** Optional supplied illustrations, by script line index (image file paths). Shown full-bleed with an
+   *  "AI-generated illustration" label; never invented here. */
+  illustrations?: Record<number, string>;
+  /** Hook for an LLM-chosen beat per line index. Honoured only when the deterministic rules also allow that beat. */
+  beatHints?: (BeatHint | undefined)[];
+  /** Optional intro clip (presenter speaking, own audio), e.g. from Veo. Prepended before the first line. */
+  hookClipPath?: string;
+  /** Seconds of the hook clip to use (required with hookClipPath; ignored when <= 0). */
+  hookSeconds?: number;
+  /** What is said in the hook clip: shown as its caption and added as the first caption cue. */
+  hookText?: string;
 }
 
 export interface MediaResult {
@@ -30,6 +53,8 @@ export interface MediaResult {
   /** Subtitle tracks (own language first), each timed to this video. */
   captionTracks: { lang: string; path: string }[];
   videos: { aspect: Aspect; mp4: string; hls?: string; thumbnail: string; durationSeconds: number }[];
+  /** Beat chosen for each script line (explainer style), for logs and review. */
+  beats?: BeatKind[];
 }
 
 /** Repo portrait for a presenter (data/presenters/<id>.png) when it exists. */
@@ -52,27 +77,21 @@ const fmt = (t: number) => {
 /** ISO 639-2 codes for MP4 subtitle track metadata. */
 const ISO3: Record<string, string> = { en: "eng", hi: "hin", te: "tel", ta: "tam", ja: "jpn", ko: "kor", "zh-Hant": "zho", "zh-Hans": "zho", id: "ind", ms: "msa", th: "tha", vi: "vie", fil: "fil" };
 
-/** Split a scene's text into sentence cues, sharing the scene's time in proportion to text length (readable subtitles). */
-export function sentenceCues(text: string, start: number, seconds: number): { text: string; start: number; end: number }[] {
-  const parts = [...new Intl.Segmenter(undefined, { granularity: "sentence" }).segment(text)].map((x) => x.segment.trim()).filter(Boolean);
-  const sentences = parts.length ? parts : [text];
-  const weight = sentences.map((x) => Math.max(8, [...x].length));
-  const sum = weight.reduce((a, b) => a + b, 0);
-  let t = start;
-  return sentences.map((x, i) => {
-    const d = (seconds * weight[i]!) / sum;
-    const cue = { text: x, start: t, end: i === sentences.length - 1 ? start + seconds : t + d };
-    t += d;
-    return cue;
-  });
-}
-
-export function toCuesVtt(texts: string[], seconds: number[]): string {
-  let t = 0;
+/** WebVTT with one cue per spoken line. A cue starts when its line starts and ends when that line's narration ends
+ *  (`spoken[i]`, the exact TTS duration); the pause after a line belongs to no cue. `seconds[i]` is the line's slot
+ *  (narration + pause). `offset` shifts everything (e.g. after a hook intro); `lead` adds cues before the lines. */
+export function toCuesVtt(
+  texts: string[], seconds: number[], spoken?: number[],
+  opts: { offset?: number; lead?: { text: string; start: number; end: number }[] } = {},
+): string {
   const cues: string[] = [];
+  for (const c of opts.lead ?? []) cues.push(`${cues.length + 1}\n${fmt(c.start)} --> ${fmt(c.end)}\n${c.text}\n`);
+  let t = opts.offset ?? 0;
   texts.forEach((text, i) => {
-    for (const c of sentenceCues(text, t, seconds[i]!)) cues.push(`${cues.length + 1}\n${fmt(c.start)} --> ${fmt(c.end)}\n${c.text}\n`);
-    t += seconds[i]!;
+    const slot = seconds[i]!;
+    const end = t + Math.min(slot, spoken?.[i] ?? slot);
+    if (text.trim()) cues.push(`${cues.length + 1}\n${fmt(t)} --> ${fmt(end)}\n${text.trim()}\n`);
+    t += slot;
   });
   return `WEBVTT\n\n${cues.join("\n")}`;
 }
@@ -101,14 +120,15 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
   const GAP = 0.35;
 
   // 1) Narration per line so scene timing follows real audio.
-  const timed: { text: string; label: string; claimIds: string[]; seconds: number; wav?: string }[] = [];
+  const timed: { text: string; label: string; claimIds: string[]; seconds: number; spoken: number; wav?: string }[] = [];
   for (const [i, l] of job.script.lines.entries()) {
     if (job.silent) {
-      timed.push({ ...l, seconds: estimate(l.text) });
+      const e = estimate(l.text);
+      timed.push({ ...l, seconds: e, spoken: e });
     } else {
       const wav = join(dir, `line-${i}.wav`);
       const d = await synthesizeToFile(l.text, presenter, wav);
-      timed.push({ ...l, seconds: d + GAP, wav });
+      timed.push({ ...l, seconds: d + GAP, spoken: d, wav });
     }
   }
 
@@ -122,19 +142,32 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
   }
   const total = timed.reduce((s, t) => s + t.seconds, 0);
 
-  // 3) Captions.
+  // Optional hook intro (prepended): captions and beats start after it.
+  const hook: HookClip | undefined =
+    job.hookClipPath && (job.hookSeconds ?? 0) > 0 ? { path: job.hookClipPath, seconds: job.hookSeconds!, text: job.hookText } : undefined;
+  const cueOpts = { offset: hook?.seconds ?? 0, lead: hook?.text ? [{ text: hook.text, start: 0, end: hook.seconds }] : [] };
+
+  // 3) Captions: one cue per spoken line, timed by that line's real narration length.
   const captionsVtt = join(dir, "captions.vtt");
   const secs = timed.map((t) => t.seconds);
-  await writeFile(captionsVtt, toCuesVtt(timed.map((t) => t.text), secs));
+  const spoken = timed.map((t) => t.spoken);
+  await writeFile(captionsVtt, toCuesVtt(timed.map((t) => t.text), secs, spoken, cueOpts));
   const captionTracks: { lang: string; path: string }[] = [{ lang: job.lang, path: captionsVtt }];
   for (const [lang, texts] of Object.entries(job.captionTracks ?? {})) {
     if (lang === job.lang || texts.length !== timed.length) continue; // only line-aligned scripts
     const path = join(dir, `captions.${lang}.vtt`);
-    await writeFile(path, toCuesVtt(texts, secs));
+    // Other languages: same slots as this video; no hook cue (its text is in this video's language only).
+    await writeFile(path, toCuesVtt(texts, secs, spoken, { offset: cueOpts.offset }));
     captionTracks.push({ lang, path });
   }
 
   // 4) Videos.
+  // A missing portrait renders a blank anchor area (this shipped to Cloud Run once: assets were not in the image).
+  if (!job.presenterImagePath && !defaultPortrait(presenter)) {
+    const msg = `presenter "${presenter}" has no portrait (data/presenters/${presenter}.png); the video would have no avatar`;
+    if (process.env.REQUIRE_PRESENTER === "1") throw new Error(msg);
+    console.warn(`[media] WARNING: ${msg}`);
+  }
   const brand = {
     title: job.script.title,
     disclosure: AI_DISCLOSURE[job.lang] ?? AI_DISCLOSURE.en!,
@@ -144,16 +177,12 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
     presenterImage: await loadPresenter(job.presenterImagePath ?? defaultPortrait(presenter)),
     presenterVideo: defaultIdleClip(presenter),
   };
-  const scenes: Scene[] = timed.map((t, i) => ({
-    label: t.label, text: t.text, claimIds: t.claimIds, seconds: t.seconds,
-    sources: [...new Set(t.claimIds.flatMap((id) => job.sourceLabels?.[id] ?? []))].slice(0, 2),
-    // TV rhythm: anchor opens and closes; split-screen evidence cards in between.
-    layout: (i === 0 || i === timed.length - 1 || i % 2 === 0 ? "anchor" : "split") as Scene["layout"],
-  }));
+  const scenes: Scene[] = job.style === "tv" ? tvScenes(job, timed) : explainerScenes(job, timed);
+  const beats = scenes.map((s) => s.beat?.kind).filter((k): k is BeatKind => Boolean(k));
   const videos: MediaResult["videos"] = [];
   for (const aspect of job.aspects ?? (["9:16"] as Aspect[])) {
     const name = aspect === "9:16" ? "video-916" : "video-169";
-    const r = await renderVideo({ outDir: dir, name, scenes, brand, aspect, hls: aspect === "9:16", audioPath: job.silent ? undefined : audioPath });
+    const r = await renderVideo({ outDir: dir, name, scenes, brand, aspect, hls: aspect === "9:16", audioPath: job.silent ? undefined : audioPath, hook });
     videos.push({ aspect, mp4: r.mp4, hls: r.hlsPlaylist, thumbnail: r.thumbnail, durationSeconds: r.durationSeconds });
   }
 
@@ -180,5 +209,50 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
     captionsVtt,
     captionTracks,
     videos,
+    beats,
   };
+}
+
+type TimedLine = { text: string; label: string; claimIds: string[]; seconds: number };
+
+const outletsFor = (job: MediaJob, claimIds: string[]) => [...new Set(claimIds.flatMap((id) => job.sourceLabels?.[id] ?? []))];
+
+/** Older TV look: anchor opens and closes; split-screen evidence cards in between. */
+function tvScenes(job: MediaJob, timed: TimedLine[]): Scene[] {
+  return timed.map((t, i) => ({
+    label: t.label, text: t.text, claimIds: t.claimIds, seconds: t.seconds,
+    sources: outletsFor(job, t.claimIds).slice(0, 2),
+    layout: (i === 0 || i === timed.length - 1 || i % 2 === 0 ? "anchor" : "split") as Scene["layout"],
+  }));
+}
+
+/** Minimum time the end card stays up. */
+const END_CARD_SECONDS = 2;
+
+/** Social explainer: one deterministic beat per line (see beats.ts), plus an end card. */
+export function explainerScenes(job: MediaJob, timed: TimedLine[]): Scene[] {
+  const ctaUrl = job.ctaUrl ?? (process.env.OPENLENS_PUBLIC_URL?.trim() || undefined);
+  let prev: BeatKind | undefined;
+  const scenes: Scene[] = timed.map((t, i) => {
+    const sources = outletsFor(job, t.claimIds);
+    const imagePath = job.illustrations?.[i];
+    const beat: Beat = pickBeat(
+      { label: t.label, text: t.text, claimIds: t.claimIds },
+      { claims: job.claims, sources, timeline: job.timeline, timelineLang: job.ledgerLang ?? "en", lang: job.lang,
+        index: i, total: timed.length, prev, ctaUrl, illustration: Boolean(imagePath) },
+      job.beatHints?.[i],
+    );
+    prev = beat.kind;
+    return { label: t.label, text: t.text, claimIds: t.claimIds, seconds: t.seconds, sources, beat, layout: "beat",
+      ...(beat.kind === "illustration" ? { imagePath } : {}) };
+  });
+  const last = scenes.at(-1)!;
+  if (last.beat?.kind === "cta") last.seconds = Math.max(last.seconds, END_CARD_SECONDS);
+  else {
+    // No spoken call to action: append a silent end card.
+    const ui = uiStrings(job.lang);
+    const cta = ui.openResearch.charAt(0).toUpperCase() + ui.openResearch.slice(1);
+    scenes.push({ text: "", claimIds: [], seconds: END_CARD_SECONDS, layout: "beat", beat: { kind: "cta", text: cta, url: ctaUrl } });
+  }
+  return scenes;
 }

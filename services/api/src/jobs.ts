@@ -90,6 +90,10 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
     const sourceLabels = Object.fromEntries(
       rec.claims.map((c) => [c.id, [...new Set(c.evidence.map((e) => publisher.get(e.sourceId)).filter((x): x is string => Boolean(x)))]]),
     );
+    // Ledger facts for the beat picker (number / attributed-statement / timeline cards) and the end-card link.
+    const claims = Object.fromEntries(rec.claims.map((c) => [c.id, { text: c.text, attributedTo: c.attributedTo ?? undefined, state: c.state }]));
+    const publicUrl = process.env.OPENLENS_PUBLIC_URL?.trim().replace(/\/$/, "");
+    const ctaUrl = publicUrl ? `${publicUrl}/story/${encodeURIComponent(storyId)}` : undefined;
     // Every language's line texts (aligned line-by-line), offered as extra subtitle tracks on each video.
     const allScripts = rec.outputs.filter((o) => o.kind === "script");
     for (const s of scripts) {
@@ -107,6 +111,9 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
         presenterImagePath: deps.presenterImages?.[script.presenter],
         sourceLabels,
         captionTracks,
+        claims,
+        timeline: rec.timeline,
+        ctaUrl,
       });
       const base = `${storyId}/${sfx}/v${rec.story.version}`;
       const captionsUrl = await deps.assets.put(r.captionsVtt, `${base}/captions.vtt`, "text/vtt");

@@ -36,6 +36,8 @@ export function toCard(f: FeedItem, bundle?: StoryBundle): CardItem {
       })
       // vertical first: cards and the hero are 9:16 / 2:3
       .sort((a, b) => (a.aspect === "9:16" ? 0 : 1) - (b.aspect === "9:16" ? 0 : 1));
+  } else if (f.videos?.length) {
+    videos = f.videos;
   } else if (f.videoUrl) {
     // Every OpenLens video uses a disclosed synthetic presenter (plan §1b), so the tag is safe to show.
     videos = [{ lang: f.languages.includes("en") ? "en" : (f.languages[0] ?? "en"), mp4Url: f.videoUrl, aiPresenter: true }];

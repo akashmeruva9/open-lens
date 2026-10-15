@@ -41,6 +41,13 @@ export function toFeedItem(r: StoryRecord): FeedItem {
     videoUrl: (video?.payload as { mp4Url?: string } | undefined)?.mp4Url,
     corrected: r.corrections.length > 0,
     autoPublished: r.story.autoPublished,
+    videos: r.outputs
+      .filter((o) => o.kind === "video" && READER_OUTPUT_STATUSES.has(o.status))
+      .map((o) => {
+        const p = o.payload as { aspect?: "9:16" | "16:9"; durationSeconds?: number; thumbnailUrl?: string; mp4Url?: string; hlsUrl?: string };
+        return { lang: o.lang, aspect: p.aspect, durationSeconds: p.durationSeconds, thumbnailUrl: p.thumbnailUrl, mp4Url: p.mp4Url, hlsUrl: p.hlsUrl, aiPresenter: o.aiDisclosure };
+      })
+      .sort((a, b) => (a.aspect === "9:16" ? 0 : 1) - (b.aspect === "9:16" ? 0 : 1)),
     lastCorrection: r.corrections.length ? { at: r.corrections.at(-1)!.at, reason: r.corrections.at(-1)!.reason } : undefined,
   };
 }

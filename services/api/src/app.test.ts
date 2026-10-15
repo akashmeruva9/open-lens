@@ -80,3 +80,11 @@ test("market filter: own market, sub-national, and APAC-wide stories", async () 
   assert.ok(!inMarket("JP", "IN"));
   assert.ok(inMarket("JP", "APAC"));
 });
+
+test("feed items carry approved video details for cards", async () => {
+  const { req } = await setup();
+  const [item] = await (await req("GET", "/v1/feed")).json();
+  assert.ok(item.videos.length >= 1);
+  assert.equal(item.videos[0].aspect, "9:16");
+  assert.equal(typeof item.videos[0].durationSeconds, "number");
+});

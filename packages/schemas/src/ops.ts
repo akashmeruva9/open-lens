@@ -79,6 +79,20 @@ export const FeedItem = z.object({
   corrected: z.boolean(),
   lastCorrection: z.object({ at: z.string(), reason: z.string() }).optional(),
   autoPublished: z.boolean().optional(),
+  /** Approved/published videos for cards (vertical first): lets clients show duration, language and thumbnail. */
+  videos: z
+    .array(
+      z.object({
+        lang: z.string(),
+        aspect: z.enum(["9:16", "16:9"]).optional(),
+        durationSeconds: z.number().optional(),
+        thumbnailUrl: z.string().optional(),
+        mp4Url: z.string().optional(),
+        hlsUrl: z.string().optional(),
+        aiPresenter: z.boolean(),
+      }),
+    )
+    .optional(),
 });
 export type FeedItem = z.infer<typeof FeedItem>;
 

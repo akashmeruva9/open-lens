@@ -13,7 +13,7 @@ What OpenLens adds on top of the pattern — and must stay visible — is the ev
 | `--surface-2` | `#e9e9e9` | `#1f1f1f` | hover, skeletons |
 | `--ink` | `#0a0a0a` | `#f5f5f5` | headlines, body |
 | `--ink-2` | `#3d3d3d` | `#c7c7c7` | deks, secondary |
-| `--ink-3` | `#8c8c8c` | `#8c8c8c` | metadata |
+| `--ink-3` | `#737373` | `#8c8c8c` | metadata (≥4.5:1 on white) |
 | `--line` | `#dedede` | `#2a2a2a` | dividers |
 | `--accent` | `#2f5bff` | `#6b8bff` | OpenLens accent: links, active nav, "View all", focus ring base |
 | `--accent-ink` | `#ffffff` | `#080808` | text on accent |

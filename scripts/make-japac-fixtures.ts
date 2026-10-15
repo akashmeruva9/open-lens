@@ -26,7 +26,8 @@ const bundles = items.map(([id, region, title, summary, topics, h], i) => {
   b.claims = b.claims.map((c) => ({ ...c, storyId: id }));
   b.assessment = b.assessment && { ...b.assessment, storyId: id, headline: title, neutralSummary: summary };
   b.outputs = b.outputs
-    .filter((o) => o.kind !== "video" || withVideo)
+    // Only the English media is meaningful for these samples (cloned outputs in other languages would be the wrong language).
+    .filter((o) => o.lang === "en" && (o.kind !== "video" || withVideo))
     .map((o) => ({ ...o, storyId: id, createdAt: at, updatedAt: at, status: o.kind === "video" || o.kind === "script" ? "approved" : o.status }));
   b.corrections = i === 4 ? [{ id: `corr-${id}`, storyId: id, at, by: "editor@dev", reason: "Fare figure updated (sample)", changedClaimIds: ["c1"], fromVersion: 1, toVersion: 2, impactedOutputIds: [], impactedPublicationIds: [] }] : [];
   b.publications = [];

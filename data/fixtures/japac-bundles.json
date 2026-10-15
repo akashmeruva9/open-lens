@@ -493,55 +493,6 @@
         "updatedAt": "2026-10-15T08:00:00.000Z"
       },
       {
-        "id": "script-te",
-        "storyId": "jp-typhoon-drill",
-        "kind": "script",
-        "channel": "app",
-        "lang": "te",
-        "claimIds": [
-          "c1",
-          "c3",
-          "c2",
-          "c11",
-          "c6"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు",
-          "presenter": "priya-te",
-          "lines": [
-            {
-              "label": "ఏమి జరిగింది",
-              "text": "మెట్రో ఛార్జీలు జనవరి 1 నుంచి 20 శాతం పెరుగుతాయి.",
-              "claimIds": [
-                "c1",
-                "c3"
-              ]
-            },
-            {
-              "label": "ఎందుకు",
-              "text": "విద్యుత్ ఖర్చులు 35 శాతం పెరిగాయని అథారిటీ చెబుతోంది.",
-              "claimIds": [
-                "c2",
-                "c11"
-              ]
-            },
-            {
-              "label": "తెలియనివి",
-              "text": "ప్రభుత్వ సబ్సిడీ పరిశీలనలో ఉందో లేదో స్పష్టంగా లేదు.",
-              "claimIds": [
-                "c6"
-              ]
-            }
-          ]
-        },
-        "aiDisclosure": true,
-        "dependsOn": [],
-        "createdAt": "2026-10-15T08:00:00.000Z",
-        "updatedAt": "2026-10-15T08:00:00.000Z"
-      },
-      {
         "id": "video-en-916",
         "storyId": "jp-typhoon-drill",
         "kind": "video",
@@ -564,36 +515,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-15T08:00:00.000Z",
-        "updatedAt": "2026-10-15T08:00:00.000Z"
-      },
-      {
-        "id": "yt-te",
-        "storyId": "jp-typhoon-drill",
-        "kind": "yt_meta",
-        "channel": "youtube",
-        "lang": "te",
-        "tier": "regional",
-        "claimIds": [
-          "c1",
-          "c3"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "tier": "regional",
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు | OpenLens",
-          "description": "మూలాలు: ...\nAI-generated presenter / narration.",
-          "tags": [
-            "metro",
-            "news"
-          ],
-          "containsSyntheticMedia": true
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-15T08:00:00.000Z",
         "updatedAt": "2026-10-15T08:00:00.000Z"
@@ -669,32 +590,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-15T08:00:00.000Z",
-        "updatedAt": "2026-10-15T08:00:00.000Z"
-      },
-      {
-        "id": "wa-te",
-        "storyId": "jp-typhoon-drill",
-        "kind": "wa_digest",
-        "channel": "whatsapp",
-        "lang": "te",
-        "claimIds": [
-          "c1"
-        ],
-        "ledgerVersion": 1,
-        "status": "draft",
-        "payload": {
-          "templateName": "daily_digest_te",
-          "params": [
-            "మెట్రో ఛార్జీలు 20% పెంపు"
-          ],
-          "previewText": "నేటి వార్త: మెట్రో ఛార్జీలు 20% పెంపు",
-          "link": "https://openlens.app/story/sample-metro-fare"
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-15T08:00:00.000Z",
         "updatedAt": "2026-10-15T08:00:00.000Z"
@@ -1198,55 +1093,6 @@
         "updatedAt": "2026-10-15T07:00:00.000Z"
       },
       {
-        "id": "script-te",
-        "storyId": "kr-chip-exports",
-        "kind": "script",
-        "channel": "app",
-        "lang": "te",
-        "claimIds": [
-          "c1",
-          "c3",
-          "c2",
-          "c11",
-          "c6"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు",
-          "presenter": "priya-te",
-          "lines": [
-            {
-              "label": "ఏమి జరిగింది",
-              "text": "మెట్రో ఛార్జీలు జనవరి 1 నుంచి 20 శాతం పెరుగుతాయి.",
-              "claimIds": [
-                "c1",
-                "c3"
-              ]
-            },
-            {
-              "label": "ఎందుకు",
-              "text": "విద్యుత్ ఖర్చులు 35 శాతం పెరిగాయని అథారిటీ చెబుతోంది.",
-              "claimIds": [
-                "c2",
-                "c11"
-              ]
-            },
-            {
-              "label": "తెలియనివి",
-              "text": "ప్రభుత్వ సబ్సిడీ పరిశీలనలో ఉందో లేదో స్పష్టంగా లేదు.",
-              "claimIds": [
-                "c6"
-              ]
-            }
-          ]
-        },
-        "aiDisclosure": true,
-        "dependsOn": [],
-        "createdAt": "2026-10-15T07:00:00.000Z",
-        "updatedAt": "2026-10-15T07:00:00.000Z"
-      },
-      {
         "id": "video-en-916",
         "storyId": "kr-chip-exports",
         "kind": "video",
@@ -1269,36 +1115,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-15T07:00:00.000Z",
-        "updatedAt": "2026-10-15T07:00:00.000Z"
-      },
-      {
-        "id": "yt-te",
-        "storyId": "kr-chip-exports",
-        "kind": "yt_meta",
-        "channel": "youtube",
-        "lang": "te",
-        "tier": "regional",
-        "claimIds": [
-          "c1",
-          "c3"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "tier": "regional",
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు | OpenLens",
-          "description": "మూలాలు: ...\nAI-generated presenter / narration.",
-          "tags": [
-            "metro",
-            "news"
-          ],
-          "containsSyntheticMedia": true
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-15T07:00:00.000Z",
         "updatedAt": "2026-10-15T07:00:00.000Z"
@@ -1374,32 +1190,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-15T07:00:00.000Z",
-        "updatedAt": "2026-10-15T07:00:00.000Z"
-      },
-      {
-        "id": "wa-te",
-        "storyId": "kr-chip-exports",
-        "kind": "wa_digest",
-        "channel": "whatsapp",
-        "lang": "te",
-        "claimIds": [
-          "c1"
-        ],
-        "ledgerVersion": 1,
-        "status": "draft",
-        "payload": {
-          "templateName": "daily_digest_te",
-          "params": [
-            "మెట్రో ఛార్జీలు 20% పెంపు"
-          ],
-          "previewText": "నేటి వార్త: మెట్రో ఛార్జీలు 20% పెంపు",
-          "link": "https://openlens.app/story/sample-metro-fare"
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-15T07:00:00.000Z",
         "updatedAt": "2026-10-15T07:00:00.000Z"
@@ -1905,85 +1695,6 @@
         "updatedAt": "2026-10-15T06:00:00.000Z"
       },
       {
-        "id": "script-te",
-        "storyId": "in-heatwave-schools",
-        "kind": "script",
-        "channel": "app",
-        "lang": "te",
-        "claimIds": [
-          "c1",
-          "c3",
-          "c2",
-          "c11",
-          "c6"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు",
-          "presenter": "priya-te",
-          "lines": [
-            {
-              "label": "ఏమి జరిగింది",
-              "text": "మెట్రో ఛార్జీలు జనవరి 1 నుంచి 20 శాతం పెరుగుతాయి.",
-              "claimIds": [
-                "c1",
-                "c3"
-              ]
-            },
-            {
-              "label": "ఎందుకు",
-              "text": "విద్యుత్ ఖర్చులు 35 శాతం పెరిగాయని అథారిటీ చెబుతోంది.",
-              "claimIds": [
-                "c2",
-                "c11"
-              ]
-            },
-            {
-              "label": "తెలియనివి",
-              "text": "ప్రభుత్వ సబ్సిడీ పరిశీలనలో ఉందో లేదో స్పష్టంగా లేదు.",
-              "claimIds": [
-                "c6"
-              ]
-            }
-          ]
-        },
-        "aiDisclosure": true,
-        "dependsOn": [],
-        "createdAt": "2026-10-15T06:00:00.000Z",
-        "updatedAt": "2026-10-15T06:00:00.000Z"
-      },
-      {
-        "id": "yt-te",
-        "storyId": "in-heatwave-schools",
-        "kind": "yt_meta",
-        "channel": "youtube",
-        "lang": "te",
-        "tier": "regional",
-        "claimIds": [
-          "c1",
-          "c3"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "tier": "regional",
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు | OpenLens",
-          "description": "మూలాలు: ...\nAI-generated presenter / narration.",
-          "tags": [
-            "metro",
-            "news"
-          ],
-          "containsSyntheticMedia": true
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
-        ],
-        "createdAt": "2026-10-15T06:00:00.000Z",
-        "updatedAt": "2026-10-15T06:00:00.000Z"
-      },
-      {
         "id": "x-en",
         "storyId": "in-heatwave-schools",
         "kind": "x_thread",
@@ -2054,32 +1765,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-15T06:00:00.000Z",
-        "updatedAt": "2026-10-15T06:00:00.000Z"
-      },
-      {
-        "id": "wa-te",
-        "storyId": "in-heatwave-schools",
-        "kind": "wa_digest",
-        "channel": "whatsapp",
-        "lang": "te",
-        "claimIds": [
-          "c1"
-        ],
-        "ledgerVersion": 1,
-        "status": "draft",
-        "payload": {
-          "templateName": "daily_digest_te",
-          "params": [
-            "మెట్రో ఛార్జీలు 20% పెంపు"
-          ],
-          "previewText": "నేటి వార్త: మెట్రో ఛార్జీలు 20% పెంపు",
-          "link": "https://openlens.app/story/sample-metro-fare"
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-15T06:00:00.000Z",
         "updatedAt": "2026-10-15T06:00:00.000Z"
@@ -2582,55 +2267,6 @@
         "updatedAt": "2026-10-15T04:00:00.000Z"
       },
       {
-        "id": "script-te",
-        "storyId": "id-ferry-safety",
-        "kind": "script",
-        "channel": "app",
-        "lang": "te",
-        "claimIds": [
-          "c1",
-          "c3",
-          "c2",
-          "c11",
-          "c6"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు",
-          "presenter": "priya-te",
-          "lines": [
-            {
-              "label": "ఏమి జరిగింది",
-              "text": "మెట్రో ఛార్జీలు జనవరి 1 నుంచి 20 శాతం పెరుగుతాయి.",
-              "claimIds": [
-                "c1",
-                "c3"
-              ]
-            },
-            {
-              "label": "ఎందుకు",
-              "text": "విద్యుత్ ఖర్చులు 35 శాతం పెరిగాయని అథారిటీ చెబుతోంది.",
-              "claimIds": [
-                "c2",
-                "c11"
-              ]
-            },
-            {
-              "label": "తెలియనివి",
-              "text": "ప్రభుత్వ సబ్సిడీ పరిశీలనలో ఉందో లేదో స్పష్టంగా లేదు.",
-              "claimIds": [
-                "c6"
-              ]
-            }
-          ]
-        },
-        "aiDisclosure": true,
-        "dependsOn": [],
-        "createdAt": "2026-10-15T04:00:00.000Z",
-        "updatedAt": "2026-10-15T04:00:00.000Z"
-      },
-      {
         "id": "video-en-916",
         "storyId": "id-ferry-safety",
         "kind": "video",
@@ -2653,36 +2289,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-15T04:00:00.000Z",
-        "updatedAt": "2026-10-15T04:00:00.000Z"
-      },
-      {
-        "id": "yt-te",
-        "storyId": "id-ferry-safety",
-        "kind": "yt_meta",
-        "channel": "youtube",
-        "lang": "te",
-        "tier": "regional",
-        "claimIds": [
-          "c1",
-          "c3"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "tier": "regional",
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు | OpenLens",
-          "description": "మూలాలు: ...\nAI-generated presenter / narration.",
-          "tags": [
-            "metro",
-            "news"
-          ],
-          "containsSyntheticMedia": true
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-15T04:00:00.000Z",
         "updatedAt": "2026-10-15T04:00:00.000Z"
@@ -2758,32 +2364,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-15T04:00:00.000Z",
-        "updatedAt": "2026-10-15T04:00:00.000Z"
-      },
-      {
-        "id": "wa-te",
-        "storyId": "id-ferry-safety",
-        "kind": "wa_digest",
-        "channel": "whatsapp",
-        "lang": "te",
-        "claimIds": [
-          "c1"
-        ],
-        "ledgerVersion": 1,
-        "status": "draft",
-        "payload": {
-          "templateName": "daily_digest_te",
-          "params": [
-            "మెట్రో ఛార్జీలు 20% పెంపు"
-          ],
-          "previewText": "నేటి వార్త: మెట్రో ఛార్జీలు 20% పెంపు",
-          "link": "https://openlens.app/story/sample-metro-fare"
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-15T04:00:00.000Z",
         "updatedAt": "2026-10-15T04:00:00.000Z"
@@ -3286,55 +2866,6 @@
         "updatedAt": "2026-10-15T03:00:00.000Z"
       },
       {
-        "id": "script-te",
-        "storyId": "tw-transit-pass",
-        "kind": "script",
-        "channel": "app",
-        "lang": "te",
-        "claimIds": [
-          "c1",
-          "c3",
-          "c2",
-          "c11",
-          "c6"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు",
-          "presenter": "priya-te",
-          "lines": [
-            {
-              "label": "ఏమి జరిగింది",
-              "text": "మెట్రో ఛార్జీలు జనవరి 1 నుంచి 20 శాతం పెరుగుతాయి.",
-              "claimIds": [
-                "c1",
-                "c3"
-              ]
-            },
-            {
-              "label": "ఎందుకు",
-              "text": "విద్యుత్ ఖర్చులు 35 శాతం పెరిగాయని అథారిటీ చెబుతోంది.",
-              "claimIds": [
-                "c2",
-                "c11"
-              ]
-            },
-            {
-              "label": "తెలియనివి",
-              "text": "ప్రభుత్వ సబ్సిడీ పరిశీలనలో ఉందో లేదో స్పష్టంగా లేదు.",
-              "claimIds": [
-                "c6"
-              ]
-            }
-          ]
-        },
-        "aiDisclosure": true,
-        "dependsOn": [],
-        "createdAt": "2026-10-15T03:00:00.000Z",
-        "updatedAt": "2026-10-15T03:00:00.000Z"
-      },
-      {
         "id": "video-en-916",
         "storyId": "tw-transit-pass",
         "kind": "video",
@@ -3357,36 +2888,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-15T03:00:00.000Z",
-        "updatedAt": "2026-10-15T03:00:00.000Z"
-      },
-      {
-        "id": "yt-te",
-        "storyId": "tw-transit-pass",
-        "kind": "yt_meta",
-        "channel": "youtube",
-        "lang": "te",
-        "tier": "regional",
-        "claimIds": [
-          "c1",
-          "c3"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "tier": "regional",
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు | OpenLens",
-          "description": "మూలాలు: ...\nAI-generated presenter / narration.",
-          "tags": [
-            "metro",
-            "news"
-          ],
-          "containsSyntheticMedia": true
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-15T03:00:00.000Z",
         "updatedAt": "2026-10-15T03:00:00.000Z"
@@ -3462,32 +2963,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-15T03:00:00.000Z",
-        "updatedAt": "2026-10-15T03:00:00.000Z"
-      },
-      {
-        "id": "wa-te",
-        "storyId": "tw-transit-pass",
-        "kind": "wa_digest",
-        "channel": "whatsapp",
-        "lang": "te",
-        "claimIds": [
-          "c1"
-        ],
-        "ledgerVersion": 1,
-        "status": "draft",
-        "payload": {
-          "templateName": "daily_digest_te",
-          "params": [
-            "మెట్రో ఛార్జీలు 20% పెంపు"
-          ],
-          "previewText": "నేటి వార్త: మెట్రో ఛార్జీలు 20% పెంపు",
-          "link": "https://openlens.app/story/sample-metro-fare"
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-15T03:00:00.000Z",
         "updatedAt": "2026-10-15T03:00:00.000Z"
@@ -4004,85 +3479,6 @@
         "updatedAt": "2026-10-15T01:00:00.000Z"
       },
       {
-        "id": "script-te",
-        "storyId": "au-water-rates",
-        "kind": "script",
-        "channel": "app",
-        "lang": "te",
-        "claimIds": [
-          "c1",
-          "c3",
-          "c2",
-          "c11",
-          "c6"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు",
-          "presenter": "priya-te",
-          "lines": [
-            {
-              "label": "ఏమి జరిగింది",
-              "text": "మెట్రో ఛార్జీలు జనవరి 1 నుంచి 20 శాతం పెరుగుతాయి.",
-              "claimIds": [
-                "c1",
-                "c3"
-              ]
-            },
-            {
-              "label": "ఎందుకు",
-              "text": "విద్యుత్ ఖర్చులు 35 శాతం పెరిగాయని అథారిటీ చెబుతోంది.",
-              "claimIds": [
-                "c2",
-                "c11"
-              ]
-            },
-            {
-              "label": "తెలియనివి",
-              "text": "ప్రభుత్వ సబ్సిడీ పరిశీలనలో ఉందో లేదో స్పష్టంగా లేదు.",
-              "claimIds": [
-                "c6"
-              ]
-            }
-          ]
-        },
-        "aiDisclosure": true,
-        "dependsOn": [],
-        "createdAt": "2026-10-15T01:00:00.000Z",
-        "updatedAt": "2026-10-15T01:00:00.000Z"
-      },
-      {
-        "id": "yt-te",
-        "storyId": "au-water-rates",
-        "kind": "yt_meta",
-        "channel": "youtube",
-        "lang": "te",
-        "tier": "regional",
-        "claimIds": [
-          "c1",
-          "c3"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "tier": "regional",
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు | OpenLens",
-          "description": "మూలాలు: ...\nAI-generated presenter / narration.",
-          "tags": [
-            "metro",
-            "news"
-          ],
-          "containsSyntheticMedia": true
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
-        ],
-        "createdAt": "2026-10-15T01:00:00.000Z",
-        "updatedAt": "2026-10-15T01:00:00.000Z"
-      },
-      {
         "id": "x-en",
         "storyId": "au-water-rates",
         "kind": "x_thread",
@@ -4153,32 +3549,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-15T01:00:00.000Z",
-        "updatedAt": "2026-10-15T01:00:00.000Z"
-      },
-      {
-        "id": "wa-te",
-        "storyId": "au-water-rates",
-        "kind": "wa_digest",
-        "channel": "whatsapp",
-        "lang": "te",
-        "claimIds": [
-          "c1"
-        ],
-        "ledgerVersion": 1,
-        "status": "draft",
-        "payload": {
-          "templateName": "daily_digest_te",
-          "params": [
-            "మెట్రో ఛార్జీలు 20% పెంపు"
-          ],
-          "previewText": "నేటి వార్త: మెట్రో ఛార్జీలు 20% పెంపు",
-          "link": "https://openlens.app/story/sample-metro-fare"
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-15T01:00:00.000Z",
         "updatedAt": "2026-10-15T01:00:00.000Z"
@@ -4682,55 +4052,6 @@
         "updatedAt": "2026-10-15T00:00:00.000Z"
       },
       {
-        "id": "script-te",
-        "storyId": "th-air-quality",
-        "kind": "script",
-        "channel": "app",
-        "lang": "te",
-        "claimIds": [
-          "c1",
-          "c3",
-          "c2",
-          "c11",
-          "c6"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు",
-          "presenter": "priya-te",
-          "lines": [
-            {
-              "label": "ఏమి జరిగింది",
-              "text": "మెట్రో ఛార్జీలు జనవరి 1 నుంచి 20 శాతం పెరుగుతాయి.",
-              "claimIds": [
-                "c1",
-                "c3"
-              ]
-            },
-            {
-              "label": "ఎందుకు",
-              "text": "విద్యుత్ ఖర్చులు 35 శాతం పెరిగాయని అథారిటీ చెబుతోంది.",
-              "claimIds": [
-                "c2",
-                "c11"
-              ]
-            },
-            {
-              "label": "తెలియనివి",
-              "text": "ప్రభుత్వ సబ్సిడీ పరిశీలనలో ఉందో లేదో స్పష్టంగా లేదు.",
-              "claimIds": [
-                "c6"
-              ]
-            }
-          ]
-        },
-        "aiDisclosure": true,
-        "dependsOn": [],
-        "createdAt": "2026-10-15T00:00:00.000Z",
-        "updatedAt": "2026-10-15T00:00:00.000Z"
-      },
-      {
         "id": "video-en-916",
         "storyId": "th-air-quality",
         "kind": "video",
@@ -4753,36 +4074,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-15T00:00:00.000Z",
-        "updatedAt": "2026-10-15T00:00:00.000Z"
-      },
-      {
-        "id": "yt-te",
-        "storyId": "th-air-quality",
-        "kind": "yt_meta",
-        "channel": "youtube",
-        "lang": "te",
-        "tier": "regional",
-        "claimIds": [
-          "c1",
-          "c3"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "tier": "regional",
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు | OpenLens",
-          "description": "మూలాలు: ...\nAI-generated presenter / narration.",
-          "tags": [
-            "metro",
-            "news"
-          ],
-          "containsSyntheticMedia": true
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-15T00:00:00.000Z",
         "updatedAt": "2026-10-15T00:00:00.000Z"
@@ -4858,32 +4149,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-15T00:00:00.000Z",
-        "updatedAt": "2026-10-15T00:00:00.000Z"
-      },
-      {
-        "id": "wa-te",
-        "storyId": "th-air-quality",
-        "kind": "wa_digest",
-        "channel": "whatsapp",
-        "lang": "te",
-        "claimIds": [
-          "c1"
-        ],
-        "ledgerVersion": 1,
-        "status": "draft",
-        "payload": {
-          "templateName": "daily_digest_te",
-          "params": [
-            "మెట్రో ఛార్జీలు 20% పెంపు"
-          ],
-          "previewText": "నేటి వార్త: మెట్రో ఛార్జీలు 20% పెంపు",
-          "link": "https://openlens.app/story/sample-metro-fare"
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-15T00:00:00.000Z",
         "updatedAt": "2026-10-15T00:00:00.000Z"
@@ -5386,55 +4651,6 @@
         "updatedAt": "2026-10-14T21:00:00.000Z"
       },
       {
-        "id": "script-te",
-        "storyId": "ph-rice-prices",
-        "kind": "script",
-        "channel": "app",
-        "lang": "te",
-        "claimIds": [
-          "c1",
-          "c3",
-          "c2",
-          "c11",
-          "c6"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు",
-          "presenter": "priya-te",
-          "lines": [
-            {
-              "label": "ఏమి జరిగింది",
-              "text": "మెట్రో ఛార్జీలు జనవరి 1 నుంచి 20 శాతం పెరుగుతాయి.",
-              "claimIds": [
-                "c1",
-                "c3"
-              ]
-            },
-            {
-              "label": "ఎందుకు",
-              "text": "విద్యుత్ ఖర్చులు 35 శాతం పెరిగాయని అథారిటీ చెబుతోంది.",
-              "claimIds": [
-                "c2",
-                "c11"
-              ]
-            },
-            {
-              "label": "తెలియనివి",
-              "text": "ప్రభుత్వ సబ్సిడీ పరిశీలనలో ఉందో లేదో స్పష్టంగా లేదు.",
-              "claimIds": [
-                "c6"
-              ]
-            }
-          ]
-        },
-        "aiDisclosure": true,
-        "dependsOn": [],
-        "createdAt": "2026-10-14T21:00:00.000Z",
-        "updatedAt": "2026-10-14T21:00:00.000Z"
-      },
-      {
         "id": "video-en-916",
         "storyId": "ph-rice-prices",
         "kind": "video",
@@ -5457,36 +4673,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-14T21:00:00.000Z",
-        "updatedAt": "2026-10-14T21:00:00.000Z"
-      },
-      {
-        "id": "yt-te",
-        "storyId": "ph-rice-prices",
-        "kind": "yt_meta",
-        "channel": "youtube",
-        "lang": "te",
-        "tier": "regional",
-        "claimIds": [
-          "c1",
-          "c3"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "tier": "regional",
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు | OpenLens",
-          "description": "మూలాలు: ...\nAI-generated presenter / narration.",
-          "tags": [
-            "metro",
-            "news"
-          ],
-          "containsSyntheticMedia": true
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-14T21:00:00.000Z",
         "updatedAt": "2026-10-14T21:00:00.000Z"
@@ -5562,32 +4748,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-14T21:00:00.000Z",
-        "updatedAt": "2026-10-14T21:00:00.000Z"
-      },
-      {
-        "id": "wa-te",
-        "storyId": "ph-rice-prices",
-        "kind": "wa_digest",
-        "channel": "whatsapp",
-        "lang": "te",
-        "claimIds": [
-          "c1"
-        ],
-        "ledgerVersion": 1,
-        "status": "draft",
-        "payload": {
-          "templateName": "daily_digest_te",
-          "params": [
-            "మెట్రో ఛార్జీలు 20% పెంపు"
-          ],
-          "previewText": "నేటి వార్త: మెట్రో ఛార్జీలు 20% పెంపు",
-          "link": "https://openlens.app/story/sample-metro-fare"
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-14T21:00:00.000Z",
         "updatedAt": "2026-10-14T21:00:00.000Z"
@@ -6101,85 +5261,6 @@
         "updatedAt": "2026-10-14T13:00:00.000Z"
       },
       {
-        "id": "script-te",
-        "storyId": "apac-quake-response",
-        "kind": "script",
-        "channel": "app",
-        "lang": "te",
-        "claimIds": [
-          "c1",
-          "c3",
-          "c2",
-          "c11",
-          "c6"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు",
-          "presenter": "priya-te",
-          "lines": [
-            {
-              "label": "ఏమి జరిగింది",
-              "text": "మెట్రో ఛార్జీలు జనవరి 1 నుంచి 20 శాతం పెరుగుతాయి.",
-              "claimIds": [
-                "c1",
-                "c3"
-              ]
-            },
-            {
-              "label": "ఎందుకు",
-              "text": "విద్యుత్ ఖర్చులు 35 శాతం పెరిగాయని అథారిటీ చెబుతోంది.",
-              "claimIds": [
-                "c2",
-                "c11"
-              ]
-            },
-            {
-              "label": "తెలియనివి",
-              "text": "ప్రభుత్వ సబ్సిడీ పరిశీలనలో ఉందో లేదో స్పష్టంగా లేదు.",
-              "claimIds": [
-                "c6"
-              ]
-            }
-          ]
-        },
-        "aiDisclosure": true,
-        "dependsOn": [],
-        "createdAt": "2026-10-14T13:00:00.000Z",
-        "updatedAt": "2026-10-14T13:00:00.000Z"
-      },
-      {
-        "id": "yt-te",
-        "storyId": "apac-quake-response",
-        "kind": "yt_meta",
-        "channel": "youtube",
-        "lang": "te",
-        "tier": "regional",
-        "claimIds": [
-          "c1",
-          "c3"
-        ],
-        "ledgerVersion": 1,
-        "status": "approved",
-        "payload": {
-          "tier": "regional",
-          "title": "మెట్రో ఛార్జీలు 20% పెంపు | OpenLens",
-          "description": "మూలాలు: ...\nAI-generated presenter / narration.",
-          "tags": [
-            "metro",
-            "news"
-          ],
-          "containsSyntheticMedia": true
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
-        ],
-        "createdAt": "2026-10-14T13:00:00.000Z",
-        "updatedAt": "2026-10-14T13:00:00.000Z"
-      },
-      {
         "id": "x-en",
         "storyId": "apac-quake-response",
         "kind": "x_thread",
@@ -6250,32 +5331,6 @@
         "aiDisclosure": true,
         "dependsOn": [
           "script-en"
-        ],
-        "createdAt": "2026-10-14T13:00:00.000Z",
-        "updatedAt": "2026-10-14T13:00:00.000Z"
-      },
-      {
-        "id": "wa-te",
-        "storyId": "apac-quake-response",
-        "kind": "wa_digest",
-        "channel": "whatsapp",
-        "lang": "te",
-        "claimIds": [
-          "c1"
-        ],
-        "ledgerVersion": 1,
-        "status": "draft",
-        "payload": {
-          "templateName": "daily_digest_te",
-          "params": [
-            "మెట్రో ఛార్జీలు 20% పెంపు"
-          ],
-          "previewText": "నేటి వార్త: మెట్రో ఛార్జీలు 20% పెంపు",
-          "link": "https://openlens.app/story/sample-metro-fare"
-        },
-        "aiDisclosure": true,
-        "dependsOn": [
-          "script-te"
         ],
         "createdAt": "2026-10-14T13:00:00.000Z",
         "updatedAt": "2026-10-14T13:00:00.000Z"

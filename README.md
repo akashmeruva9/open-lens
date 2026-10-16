@@ -82,6 +82,24 @@ gcloud builds submit --config infra/cloudbuild.yaml .
 ```
 The api runs on Cloud Run with `STORE=firestore`, `ASSETS_BUCKET` (public media for Instagram/Facebook), and `AUTH_MODE=firebase` (studio editors need the `role: editor` custom claim or an address in `EDITOR_EMAILS`).
 
+### Redeploying an existing project, and the optional image features
+Run this in a terminal **from the repo root** (the folder that contains `infra/` and `services/`), logged in with `gcloud auth login` as someone who can deploy to the project. It is the same command as above, plus options:
+
+```bash
+gcloud builds submit --config infra/cloudbuild.yaml --project <your-project-id> \
+  --substitutions=_TAG=$(git rev-parse --short HEAD),_PUBLIC_URL=https://<your-web-service-url>,_PHOTOS=2,_ILLUSTRATIONS=1,_MAPS=1 .
+```
+
+| Option | Default | What it does | Cost per video |
+|---|---|---|---|
+| `_PUBLIC_URL` | empty | Where the end-card QR code and link point (`<url>/story/<id>`). Empty = placeholder | none |
+| `_PHOTOS` | 0 | Up to N credited file photos (Wikimedia Commons, licence- and Gemini-checked) of public figures, organisations or objects named in the script | about US$0.004 per photo checked |
+| `_ILLUSTRATIONS` | 0 | Up to N realistic, people-free AI backdrops, labelled "AI image" on screen | about US$0.035 each + one Gemini call |
+| `_MAPS` | 0 | A locator map (Natural Earth outline + pin) for the line that names a place | about US$0.004 |
+| `_CPU`, `_MEMORY`, `_DAILY_RUNS`, `_MAX_NEW`, `_MAX_UPDATES`, `_CONCURRENCY`, `_AUTO_PUBLISH` | 4, 8Gi, 100, 5, 4, 5, all | Sizing and wire limits. Lower them on a test project to protect credit, e.g. `_CPU=2,_MEMORY=4Gi,_DAILY_RUNS=10,_MAX_NEW=1,_MAX_UPDATES=1,_CONCURRENCY=1` | |
+
+Existing videos keep their old look until their story is re-run; new stories get the new layout. `_AUTO_PUBLISH` must stay `all` unless a person approves stories some other way (the studio was removed). If a service returns 403 after the first deploy, give it public access: `gcloud run services add-iam-policy-binding <service> --region us-central1 --member=allUsers --role=roles/run.invoker`.
+
 ## Guardrails built in
 - Claims are dropped unless their quoted passage appears verbatim in the source.
 - Evidence states are assigned by deterministic rules (independent roots, primary sources, contradictions); the model only proposes groupings.

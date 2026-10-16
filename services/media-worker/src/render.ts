@@ -1,15 +1,35 @@
+import { loadImage } from "@napi-rs/canvas";
 import { spawn } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { portraitBox, renderSceneFrame, SIZES, type Aspect, type Branding, type Scene } from "./scenes.js";
+import { renderHookFrame } from "./explainer.js";
+import { portraitBox, renderSceneFrame, sceneLayout, SIZES, type Aspect, type Branding, type Scene } from "./scenes.js";
 
 export function run(cmd: string, args: string[]): Promise<void> {
+  return runCapture(cmd, args).then(() => undefined);
+}
+
+/** Run a command; resolves with stdout + stderr (ffprobe/cropdetect output), rejects on a non-zero exit. */
+export function runCapture(cmd: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
-    const p = spawn(cmd, args, { stdio: ["ignore", "ignore", "pipe"] });
+    const p = spawn(cmd, args, { stdio: ["ignore", "pipe", "pipe"] });
+    let out = "";
     let err = "";
+    p.stdout.on("data", (d) => (out += d));
     p.stderr.on("data", (d) => (err += d));
-    p.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} exited ${code}: ${err.slice(-1500)}`))));
+    p.on("close", (code) => (code === 0 ? resolve({ stdout: out, stderr: err }) : reject(new Error(`${cmd} exited ${code}: ${err.slice(-1500)}`))));
   });
+}
+
+/** Optional intro: the first `seconds` show a supplied presenter clip (speaking, with its own audio) at a large size,
+ *  before the beats start. It is prepended: narration and captions of the script lines start after it. */
+export interface HookClip {
+  /** Video file (e.g. a Veo clip of the presenter). Its audio track, if any, is used for the intro. */
+  path: string;
+  /** How much of the clip to use. */
+  seconds: number;
+  /** What the presenter says in the clip, shown as the intro caption (and added as the first caption cue). */
+  text?: string;
 }
 
 export interface RenderOptions {
@@ -22,6 +42,8 @@ export interface RenderOptions {
   /** Also emit HLS for mobile playback. */
   hls?: boolean;
   aspect?: Aspect;
+  /** Optional intro clip (see HookClip). Absent: the video starts straight on the first beat. */
+  hook?: HookClip;
 }
 
 export interface RenderResult {
@@ -31,6 +53,29 @@ export interface RenderResult {
   durationSeconds: number;
 }
 
+async function hasAudio(path: string): Promise<boolean> {
+  try {
+    const { stdout } = await runCapture("ffprobe", ["-v", "error", "-select_streams", "a", "-show_entries", "stream=index", "-of", "csv=p=0", path]);
+    return stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Black-bar crop for generated clips (Veo can return 3:4 content letterboxed in a 9:16 frame). */
+async function detectCrop(path: string): Promise<string | undefined> {
+  try {
+    const { stderr } = await runCapture("ffmpeg", ["-hide_banner", "-t", "2", "-i", path, "-vf", "cropdetect=24:2:0", "-f", "null", "-"]);
+    const all = [...stderr.matchAll(/crop=(\d+):(\d+):(\d+):(\d+)/g)];
+    const m = all.at(-1);
+    return m ? `crop=${m[1]}:${m[2]}:${m[3]}:${m[4]},` : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+const even = (n: number) => Math.round(n / 2) * 2;
+
 export async function renderVideo(opts: RenderOptions): Promise<RenderResult> {
   const { outDir, name, scenes, brand } = opts;
   if (scenes.length === 0) throw new Error("No scenes to render");
@@ -38,23 +83,51 @@ export async function renderVideo(opts: RenderOptions): Promise<RenderResult> {
   await mkdir(work, { recursive: true });
 
   const aspect = opts.aspect ?? "9:16";
-  const total = scenes.reduce((s, sc) => s + sc.seconds, 0);
+  const hook = opts.hook && opts.hook.seconds > 0 ? opts.hook : undefined;
+  const hookSeconds = hook?.seconds ?? 0;
+  const total = scenes.reduce((s, sc) => s + sc.seconds, 0) + hookSeconds;
   const mp4 = join(outDir, `${name}.mp4`);
-  const audioArgs = opts.audioPath
-    ? ["-i", opts.audioPath]
-    : ["-f", "lavfi", "-i", "anullsrc=channel_layout=mono:sample_rate=44100"];
 
-  // With a presenter idle clip: each scene is composited (navy base + looping clip + transparent text overlay).
-  // Without one: still frames per scene, as before.
+  // Supplied illustrations are loaded once here so frame drawing stays synchronous.
+  for (const sc of scenes) {
+    if (sc.imagePath && !sc.image) sc.image = await loadImage(sc.imagePath).catch(() => undefined);
+  }
+
+  // Segment mode (one mp4 per scene, concatenated by stream copy) whenever something moves: the presenter idle clip
+  // or the hook intro. Otherwise still frames per scene through the concat demuxer, as before.
+  const segmentMode = Boolean(brand.presenterVideo || hook);
   const listLines: string[] = [];
   const { w: W, h: H } = SIZES[aspect];
+  const encode = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p", "-r", "30"];
+
+  if (hook) {
+    const overlay = join(work, "overlay-hook.png");
+    await writeFile(overlay, renderHookFrame({ text: hook.text, title: brand.title }, brand, aspect, true));
+    const box = portraitBox("hook", aspect);
+    const bw = even(box.w), bh = even(box.h);
+    const crop = (await detectCrop(hook.path)) ?? "";
+    const seg = join(work, "seg-hook.mp4");
+    await run("ffmpeg", [
+      "-y",
+      "-f", "lavfi", "-i", `color=c=0x0d0e12:s=${W}x${H}:r=30:d=${hookSeconds}`,
+      "-i", hook.path,
+      "-loop", "1", "-framerate", "30", "-t", String(hookSeconds), "-i", overlay,
+      "-filter_complex",
+      `[1:v]${crop}scale=${bw}:${bh}:force_original_aspect_ratio=increase,crop=${bw}:${bh}:(iw-${bw})/2:(ih-${bh})*0.2,setsar=1,fps=30,tpad=stop_mode=clone:stop_duration=${hookSeconds}[v];` +
+        `[0:v][v]overlay=${box.x}:${box.y}[b];[b][2:v]overlay=0:0:format=auto,format=yuv420p[o]`,
+      "-map", "[o]", "-t", String(hookSeconds), "-an", ...encode, seg,
+    ]);
+    listLines.push(`file '${seg}'`);
+  }
+
   for (let i = 0; i < scenes.length; i++) {
     const sc = scenes[i]!;
     const tag = String(i).padStart(3, "0");
     if (brand.presenterVideo) {
       const overlay = join(work, `overlay-${tag}.png`);
       await writeFile(overlay, renderSceneFrame(sc, brand, i, scenes.length, aspect, true));
-      const box = portraitBox(sc.layout === "anchor" ? "anchor" : "split", aspect);
+      const box = portraitBox(sceneLayout(sc), aspect);
+      const bw = even(box.w), bh = even(box.h);
       const seg = join(work, `seg-${tag}.mp4`);
       const offset = ((i * 2.7) % 6).toFixed(2); // stagger so consecutive scenes don't show the same blink
       await run("ffmpeg", [
@@ -63,28 +136,53 @@ export async function renderVideo(opts: RenderOptions): Promise<RenderResult> {
         "-stream_loop", "-1", "-ss", offset, "-i", brand.presenterVideo,
         "-loop", "1", "-framerate", "30", "-t", String(sc.seconds), "-i", overlay,
         "-filter_complex",
-        `[1:v]crop=iw:trunc(min(ih\\,iw*4/3)/2)*2:0:(ih-min(ih\\,iw*4/3))/2,scale=${box.w}:${box.h}:force_original_aspect_ratio=increase,crop=${box.w}:${box.h}:(iw-${box.w})/2:(ih-${box.h})*0.15,setsar=1,fps=30[v];` +
+        `[1:v]crop=iw:trunc(min(ih\\,iw*4/3)/2)*2:0:(ih-min(ih\\,iw*4/3))/2,scale=${bw}:${bh}:force_original_aspect_ratio=increase,crop=${bw}:${bh}:(iw-${bw})/2:(ih-${bh})*0.15,setsar=1,fps=30[v];` +
           `[0:v][v]overlay=${box.x}:${box.y}[b];[b][2:v]overlay=0:0:format=auto,format=yuv420p[o]`,
-        "-map", "[o]", "-t", String(sc.seconds), "-an",
-        "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", seg,
+        "-map", "[o]", "-t", String(sc.seconds), "-an", ...encode, seg,
       ]);
       listLines.push(`file '${seg}'`);
     } else {
       const file = join(work, `scene-${tag}.png`);
       await writeFile(file, renderSceneFrame(sc, brand, i, scenes.length, aspect));
-      listLines.push(`file '${file}'`, `duration ${sc.seconds}`);
+      if (segmentMode) {
+        const seg = join(work, `seg-${tag}.mp4`);
+        await run("ffmpeg", ["-y", "-loop", "1", "-framerate", "30", "-t", String(sc.seconds), "-i", file, "-an", ...encode, seg]);
+        listLines.push(`file '${seg}'`);
+      } else listLines.push(`file '${file}'`, `duration ${sc.seconds}`);
     }
   }
-  if (!brand.presenterVideo) listLines.push(`file '${join(work, `scene-${String(scenes.length - 1).padStart(3, "0")}.png`)}'`); // concat demuxer needs the last file repeated
+  if (!segmentMode) listLines.push(`file '${join(work, `scene-${String(scenes.length - 1).padStart(3, "0")}.png`)}'`); // concat demuxer needs the last file repeated
   const listPath = join(work, "list.txt");
   await writeFile(listPath, listLines.join("\n"));
+
+  // Audio: [hook clip's own audio (or silence) for hookSeconds] + narration. Padded with silence so an appended
+  // end card (no narration) keeps its full length.
+  let audioArgs: string[];
+  if (hook) {
+    const mixed = join(work, "audio-with-hook.wav");
+    const hookHasAudio = await hasAudio(hook.path);
+    const inputs = [
+      ...(hookHasAudio ? ["-i", hook.path] : ["-f", "lavfi", "-t", String(hookSeconds), "-i", "anullsrc=channel_layout=mono:sample_rate=44100"]),
+      ...(opts.audioPath ? ["-i", opts.audioPath] : ["-f", "lavfi", "-t", String(total - hookSeconds), "-i", "anullsrc=channel_layout=mono:sample_rate=44100"]),
+    ];
+    const fmt = "aresample=44100,aformat=sample_fmts=s16:channel_layouts=mono";
+    await run("ffmpeg", [
+      "-y", ...inputs, "-filter_complex",
+      `[0:a]atrim=0:${hookSeconds},${fmt},apad=whole_dur=${hookSeconds}[h];[1:a]${fmt}[n];[h][n]concat=n=2:v=0:a=1[out]`,
+      "-map", "[out]", mixed,
+    ]);
+    audioArgs = ["-i", mixed];
+  } else {
+    audioArgs = opts.audioPath ? ["-i", opts.audioPath] : ["-f", "lavfi", "-i", "anullsrc=channel_layout=mono:sample_rate=44100"];
+  }
 
   await run("ffmpeg", [
     "-y", "-f", "concat", "-safe", "0", "-i", listPath,
     ...audioArgs,
+    "-map", "0:v", "-map", "1:a",
     "-t", String(total),
-    ...(brand.presenterVideo ? ["-c:v", "copy"] : ["-vf", "fps=30,format=yuv420p", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23"]),
-    "-af", "loudnorm=I=-16:TP=-1.5:LRA=11",
+    ...(segmentMode ? ["-c:v", "copy"] : ["-vf", "fps=30,format=yuv420p", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23"]),
+    "-af", "loudnorm=I=-16:TP=-1.5:LRA=11,apad",
     "-c:a", "aac", "-b:a", "128k", "-shortest",
     "-movflags", "+faststart",
     mp4,
@@ -103,6 +201,6 @@ export async function renderVideo(opts: RenderOptions): Promise<RenderResult> {
     ]);
   }
   const thumbnail = join(outDir, `${name}-thumb.png`);
-  await writeFile(thumbnail, renderSceneFrame(scenes[0]!, brand, 0, scenes.length, opts.aspect ?? "9:16"));
+  await writeFile(thumbnail, renderSceneFrame(scenes[0]!, brand, 0, scenes.length, aspect));
   return { mp4, thumbnail, hlsPlaylist, durationSeconds: total };
 }

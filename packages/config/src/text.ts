@@ -48,8 +48,17 @@ export function breakUnits(text: string, lang: string): string[] {
   const seg = new Intl.Segmenter(lang, { granularity: "word" });
   const units: string[] = [];
   for (const { segment } of seg.segment(text)) {
-    // Keep whitespace and closing punctuation attached to the previous unit.
-    if (units.length && (/^\s+$/.test(segment) || /^[、。，．！？」』）)\]!?,.:;%％]+$/.test(segment))) units[units.length - 1] += segment;
+    const prev = units.at(-1);
+    // Keep whitespace and closing punctuation (incl. the Devanagari danda) attached to the previous unit, and keep
+    // CJK numbers with their counters/dates together ("2027年1月1日", "20％", "600ルピー" never split after the digits).
+    if (
+      prev !== undefined &&
+      (/^\s+$/.test(segment) ||
+        /^[、。，．！？」』）)\]!?,.:;%％।॥]+$/.test(segment) ||
+        (/\d$/.test(prev) && /^[年月日時分秒円人件歳倍回か所ヶ个元년월일명]/.test(segment)) ||
+        (/\d[年月]$/.test(prev) && /^\d/.test(segment)))
+    )
+      units[units.length - 1] += segment;
     else units.push(segment);
   }
   return units;

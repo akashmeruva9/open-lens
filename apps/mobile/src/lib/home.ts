@@ -37,12 +37,12 @@ export type CategoryKey = 'top' | 'politics' | 'economy' | 'climate' | 'tech' | 
 
 export const CATEGORIES: { key: CategoryKey; label: string; icon: string; topics: string[] }[] = [
   { key: 'top', label: 'Top', icon: 'flame-outline', topics: [] },
-  { key: 'politics', label: 'Politics', icon: 'business-outline', topics: ['politics', 'civic'] },
-  { key: 'economy', label: 'Economy', icon: 'trending-up-outline', topics: ['economy', 'trade'] },
+  { key: 'politics', label: 'Politics', icon: 'business-outline', topics: ['politics', 'elections', 'diplomacy', 'conflict', 'law', 'civic'] },
+  { key: 'economy', label: 'Economy', icon: 'trending-up-outline', topics: ['economy', 'business', 'trade'] },
   { key: 'climate', label: 'Climate & Disasters', icon: 'thunderstorm-outline', topics: ['climate', 'disaster'] },
-  { key: 'tech', label: 'Tech', icon: 'hardware-chip-outline', topics: ['tech', 'technology'] },
+  { key: 'tech', label: 'Tech', icon: 'hardware-chip-outline', topics: ['tech', 'technology', 'science'] },
   { key: 'health', label: 'Health', icon: 'medkit-outline', topics: ['health'] },
-  { key: 'society', label: 'Society', icon: 'people-outline', topics: ['society', 'education', 'transport'] },
+  { key: 'society', label: 'Society', icon: 'people-outline', topics: ['society', 'education', 'transport', 'rights', 'culture'] },
   { key: 'sport', label: 'Sport', icon: 'football-outline', topics: ['sport', 'sports'] },
   { key: 'wire', label: 'Wire', icon: 'list-outline', topics: [] },
 ];

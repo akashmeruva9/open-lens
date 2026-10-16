@@ -1,7 +1,7 @@
 // The wire: discover → dedupe → cluster → ingest permitted text → create/update stories → run pipeline.
 // Runs every INGEST_INTERVAL_MIN locally, or from Cloud Scheduler via POST /v1/internal/ingest.
 import {
-  Allowlist, allowlistEntryFor, assignLeads, embedTexts, fetchFeed, fetchGdelt, FeedsFile, intakeUrl, STAGES,
+  Allowlist, allowlistEntryFor, assignLeads, classifyTopics, embedTexts, fetchFeed, fetchGdelt, FeedsFile, intakeUrl, STAGES,
   type AllowlistEntry, type Candidate, type FeedConfig, type Lead,
 } from "@openlens/agents";
 import { CHANNEL_PLAN, isLang, languagesFor, MARKET_CODES, MODELS } from "@openlens/config";
@@ -87,6 +87,8 @@ export interface IngestEffects {
   /** Run the agent pipeline (+ policy steps) for a story. */
   process(storyId: string): Promise<void>;
   sleep(ms: number): Promise<void>;
+  /** Topics for a story that has none (backfill); optional so tests can omit it. */
+  classify?(title: string, summary: string): Promise<string[]>;
 }
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -126,6 +128,7 @@ export function defaultEffects(deps: Deps, cfg: IngestConfig): IngestEffects {
       }
     },
     sleep,
+    classify: (t, s) => classifyTopics(t, s),
   };
 }
 
@@ -380,6 +383,22 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
       }
     }
     await store.putState("budget", budget);
+    // Backfill topics for live stories written before topics were assigned (cheap, bounded per cycle).
+    if (fx.classify) {
+      let n = 0;
+      for (const st of await store.listStories()) {
+        if (n >= 40 || st.topics.length || !["published", "corrected", "stale"].includes(st.status) || toRun.includes(st.id)) continue;
+        const rec = await store.get(st.id);
+        if (!rec) continue;
+        n++;
+        try {
+          rec.story.topics = await fx.classify(rec.assessment?.headline || rec.story.title, rec.assessment?.neutralSummary || rec.story.summary);
+          await store.put(rec);
+        } catch (e) {
+          report.errors.push(`topics ${st.id}: ${String(e).slice(0, 120)}`);
+        }
+      }
+    }
     // 6) Pipelines run in the background (bounded concurrency); the cycle returns now.
     for (const id of toRun) fx.process(id).catch((e) => console.error(`wire pipeline ${id}:`, e));
     return report;

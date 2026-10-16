@@ -148,20 +148,48 @@ export function createApp(deps: Deps, wire?: WireOptions) {
   app.get("/health", (c) => c.json({ ok: true, authMode }));
 
   // ---------- Reader ----------
+  // The public feed reads every published story with its sub-collections (seconds on Firestore),
+  // so it is served from memory and rebuilt in the background at most every FEED_TTL_MS
+  // (single Cloud Run instance; a stale copy is fine for a news feed).
+  const FEED_TTL_MS = 30_000;
+  let feedCache: { at: number; items: FeedItem[] } | undefined;
+  let feedBuilding: Promise<FeedItem[]> | undefined;
+  const buildFeed = () =>
+    (feedBuilding ??= (async () => {
+      try {
+        const recs = await Promise.all((await deps.store.listStories()).filter((s) => PUBLIC_STATUSES.has(s.status)).map((s) => deps.store.get(s.id)));
+        const items = recs.filter((r): r is StoryRecord => Boolean(r)).map(toFeedItem).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+        feedCache = { at: Date.now(), items };
+        return items;
+      } finally {
+        feedBuilding = undefined;
+      }
+    })());
+  const publicFeed = async () => {
+    if (!feedCache) return buildFeed();
+    if (Date.now() - feedCache.at > FEED_TTL_MS) void buildFeed().catch((e) => console.error("feed rebuild failed:", e));
+    return feedCache.items;
+  };
   app.get("/v1/feed", async (c) => {
     const { lang, region, topic } = c.req.query();
-    const recs = await Promise.all((await deps.store.listStories()).filter((s) => PUBLIC_STATUSES.has(s.status)).map((s) => deps.store.get(s.id)));
-    const items = recs
-      .filter((r): r is StoryRecord => Boolean(r))
-      .filter((r) => (!lang || r.story.languages.includes(lang)) && (!region || inMarket(r.story.region, region)) && (!topic || r.story.topics.includes(topic)))
-      .map(toFeedItem)
-      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    const items = (await publicFeed()).filter(
+      (f) => (!lang || f.languages.includes(lang)) && (!region || inMarket(f.region, region)) && (!topic || f.topics.includes(topic)),
+    );
+    c.header("cache-control", "public, max-age=15");
     return c.json(items);
   });
+  // Story pages: same idea, per story, shorter TTL.
+  const storyCache = new Map<string, { at: number; bundle: StoryBundle }>();
   app.get("/v1/stories/:id", async (c) => {
-    const r = await load(c.req.param("id"));
+    const id = c.req.param("id");
+    const hit = storyCache.get(id);
+    if (hit && Date.now() - hit.at < 15_000) return c.json(hit.bundle);
+    const r = await load(id);
     if (!PUBLIC_STATUSES.has(r.story.status)) throw httpError(404, "not published");
-    return c.json(toReaderBundle(r));
+    const bundle = toReaderBundle(r);
+    if (storyCache.size > 500) storyCache.clear();
+    storyCache.set(id, { at: Date.now(), bundle });
+    return c.json(bundle);
   });
   app.get("/v1/stories/:id/events", (c) =>
     streamSSE(c, async (stream) => {

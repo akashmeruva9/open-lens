@@ -201,3 +201,13 @@ test("stale wire stories (e.g. marked for a format upgrade) are re-run once quie
   await ingestCycle(deps, cfg(), effects([], ran), new Date("2026-10-12T02:00:00Z"));
   assert.deepEqual(ran, [id]);
 });
+
+test("live stories without topics get them backfilled", async () => {
+  const { store, deps } = await setup();
+  const first = await ingestCycle(deps, cfg(), effects([lead("l1", "a.jp", "Metro fare to rise 20%"), lead("l2", "b.jp", "Metro fare hike approved")], []), new Date("2026-10-12T01:00:00Z"));
+  const rec = (await store.get(first.storiesCreated[0]!))!;
+  await store.put({ ...rec, story: { ...rec.story, status: "published", updatedAt: "2026-10-12T01:05:00Z" } });
+  const fx = { ...effects([], []), classify: async () => ["transport", "economy"] };
+  await ingestCycle(deps, cfg(), fx, new Date("2026-10-12T01:15:00Z"));
+  assert.deepEqual((await store.get(rec.story.id))!.story.topics, ["transport", "economy"]);
+});

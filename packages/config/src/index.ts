@@ -35,4 +35,11 @@ export const QUOTE_ONLY_USAGE = "link-and-short-quote";
 /** Longest verbatim quote shown to readers from a quote-only source. */
 export const MAX_QUOTE_CHARS = 300;
 
+/** Story topics the pipeline assigns (the reader's category buttons map onto these). */
+export const TOPICS = [
+  "politics", "elections", "diplomacy", "conflict", "law", "economy", "business", "climate", "disaster",
+  "technology", "science", "health", "education", "society", "rights", "transport", "culture", "sport",
+] as const;
+export type Topic = (typeof TOPICS)[number];
+
 export const PUBLIC_WEB_URL = process.env.PUBLIC_WEB_URL ?? "https://openlens.app";

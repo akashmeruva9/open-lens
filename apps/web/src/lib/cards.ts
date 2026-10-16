@@ -72,7 +72,7 @@ export interface Category { slug: string; label: string; topics: string[] }
 
 /** Home navigation. Story topics are free-form strings, so each category lists the topics it absorbs. */
 export const CATEGORIES: Category[] = [
-  { slug: "politics", label: "Politics", topics: ["politics", "election", "elections", "government", "policy", "law", "diplomacy"] },
+  { slug: "politics", label: "Politics", topics: ["politics", "election", "elections", "government", "policy", "law", "diplomacy", "conflict"] },
   { slug: "economy", label: "Economy", topics: ["economy", "business", "trade", "markets", "prices", "energy", "jobs", "finance"] },
   { slug: "climate", label: "Climate & Disasters", topics: ["climate", "disaster", "disasters", "weather", "environment", "water", "earthquake"] },
   { slug: "tech", label: "Tech", topics: ["tech", "technology", "science", "ai", "digital"] },

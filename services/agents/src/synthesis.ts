@@ -1,7 +1,8 @@
-import { MODELS } from "@openlens/config";
+import { MODELS, TOPICS } from "@openlens/config";
 import { Assessment, type Claim, type ContextItem, type LensLane, type SourceRecord } from "@openlens/schemas";
 import { ENGLISH_DESK, PLAIN_ENGLISH } from "./desk.js";
 import { generateStructured, type RunMeta } from "./gemini.js";
+import { z } from "zod";
 import { validateAssessment, type Violation } from "./validators.js";
 
 const SYSTEM = `You are the Editorial Synthesis Agent of OpenLens, a neutral AI newsroom. People see one-sided news everywhere; OpenLens collects what every outlet reports, does its own research, and explains the whole picture fairly, then gives its own evidence-based view.
@@ -17,6 +18,8 @@ Write:
    - whatsNext: what to watch for next.
 3. sections (the evidence ledger): established (ONLY claims whose state is "supported"; if none, say nothing is independently established yet and cite the closest claims under "unknown" instead), attributed (who said what), contested (where sources disagree), unknown (what is missing), implications, would_change (what evidence would change this assessment).
 
+4. topics: 1-3 topics from this list that best describe the story: ${TOPICS.join(", ")}.
+
 Rules: every part lists the claimIds it relies on (only ids given to you; background may cite none). Never present attributed allegations or opinions as established fact. No numeric truth scores.
 ${ENGLISH_DESK}
 ${PLAIN_ENGLISH}`;
@@ -27,7 +30,7 @@ export async function synthesizeAssessment(
   sources: SourceRecord[],
   ledgerVersion = 1,
   extra: { lanes?: LensLane[]; context?: ContextItem[] } = {},
-): Promise<{ assessment: Assessment; violations: Violation[]; meta: RunMeta }> {
+): Promise<{ assessment: Assessment; topics: string[]; violations: Violation[]; meta: RunMeta }> {
   const ledger = claims
     .map(
       (c) =>
@@ -43,14 +46,15 @@ export async function synthesizeAssessment(
   const { data, meta } = await generateStructured({
     model: MODELS.reasoning,
     system: SYSTEM,
-    schema: Assessment,
+    schema: Assessment.extend({ topics: z.array(z.enum(TOPICS)).min(1).max(3) }),
     temperature: 0.3,
     prompt: `storyId: ${storyId}\nledgerVersion: ${ledgerVersion}\n\nSOURCES:\n${srcList}\n\nCLAIMS:\n${ledger}${lanes ? `\n\nHOW OUTLETS FRAMED IT (by documented lean):\n${lanes}` : ""}${context ? `\n\nRESEARCH CONTEXT:\n${context}` : ""}`,
   });
   // Explainer citations: keep only ids that exist (the ledger sections are validated below).
   const known = new Set(claims.map((c) => c.id));
   const keep = (ids: string[]) => ids.filter((id) => known.has(id));
-  const ex = data.explainer;
+  const { topics, ...rest } = data;
+  const ex = rest.explainer;
   const explainer = ex && {
     ...ex,
     whatHappened: { ...ex.whatHappened, claimIds: keep(ex.whatHappened.claimIds) },
@@ -61,7 +65,7 @@ export async function synthesizeAssessment(
   // "Established" may only cite supported claims. The model sometimes slips an attributed or
   // contested claim in; move those ids to an "attributed" section instead of shipping a false claim.
   const stateOf = new Map(claims.map((c) => [c.id, c.state]));
-  const sections = data.sections.flatMap((s) => {
+  const sections = rest.sections.flatMap((s) => {
     if (s.kind !== "established") return [s];
     const ok = s.claimIds.filter((id) => stateOf.get(id) === "supported");
     const moved = s.claimIds.filter((id) => known.has(id) && stateOf.get(id) !== "supported");
@@ -71,6 +75,18 @@ export async function synthesizeAssessment(
     out.push({ kind: "attributed" as const, text: "Reported, but not yet confirmed by independent sources.", claimIds: moved });
     return out;
   });
-  const assessment = { ...data, sections, explainer, storyId, ledgerVersion };
-  return { assessment, violations: validateAssessment(assessment, claims), meta };
+  const assessment = { ...rest, sections, explainer, storyId, ledgerVersion };
+  return { assessment, topics, violations: validateAssessment(assessment, claims), meta };
+}
+
+/** Topics for a story that has none yet (backfill): one small call on the headline and summary. */
+export async function classifyTopics(title: string, summary: string): Promise<string[]> {
+  const { data } = await generateStructured({
+    model: MODELS.fast,
+    system: `Pick 1-3 topics that best describe this news story, only from: ${TOPICS.join(", ")}.`,
+    schema: z.object({ topics: z.array(z.enum(TOPICS)).min(1).max(3) }),
+    temperature: 0,
+    prompt: `${title}\n\n${summary}`,
+  });
+  return data.topics;
 }

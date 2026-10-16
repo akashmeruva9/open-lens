@@ -113,6 +113,7 @@ export async function runPipeline(state: PipelineState, sink: PipelineSink, only
     const r = await synthesizeAssessment(id, state.claims, state.sources, state.story.version, { lanes: state.lanes, context: state.context });
     state.assessment = r.assessment;
     if (r.assessment.headline && !state.story.summary) state.story.summary = r.assessment.neutralSummary;
+    if (r.topics.length) state.story.topics = r.topics;
     // Wire stories start with the source's headline (often not English); the English desk headline replaces it.
     if (state.story.origin === "wire" && r.assessment.headline) {
       state.story.title = r.assessment.headline;

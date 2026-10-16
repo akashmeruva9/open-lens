@@ -24,7 +24,7 @@ substitutions:
   _PUBLIC_URL: ""
   # Locator map beat for the line that names a place (1 = on).
   _MAPS: "0"
-  _GENAI_CAP: "3"
+  _GENAI_CAP: "10"
 options:
   machineType: E2_HIGHCPU_8
 steps:

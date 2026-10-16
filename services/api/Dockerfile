@@ -20,6 +20,8 @@ COPY --from=build /app /app
 COPY data/sources /app/data/sources
 # Presenter portraits + idle clips: media.ts reads /app/data/presenters; without them the render has no avatar.
 COPY data/presenters /app/data/presenters
+# Country outlines for locator-map beats (Natural Earth, public domain).
+COPY data/geo /app/data/geo
 WORKDIR /app/services/api
 EXPOSE 8080
 CMD ["node", "dist/server.js"]

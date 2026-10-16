@@ -6,6 +6,7 @@ import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
 import { uiStrings } from "@openlens/config";
 import type { Beat } from "./beats.js";
 import { drawCover, drawHighlighted, fitBlock, fitWidth, roundRect, scriptLeading, text, wrap } from "./draw.js";
+import { countryAt, loadCountries, viewBox } from "./geo.js";
 import { drawQr } from "./qr.js";
 import type { Aspect, Branding, Scene } from "./scenes.js";
 
@@ -259,6 +260,92 @@ function numberCard(ctx: SKRSContext2D, beat: Extract<Beat, { kind: "number" }>,
   }
 }
 
+function figuresCard(ctx: SKRSContext2D, beat: Extract<Beat, { kind: "figures" }>, b: Box, brand: Branding, vertical: boolean) {
+  card(ctx, b);
+  const ff = brand.fontFamily;
+  const items = beat.items.slice(0, 4);
+  const cols = items.length === 4 ? 2 : items.length;
+  const rows = items.length === 4 ? 2 : 1;
+  const cw = (b.w - 48) / cols, ch = (b.h - 48) / rows;
+  items.forEach((it, i) => {
+    const cx = b.x + 24 + (i % cols) * cw, cy = b.y + 24 + Math.floor(i / cols) * ch;
+    if (i % cols > 0) { ctx.fillStyle = C.line; ctx.fillRect(cx - 1, cy + 24, 2, ch - 48); }
+    const fig = `${it.value}${it.unit ?? ""}`;
+    const figFont = `OLLatin, ${ff}`;
+    let size = rows === 2 ? 130 : vertical ? 190 : 170;
+    for (; size > 56; size -= 6) { ctx.font = `900 ${size}px ${figFont}`; if (ctx.measureText(fig).width <= cw - 56) break; }
+    const qSize = rows === 2 ? 28 : 32;
+    const lSize = rows === 2 ? 34 : vertical ? 40 : 38;
+    const blockH = (it.qualifier ? qSize + 10 : 0) + size * 0.8 + 16 + lSize * 1.3;
+    let y = cy + (ch - blockH) / 2;
+    if (it.qualifier) { ctx.font = `700 ${qSize}px ${ff}`; ctx.fillStyle = C.muted; text(ctx, it.qualifier.toUpperCase(), cx + 28, y + qSize, "beat"); y += qSize + 10; }
+    ctx.font = `900 ${size}px ${figFont}`; ctx.fillStyle = C.accent;
+    text(ctx, fig, cx + 28, y + size * 0.8, "beat");
+    ctx.font = `700 ${lSize}px ${ff}`; ctx.fillStyle = C.text;
+    text(ctx, fitWidth(ctx, it.label, cw - 56), cx + 28, y + size * 0.8 + 16 + lSize, "beat");
+  });
+}
+
+function mapCard(ctx: SKRSContext2D, beat: Extract<Beat, { kind: "map" }>, b: Box, brand: Branding, vertical: boolean) {
+  card(ctx, b);
+  const ff = brand.fontFamily;
+  const hit = countryAt(beat.lon, beat.lat);
+  const pad = 20;
+  const area = { x: b.x + pad, y: b.y + pad, w: b.w - 2 * pad, h: b.h - 2 * pad };
+  ctx.save();
+  roundRect(ctx, area.x, area.y, area.w, area.h, 18);
+  ctx.clip();
+  ctx.fillStyle = "#12151c";
+  ctx.fillRect(area.x, area.y, area.w, area.h);
+  const vb = hit ? viewBox(hit.part, { lon: beat.lon, lat: beat.lat }) : { x0: beat.lon - 4, x1: beat.lon + 4, y0: beat.lat - 3, y1: beat.lat + 3 };
+  const midLat = (vb.y0 + vb.y1) / 2;
+  const kx = Math.cos((midLat * Math.PI) / 180);
+  const spanX = (vb.x1 - vb.x0) * kx, spanY = vb.y1 - vb.y0;
+  const scale = Math.min(area.w / spanX, area.h / spanY);
+  const ox = area.x + (area.w - spanX * scale) / 2, oy = area.y + (area.h - spanY * scale) / 2;
+  const px = (lon: number) => ox + (lon - vb.x0) * kx * scale;
+  const py = (lat: number) => oy + (vb.y1 - lat) * scale;
+  for (const c of loadCountries()) {
+    const own = c === hit?.country;
+    for (const poly of c.p) {
+      const ring = poly[0]!;
+      if (!ring.some(([x, y]) => x >= vb.x0 - 1 && x <= vb.x1 + 1 && y >= vb.y0 - 1 && y <= vb.y1 + 1)) continue;
+      ctx.beginPath();
+      ring.forEach(([x, y], i) => (i ? ctx.lineTo(px(x), py(y)) : ctx.moveTo(px(x), py(y))));
+      ctx.closePath();
+      ctx.fillStyle = own ? "#2b3d5c" : "#1d212b";
+      ctx.fill();
+      ctx.strokeStyle = own ? "#4a6592" : "#2a2f3c";
+      ctx.lineWidth = own ? 3 : 1.5;
+      ctx.stroke();
+    }
+  }
+  const x = px(beat.lon), y = py(beat.lat);
+  ctx.fillStyle = "rgba(255,214,10,0.25)";
+  ctx.beginPath(); ctx.arc(x, y, 40, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = C.accent;
+  ctx.beginPath(); ctx.arc(x, y, 15, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = "#0d0e12"; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.arc(x, y, 15, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+  // Place name tag (never on top of the pin: above it, or below near the top edge).
+  const size = vertical ? 44 : 40;
+  ctx.font = `800 ${size}px ${ff}`;
+  const label = fitWidth(ctx, beat.place, area.w - 80);
+  const tw = ctx.measureText(label).width + 40;
+  const lx = Math.min(Math.max(x - tw / 2, area.x + 16), area.x + area.w - tw - 16);
+  const ly = y - 40 - size - 24 > area.y + 8 ? y - 40 - size - 24 : y + 52;
+  ctx.fillStyle = "rgba(13,14,18,0.88)";
+  roundRect(ctx, lx, ly, tw, size + 24, 14); ctx.fill();
+  ctx.fillStyle = C.text;
+  text(ctx, label, lx + 20, ly + size + 4, "beat");
+  if (hit) {
+    ctx.font = `700 ${vertical ? 26 : 24}px ${ff}`;
+    ctx.fillStyle = C.muted;
+    text(ctx, hit.country.n.toUpperCase(), area.x + 24, area.y + area.h - 22, "beat");
+  }
+}
+
 function quoteCard(ctx: SKRSContext2D, beat: Extract<Beat, { kind: "quote" }>, b: Box, brand: Branding, vertical: boolean) {
   card(ctx, b);
   const ff = brand.fontFamily;
@@ -475,6 +562,8 @@ export function renderExplainerFrame(scene: Scene, brand: Branding, index: numbe
 
   switch (beat.kind) {
     case "number": numberCard(ctx, beat, L.beat, brand, vertical); break;
+    case "figures": figuresCard(ctx, beat, L.beat, brand, vertical); break;
+    case "map": mapCard(ctx, beat, L.beat, brand, vertical); break;
     case "quote": quoteCard(ctx, beat, L.beat, brand, vertical); break;
     case "timeline": timelineCard(ctx, beat, L.beat, brand, vertical); break;
     case "sources": sourcesCard(ctx, beat, L.beat, brand, vertical); break;

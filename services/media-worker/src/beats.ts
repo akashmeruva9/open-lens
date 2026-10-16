@@ -11,13 +11,17 @@
 import { numbersIn } from "@openlens/config";
 import type { ScriptLine } from "@openlens/schemas";
 
-export type BeatKind = "hero" | "number" | "quote" | "timeline" | "sources" | "illustration" | "cta";
+export type BeatKind = "hero" | "number" | "figures" | "map" | "quote" | "timeline" | "sources" | "illustration" | "cta";
 
 export type Beat =
   /** Headline card: first sentence of the line (empty for one-sentence lines: the renderer shows the label big). */
   | { kind: "hero"; headline: string }
   /** Big figure (digits copied from the line and verified against its claim text) + the sentence it comes from. */
   | { kind: "number"; value: string; unit?: string; qualifier?: string; sentence: string; claimId: string; by?: string }
+  /** Key figures: 2-4 verified numbers from the line, each with the words that follow it in the line (e.g. "33" + "children"). */
+  | { kind: "figures"; items: { value: string; unit?: string; qualifier?: string; label: string; claimId: string }[] }
+  /** Locator map: a place named in the line, drawn as a country outline with a pin. Coordinates come from a place lookup. */
+  | { kind: "map"; place: string; country?: string; lat: number; lon: number }
   /** Attributed statement: the sentence that carries an attributed claim + the name as spoken in the line.
    *  Drawn WITHOUT quotation marks, because the sentence is the presenter's paraphrase, not a verbatim quote. */
   | { kind: "quote"; text: string; by: string; claimId: string }
@@ -56,6 +60,8 @@ export interface BeatContext {
   ctaUrl?: string;
   /** An illustration image was supplied for this line. */
   illustration?: boolean;
+  /** A place named in this line, already geocoded (see mapplan.ts). Enables the locator-map beat. */
+  map?: { place: string; country?: string; lat: number; lon: number };
 }
 
 /** Hook for an LLM-chosen beat: a preferred kind. It is honoured only if the deterministic rules also allow it. */
@@ -147,6 +153,45 @@ export function numberBeat(line: ScriptLine, ctx: BeatContext): Beat | undefined
   return { kind: "number", value: cand.raw, unit: cand.percent ? "%" : undefined, qualifier: cand.qualifier, sentence: cand.sentence, claimId: best.claimId, ...(best.by ? { by: best.by } : {}) };
 }
 
+const LABEL_STOP = new Set(["of", "and", "or", "in", "on", "at", "by", "from", "to", "for", "with", "as", "that", "which", "who", "were", "was", "are", "is", "has", "have", "had", "be", "been", "will", "would", "the", "a", "an", "this", "these", "those", "when", "after", "before", "while", "but", "so"]);
+
+/** The 1-3 words right after a figure in the line ("33 children and a teacher" -> "children"); English lines only. */
+function labelAfter(text: string, cand: NumberCandidate): string | undefined {
+  let rest = text.slice(cand.index + cand.raw.length).replace(PERCENT_RE, "").replace(/^\s*(of\s+)?/i, "");
+  const words: string[] = [];
+  for (const w of rest.split(/\s+/)) {
+    const clean = w.replace(/^[("'\u2018\u201c]+|[)"'\u2019\u201d]+$/g, "");
+    const ends = /[.,;:!?]$/.test(clean);
+    const word = clean.replace(/[.,;:!?]+$/, "");
+    if (!word || LABEL_STOP.has(word.toLowerCase()) || /\d/.test(word) || !/^[\p{L}'-]+$/u.test(word)) break;
+    words.push(word);
+    if (ends || words.length === 3) break;
+  }
+  return words.length ? words.join(" ") : undefined;
+}
+
+/** Key-figures candidate: two or more distinct verified figures in one line, each with a label. English only; never attributed figures. */
+export function figuresBeat(line: ScriptLine, ctx: BeatContext): Beat | undefined {
+  if (!ctx.claims || ctx.lang !== "en") return undefined;
+  const backing = line.claimIds.map((id) => [id, ctx.claims![id]] as const).filter(([, c]) => safeClaim(c) && c!.state !== "attributed")
+    .map(([id, c]) => ({ id, nums: new Set(numbersIn(c!.text)) }));
+  const items: Extract<Beat, { kind: "figures" }>["items"] = [];
+  const seen = new Set<string>();
+  const t = line.text.normalize("NFKC");
+  for (const cand of numbersInLine(line.text)) {
+    if (cand.dateLike || (YEAR_RE.test(cand.norm) && !cand.percent) || seen.has(cand.norm)) continue;
+    const value = Number(cand.norm);
+    if (!Number.isFinite(value) || (!cand.percent && value < 2)) continue;
+    const owner = backing.find((b) => b.nums.has(cand.norm));
+    const label = owner ? labelAfter(t, cand) : undefined;
+    if (!owner || !label) continue;
+    seen.add(cand.norm);
+    items.push({ value: cand.raw, unit: cand.percent ? "%" : undefined, qualifier: cand.qualifier, label, claimId: owner.id });
+    if (items.length === 4) break;
+  }
+  return items.length >= 2 ? { kind: "figures", items } : undefined;
+}
+
 /** Attributed-statement candidate: an attributed claim whose attribution name is spoken in this line. */
 export function quoteBeat(line: ScriptLine, ctx: BeatContext): Beat | undefined {
   if (!ctx.claims) return undefined;
@@ -200,6 +245,10 @@ export function beatCandidates(line: ScriptLine, ctx: BeatContext): Beat[] {
   if (ctx.index === ctx.total - 1 && isCtaLine(line.text)) return [{ kind: "cta", text: line.text, url: ctx.ctaUrl }];
   const out: Beat[] = [];
   if (ctx.illustration) out.push({ kind: "illustration" });
+  // Where it happened comes first (once per video); then the figures, then the single most prominent number.
+  if (ctx.map) out.push({ kind: "map", ...ctx.map });
+  const fg = figuresBeat(line, ctx);
+  if (fg) out.push(fg);
   const n = numberBeat(line, ctx);
   if (n) out.push(n);
   const t = timelineBeat(line, ctx);
@@ -221,7 +270,8 @@ export function pickBeat(line: ScriptLine, ctx: BeatContext, hint?: BeatHint): B
     const h = cands.find((b) => b.kind === hint.kind);
     if (h) return h;
   }
-  const fresh = cands.filter((b) => !(b.kind === "sources" && ctx.used?.includes("sources")));
+  // The sources card (repeats the evidence chip) and the locator map are shown at most once per video.
+  const fresh = cands.filter((b) => !((b.kind === "sources" || b.kind === "map") && ctx.used?.includes(b.kind)));
   return fresh.find((b) => b.kind !== ctx.prev) ?? fresh[0] ?? cands[0]!;
 }
 

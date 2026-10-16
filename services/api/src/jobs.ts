@@ -112,6 +112,7 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
         storyId,
         autoIllustrations: Number(process.env.AUTO_ILLUSTRATIONS ?? 0) || 0,
         autoPhotos: Number(process.env.AUTO_PHOTOS ?? 0) || 0,
+        autoMaps: process.env.AUTO_MAPS === "1",
         sourceLabels,
         captionTracks,
         claims,

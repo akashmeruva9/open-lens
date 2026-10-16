@@ -9,6 +9,7 @@ import { run, renderVideo, type HookClip } from "./render.js";
 import { loadPresenter, type Aspect, type Scene } from "./scenes.js";
 import { synthesizeToFile } from "./tts.js";
 import { planFilePhotos } from "./imagedesk.js";
+import { planMap, type MapPlace } from "./mapplan.js";
 import { pickIllustrationLines, planIllustrations } from "./visuals.js";
 
 export interface MediaJob {
@@ -40,6 +41,10 @@ export interface MediaJob {
   storyId?: string;
   /** Generate up to N realistic backdrops (about US$0.035 each + one Gemini call) for lines with nothing numeric to show. 0 = off. */
   autoIllustrations?: number;
+  /** Draw a locator map for the line that names a specific place (Natural Earth outline + place lookup; ~US$0.004). */
+  autoMaps?: boolean;
+  /** Places by script line index (set by autoMaps, or supplied). */
+  maps?: Record<number, MapPlace>;
   /** Real licensed file photos (Wikimedia Commons, verified by Gemini) of subjects the lines name, with a credit line. 0 = off. Tried before AI backdrops. */
   autoPhotos?: number;
   /** Credit line per script line index for file photos (shown as "File photo · credit"). */
@@ -187,6 +192,9 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
     presenterImage: await loadPresenter(job.presenterImagePath ?? defaultPortrait(presenter)),
     presenterVideo: defaultIdleClip(presenter),
   };
+  if (job.style !== "tv" && job.autoMaps && !job.maps) {
+    job.maps = await planMap({ title: job.script.title, lines: timed.map((t, i) => ({ index: i, text: t.text })), lang: job.lang });
+  }
   if (job.style !== "tv" && !job.illustrations && ((job.autoIllustrations ?? 0) > 0 || (job.autoPhotos ?? 0) > 0) && job.storyId) {
     const ctaUrl = job.ctaUrl ?? (process.env.OPENLENS_PUBLIC_URL?.trim() || undefined);
     const kinds = timed.map((t, i) => beatCandidates({ label: t.label, text: t.text, claimIds: t.claimIds },
@@ -269,7 +277,7 @@ export function explainerScenes(job: MediaJob, timed: TimedLine[]): Scene[] {
     const beat: Beat = pickBeat(
       { label: t.label, text: t.text, claimIds: t.claimIds },
       { claims: job.claims, sources, timeline: job.timeline, timelineLang: job.ledgerLang ?? "en", lang: job.lang,
-        index: i, total: timed.length, prev, used, ctaUrl, illustration: Boolean(imagePath) },
+        index: i, total: timed.length, prev, used, ctaUrl, map: job.maps?.[i], illustration: Boolean(imagePath) },
       job.beatHints?.[i],
     );
     prev = beat.kind;

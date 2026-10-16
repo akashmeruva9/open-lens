@@ -63,9 +63,9 @@ export default async function BrowsePage({ params, searchParams }: Params) {
     <div className="page pb-8 pt-8 sm:pt-12">
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-line pb-6">
         <div className="flex items-center gap-3">
-          <span aria-hidden className="inline-flex size-11 items-center justify-center rounded-full bg-ink text-bg">{view.icon}</span>
+          <span aria-hidden className="hidden size-12 items-center justify-center rounded-md border border-line-strong text-ink sm:inline-flex">{view.icon}</span>
           <div>
-            <h1 className="display text-[30px] leading-[34px] sm:text-[40px] sm:leading-[44px]">{view.title}</h1>
+            <h1 className="display text-[32px] leading-[36px] sm:text-[48px] sm:leading-[50px]">{view.title}</h1>
             <p className="mt-1 text-[15px] leading-[22px] text-ink-2">
               {view.blurb}
               {view.byEdition && edition !== "APAC" ? <> Showing the {editionName(edition)} edition (plus region-wide stories).</> : null}

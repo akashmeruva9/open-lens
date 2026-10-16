@@ -22,13 +22,16 @@ What OpenLens adds on top of the pattern — and must stay visible — is the ev
 
 Keep the existing lens (`--lens-*`) and evidence (`--ev-*`) colours; they carry meaning.
 
-Radii: `--r-sm: 4px` (chips on media), `--r-md: 6px` (thumbnails, cards), `--r-lg: 10px` (hero, sheets), `--r-pill: 999px` (chips, buttons).
+Radii: `--r-sm: 4px` (chips on media, label pills), `--r-md: 8px` (thumbnails, cards), `--r-lg: 12px` (featured band, sheets), `--r-pill: 999px` (chips, buttons).
+
+Added for the editorial layout: `--pop` `#f5ff3d` / `--pop-ink` `#080808` (solid label pills such as "In the spotlight" and "Featured", and highlighted words in burned-in headlines), `--line-strong` (`#0a0a0a` light / `#3a3a3a` dark: outlined spotlight tiles, "View all" and pager buttons).
 Spacing unit 4px; page max width **1240px**, outer margin 20px (16px on phones), rail gutter 12px (phone) / 16px (desktop).
 
 ## 2. Type
 
 - **Display:** Inter Tight 700 (web: `next/font/google`; mobile: system bold fallback acceptable). Sentence case, tight tracking (−0.01em to −0.02em), line-height 1.05–1.15.
-  - Hero title 40/44 desktop, 30/34 phone · Rail title 24/28 · Card title 15/19 (clamp 4 lines on video cards, 3 on article cards).
+  - Featured title 52/54 desktop, 32/34 phone · Rail title 32/36 (26/30 phone) · Card title 15/19 semibold (3-line clamp).
+  - **Burned-in headlines** (`.burn`): white display type over a scrim on media tiles; the two longest content words are set in `--pop` (`burnTitle()`).
 - **Body:** Inter 400/500, 16/24; deks 15/22 `--ink-2`.
 - **Labels:** 12/16, 600, sentence case (no all-caps blocks). Market/category eyebrow may use small caps-style weight 600 `--ink-3`.
 - **Scripts:** fall back to system fonts for ja/ko/zh/th/hi/te/ta (Noto/Hiragino/Apple SD Gothic/PingFang/Thonburi). Never clip non-Latin text with fixed heights.
@@ -36,20 +39,20 @@ Spacing unit 4px; page max width **1240px**, outer margin 20px (16px on phones),
 ## 3. Core components
 
 - **VideoCard (vertical)** — thumbnail 9:16 (`aspect-ratio: 9/16`), `--r-md`, subtle dark gradient at bottom; overlays: duration pill bottom-left (`0:48`), language pill top-left (`日本語`), tiny "AI presenter" tag top-right. Title below the thumbnail (display 15/19, 4-line clamp), then a metadata row: market · relative time · evidence dot-counts. Hover (web): image scale 1.03, title underline. Story without video → **PosterCard**: same frame, solid `--surface` with the headline set large inside, market eyebrow, and a "Read" glyph instead of play.
-- **SpotlightHero** — left: large 2:3 (phone: full-width 4:5) media tile with muted autoplay preview when a video exists (respect reduced motion + low-data); right/below: eyebrow ("In the spotlight" / market), hero title, dek, evidence chips, CTA buttons "Watch" (filled ink) and "Open the research" (outline).
-- **SpotlightList** — 3 compact rows next to the hero (desktop) / under it (phone): 4:5 thumb 96px + title + dek (2 lines).
-- **Rail** — header: icon + title (24/28 display) + "View all →" (accent) on the right; body: horizontal scroll-snap row of VideoCards (desktop shows ~5.5 cards to signal scrolling; arrow buttons on hover; phone shows ~2.3). Keyboard reachable, `aria-roledescription="carousel"`.
-- **ArticleSlider** — cards with 3:2 thumbnail, pill chip (topic/market) and 3-line title; used for "Explainers" (stories without video, or assessment-led).
-- **EditionSwitcher** — pill dropdown in the header: "Asia-Pacific ▾" listing JAPAC markets (`MARKETS` from `@openlens/config`) with native-language subtitle; selection filters every rail and persists (cookie/localStorage on web, settings on mobile).
-- **CategoryNav** — icon-over-label row (horizontal scroll on phone): Top, Politics, Economy, Climate & Disasters, Tech, Health, Society, Sport (topics) — plus a "Wire" item that lists everything newest-first.
+- **SpotlightGrid** — outlined tiles (1px `--line-strong`, 8px inner gutter): a lead tile spanning two rows with an "In the spotlight" pop pill straddling its top edge, two stacked tiles, and a tall tile with its dek. Each tile: landscape media with the headline burned in, then title, dek, and market · time · evidence dots.
+- **FeaturedBand** — full-width dark panel (both themes) over a blurred still: vertical video with muted preview on the left (respect reduced motion + low-data); "Featured" pill, burned-in title, dek, disclosure labels (auto-published, checks flagged, evidence counts) and "Watch" / "Open the research" on the right.
+- **Rail** — header: title (32/36 display) with a chevron link + round outlined "View all" button on the right; body: horizontal scroll-snap row of VideoCards with a thin visible scrollbar (desktop ~5.5 cards; arrow buttons on hover; phone ~2.3). Article rails use round prev/next buttons under the track instead. Keyboard reachable, `aria-roledescription="carousel"`.
+- **ArticleSlider** — horizontal cards: 4:3 thumbnail left; accent "Explainer" pill, 4-line title and metadata right; used for "Explainers" (stories without video, or assessment-led).
+- **EditionSwitcher** — row pinned to the foot of the desktop sidebar (opens upwards), pill in the phone top bar: "Asia-Pacific ▾" listing JAPAC markets (`MARKETS` from `@openlens/config`) with native-language subtitle; selection filters every rail and persists (cookie/localStorage on web, settings on mobile).
+- **CategoryNav** — vertical icon + label list in the desktop sidebar (active item inverted ink), then Videos / Explainers / Corrections / Search; icon-over-label strip under the phone top bar: Top, Politics, Economy, Climate & Disasters, Tech, Health, Society, Sport (topics) — plus a "Wire" item that lists everything newest-first.
 - **Chips** — pill, 12/16 600: evidence chips keep `--ev-*`; `LIVE`/`Developing`/`Corrected` use `--live`; `Auto-published · not editor-reviewed` uses outline `--ink-3`.
 - **Footer** — editions (markets), categories, About OpenLens ("How we verify", "AI disclosure policy", "Corrections"), social links placeholders, legal. No third-party brand names.
 
 ## 4. Page layouts
 
 ### Home
-1. Header (sticky, white, 64px): wordmark · CategoryNav (desktop inline; phone below header) · EditionSwitcher · search icon · theme toggle.
-2. **SpotlightHero + SpotlightList** (top story by recency × evidence × video availability).
+1. Shell: desktop (≥1024px) has a sticky left sidebar (`--sidebar-w`, 232px): wordmark · CategoryNav · About links · EditionSwitcher + theme toggle at the foot. Phones/tablets get a sticky top bar (wordmark · EditionSwitcher · search · theme) with the category strip below.
+2. **SpotlightGrid** (top four stories by recency × evidence × video availability), then the **FeaturedBand** (strongest video story not in the grid).
 3. **Rail "Latest videos"** (all video outputs, newest first, in the reader's language if available).
 4. **ArticleSlider "Explainers"**.
 5. **One Rail per market** in the selected edition order (Asia-Pacific shows all markets with stories; a single edition shows its topics instead).

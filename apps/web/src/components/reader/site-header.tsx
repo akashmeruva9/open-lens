@@ -1,23 +1,52 @@
 import { MARKETS, MARKET_CODES } from "@openlens/config";
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
-import { IconSearch } from "@/components/ui/icons";
+import { IconArrowUpRight, IconSearch } from "@/components/ui/icons";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { readEdition } from "@/lib/edition-server";
 import { CategoryNav } from "./category-nav";
 import { NAV_ITEMS } from "./category-icons";
 import { EditionSwitcher } from "./edition-switcher";
 
-export async function SiteHeader() {
+/** Desktop: fixed left sidebar with wordmark, sections, about links and the edition switcher pinned to the foot. */
+export async function SiteSidebar() {
   const edition = await readEdition();
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-bg/95 backdrop-blur supports-[backdrop-filter]:bg-bg/85">
-      <div className="page flex h-16 items-center gap-3">
+    <aside className="sticky top-0 hidden h-dvh flex-col border-r border-line bg-bg lg:flex">
+      <div className="px-5 pb-6 pt-7">
         <Logo />
-        <div className="mx-auto hidden xl:block">
-          <CategoryNav variant="inline" />
+      </div>
+      <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto px-2.5">
+        <CategoryNav variant="sidebar" />
+        <hr className="mx-2.5 my-3 border-line" />
+        <ul aria-label="About OpenLens" className="grid gap-1 px-2.5 pb-4">
+          {ABOUT.map((a) => (
+            <li key={a.href}>
+              <Link href={a.href} className="inline-flex items-center gap-1 text-[13px] font-semibold leading-6 text-ink-2 hover:text-ink">
+                {a.label} <IconArrowUpRight size={12} />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="flex items-center gap-1 border-t border-line px-2.5 py-2.5">
+        <div className="min-w-0 flex-1">
+          <EditionSwitcher edition={edition} variant="sidebar" />
         </div>
-        <div className="ml-auto flex items-center gap-1 xl:ml-0">
+        <ThemeToggle />
+      </div>
+    </aside>
+  );
+}
+
+/** Phone and tablet: sticky top bar with the category strip underneath. */
+export async function MobileHeader() {
+  const edition = await readEdition();
+  return (
+    <header className="sticky top-0 z-40 border-b border-line bg-bg/95 backdrop-blur supports-[backdrop-filter]:bg-bg/85 lg:hidden">
+      <div className="page flex h-14 items-center gap-2">
+        <Logo />
+        <div className="ml-auto flex items-center gap-0.5 sm:gap-1">
           <EditionSwitcher edition={edition} />
           <Link href="/browse/wire?focus=search" aria-label="Search stories"
             className="inline-flex size-10 items-center justify-center rounded-full text-ink hover:bg-surface">
@@ -26,7 +55,7 @@ export async function SiteHeader() {
           <ThemeToggle />
         </div>
       </div>
-      <div className="border-t border-line xl:hidden">
+      <div className="border-t border-line">
         <CategoryNav variant="strip" />
       </div>
     </header>

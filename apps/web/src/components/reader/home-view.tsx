@@ -2,15 +2,13 @@
 import { MARKETS, MARKET_CODES } from "@openlens/config";
 import Link from "next/link";
 import { buttonClass } from "@/components/ui/button";
-import { IconArticle, IconFilm, IconPin, IconShieldCheck } from "@/components/ui/icons";
 import { CATEGORIES, hasVideo, inCategory, newestFirst, spotlightScore, type CardItem } from "@/lib/cards";
 import { useLiveCards } from "@/lib/data/live";
 import { editionName, inEdition } from "@/lib/edition";
 import { langNative } from "@/lib/format";
 import { ArticleCard } from "./article-card";
-import { CategoryIcon } from "./category-icons";
 import { Rail } from "./rail";
-import { SpotlightHero, SpotlightList } from "./spotlight";
+import { FeaturedBand, SpotlightGrid } from "./spotlight";
 import { StoryCard } from "./story-card";
 
 const marketSubtitle = (m: string) => (MARKETS as Record<string, { languages: readonly string[] }>)[m]?.languages.map(langNative).join(" · ");
@@ -23,8 +21,9 @@ export function HomeView({ initial, edition }: { initial: CardItem[]; edition: s
 
   const now = Date.now();
   const ranked = [...cards].sort((a, b) => spotlightScore(b, now) - spotlightScore(a, now));
-  const [hero, ...rest] = ranked;
-  const spotlightList = rest.slice(0, 3);
+  const spotlight = ranked.slice(0, 4);
+  // Featured: the strongest video story not already in the grid (else the lead, when it has a video).
+  const featured = ranked.find((c, i) => i >= spotlight.length && hasVideo(c)) ?? (hasVideo(ranked[0]) ? ranked[0] : undefined);
 
   const videos = cards.filter(hasVideo);
   const explainers = cards.filter((c) => !hasVideo(c));
@@ -40,7 +39,6 @@ export function HomeView({ initial, edition }: { initial: CardItem[]; edition: s
           title: m === "APAC" ? "Across Asia-Pacific" : MARKETS[m].name,
           subtitle: marketSubtitle(m),
           href: `/browse/${m.toLowerCase()}`,
-          icon: <IconPin size={18} />,
           list: cards.filter((c) => c.market === m),
         }))
       : CATEGORIES.map((cat) => ({
@@ -48,32 +46,30 @@ export function HomeView({ initial, edition }: { initial: CardItem[]; edition: s
           title: cat.label,
           subtitle: `${editionName(edition)} edition`,
           href: `/browse/${cat.slug}`,
-          icon: <CategoryIcon slug={cat.slug} size={18} />,
           list: cards.filter((c) => inCategory(c, cat)),
         }));
 
   return (
     <div className="pb-8">
-      <div className="page pt-6 sm:pt-10">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10">
-          <SpotlightHero card={hero} edition={edition} />
-          <SpotlightList cards={spotlightList} edition={edition} />
-        </div>
+      <div className="page pt-5 sm:pt-8">
+        <SpotlightGrid cards={spotlight} edition={edition} />
       </div>
 
+      {featured ? <FeaturedBand card={featured} edition={edition} /> : null}
+
       <div className="mt-14">
-        <Rail title="Latest videos" icon={<IconFilm size={18} />} href="/browse/videos" items={videoItems(videos)}
+        <Rail title="Latest videos" href="/browse/videos" items={videoItems(videos)}
           subtitle={edition === "APAC" ? "Vertical briefs from every desk" : `In ${marketSubtitle(edition)} where available`} />
 
-        <Rail title="Explainers" variant="article" icon={<IconArticle size={18} />} href="/browse/explainers"
+        <Rail title="Explainers" variant="article" href="/browse/explainers"
           subtitle="Read-first stories, built from the evidence ledger"
           items={explainers.map((c) => ({ key: c.id, node: <ArticleCard card={c} /> }))} />
 
         {groupRails.map((g) => (
-          <Rail key={g.key} title={g.title} subtitle={g.subtitle} href={g.href} icon={g.icon} items={videoItems(g.list)} />
+          <Rail key={g.key} title={g.title} subtitle={g.subtitle} href={g.href} items={videoItems(g.list)} />
         ))}
 
-        <Rail title="Corrected & updated" icon={<IconShieldCheck size={18} />} href="/browse/corrected"
+        <Rail title="Corrected & updated" href="/browse/corrected"
           subtitle="Every correction is logged publicly and travels to every video and post"
           items={videoItems(corrected)} />
       </div>

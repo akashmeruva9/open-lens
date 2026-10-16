@@ -41,6 +41,8 @@ export const IconBroadcast = (p: P) => <Svg {...p}><circle cx="12" cy="12" r="2"
 
 // ---- Navigation / rails (drawn for OpenLens; 24px grid, 1.8 stroke) ----
 export const IconSearch = (p: P) => <Svg {...p}><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4.2-4.2" /></Svg>;
+export const IconArrowUpRight = (p: P) => <Svg {...p}><path d="M7 17 17 7M8 7h9v9" /></Svg>;
+export const IconArrowLeft = (p: P) => <Svg {...p}><path d="M19 12H5M11 18l-6-6 6-6" /></Svg>;
 export const IconArrowRight = (p: P) => <Svg {...p}><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></Svg>;
 export const IconTop = (p: P) => <Svg {...p}><path d="M3 17 9 11l4 4 8-8" /><path d="M15 7h6v6" /></Svg>;
 export const IconPolitics = (p: P) => <Svg {...p}><path d="M3 9.5 12 4l9 5.5" /><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8" /><path d="M3 20h18" /></Svg>;

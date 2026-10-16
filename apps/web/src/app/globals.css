@@ -25,6 +25,11 @@
   --accent-ink: #ffffff;
   --live: #e5383b;
   --highlight: #eaff5c;
+  /* Label pills ("In the spotlight", "Featured") and highlighted words in burned-in headlines */
+  --pop: #f5ff3d;
+  --pop-ink: #080808;
+  /* Card outlines: hard ink in light, quiet grey in dark */
+  --line-strong: #0a0a0a;
 
   /* Media frames (posters, players) stay dark in both themes so white type keeps >= 4.5:1. */
   --frame: #141414;
@@ -38,10 +43,11 @@
   --focus: var(--accent);
 
   --r-sm: 4px;
-  --r-md: 6px;
-  --r-lg: 10px;
+  --r-md: 8px;
+  --r-lg: 12px;
   --r-pill: 999px;
   --header-h: 64px;
+  --sidebar-w: 232px;
 
   --lens-left: #4f46e5;
   --lens-center: #57606f;
@@ -72,6 +78,7 @@
     --ink-2: #c7c7c7;
     --ink-3: #8c8c8c;
     --line: #2a2a2a;
+    --line-strong: #3a3a3a;
     --accent: #6b8bff;
     --accent-ink: #080808;
     --live: #ff5a5d;
@@ -101,6 +108,7 @@
   --ink-2: #c7c7c7;
   --ink-3: #8c8c8c;
   --line: #2a2a2a;
+  --line-strong: #3a3a3a;
   --accent: #6b8bff;
   --accent-ink: #080808;
   --live: #ff5a5d;
@@ -134,6 +142,9 @@
   --color-accent-ink: var(--accent-ink);
   --color-live: var(--live);
   --color-highlight: var(--highlight);
+  --color-pop: var(--pop);
+  --color-pop-ink: var(--pop-ink);
+  --color-line-strong: var(--line-strong);
   --color-frame: var(--frame);
   --color-frame-2: var(--frame-2);
   --color-frame-ink: var(--frame-ink);
@@ -213,6 +224,31 @@ button {
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
 }
+@utility frame-card {
+  /* Outlined tile with an inner gutter around its media (spotlight grid) */
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  padding: 8px;
+}
+@utility pop-pill {
+  /* Solid label pill: "In the spotlight", "Featured" */
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--r-sm);
+  background: var(--pop);
+  color: var(--pop-ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 20px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+@utility thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-3) var(--surface);
+}
 @utility eyebrow {
   /* Labels: 12/16 600, sentence case (spec §2) */
   font-size: 0.75rem;
@@ -223,7 +259,7 @@ button {
 @utility display {
   font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.02em;
   line-height: 1.1;
 }
 @utility page {
@@ -256,6 +292,21 @@ button {
   font-size: clamp(10px, 5.4cqi, 13px);
   line-height: 1.2;
   font-weight: 600;
+}
+
+/* Burned-in headline on media: highlighted words take the pop colour */
+.burn {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+  color: #fff;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 12px rgb(0 0 0 / 0.35);
+}
+.burn em {
+  font-style: normal;
+  color: var(--pop);
 }
 
 /* Scrim: guarantees >= 4.5:1 for white text over any thumbnail. */

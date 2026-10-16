@@ -8,8 +8,12 @@ import { langNative } from "@/lib/format";
 
 const subtitle = (m: MarketCode) => (m === "APAC" ? "All markets · English desk" : MARKETS[m].languages.map(langNative).join(" · "));
 
-/** Pill dropdown listing JAPAC markets with native-language subtitles. Persists to a cookie, then re-renders on the server. */
-export function EditionSwitcher({ edition }: { edition: MarketCode }) {
+/**
+ * Dropdown listing JAPAC markets with native-language subtitles. Persists to a cookie, then re-renders on the server.
+ * "pill" sits in the phone top bar; "sidebar" is the full-width row at the foot of the desktop sidebar and opens upwards.
+ */
+export function EditionSwitcher({ edition, variant = "pill" }: { edition: MarketCode; variant?: "pill" | "sidebar" }) {
+  const sidebar = variant === "sidebar";
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(() => MARKET_CODES.indexOf(edition));
@@ -58,7 +62,7 @@ export function EditionSwitcher({ edition }: { edition: MarketCode }) {
   }
 
   return (
-    <div ref={wrap} className="relative">
+    <div ref={wrap} className={`relative ${sidebar ? "w-full" : ""}`}>
       <button
         ref={btn}
         type="button"
@@ -73,11 +77,17 @@ export function EditionSwitcher({ edition }: { edition: MarketCode }) {
             setOpen(true);
           }
         }}
-        className={`inline-flex h-10 items-center gap-1.5 rounded-full border border-line bg-bg pl-3 pr-2.5 text-sm font-semibold text-ink hover:border-ink-3 ${pending ? "opacity-60" : ""}`}
+        className={`${
+          sidebar
+            ? "flex h-11 w-full items-center gap-2 rounded-md px-2.5 text-[14px] font-semibold text-ink hover:bg-surface"
+            : "inline-flex h-10 items-center gap-1 rounded-full border border-line bg-bg pl-2.5 pr-2 sm:gap-1.5 sm:pl-3 sm:pr-2.5 text-sm font-semibold text-ink hover:border-ink-3"
+        } ${pending ? "opacity-60" : ""}`}
       >
-        <IconGlobe size={16} className="text-ink-2" />
-        <span className="max-w-[9.5rem] truncate">{MARKETS[edition].name}</span>
-        <IconChevronDown size={16} className={`text-ink-2 transition-transform ${open ? "rotate-180" : ""}`} />
+        <IconGlobe size={16} className="shrink-0 text-ink-2" />
+        <span className={`truncate ${sidebar ? "flex-1 text-left" : "max-w-[5.5rem] sm:max-w-[9.5rem]"}`}>
+          {MARKETS[edition].name}
+        </span>
+        <IconChevronDown size={16} className={`shrink-0 text-ink-2 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open ? (
         <ul
@@ -88,7 +98,9 @@ export function EditionSwitcher({ edition }: { edition: MarketCode }) {
           aria-label="Choose your edition"
           aria-activedescendant={`${listId}-${MARKET_CODES[active]}`}
           onKeyDown={onKey}
-          className="absolute right-0 top-12 z-50 max-h-[min(70vh,520px)] w-72 overflow-y-auto rounded-lg border border-line bg-bg p-1.5 shadow-[0_12px_40px_rgb(0_0_0/0.16)] focus:outline-none"
+          className={`absolute z-50 max-h-[min(70vh,520px)] w-72 overflow-y-auto rounded-lg border border-line bg-bg p-1.5 shadow-[0_12px_40px_rgb(0_0_0/0.16)] focus:outline-none ${
+            sidebar ? "bottom-12 left-0" : "right-0 top-12"
+          }`}
         >
           {MARKET_CODES.map((m, i) => {
             const selected = m === edition;

@@ -1,7 +1,7 @@
 "use client";
 import { uiStrings } from "@openlens/config";
 import Link from "next/link";
-import { useState } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import { EvidenceBar, EvidenceDots } from "@/components/ui/chips";
 import { IconPlayFilled, IconRead, IconSparkle } from "@/components/ui/icons";
 import { RelTime } from "@/components/ui/time";
@@ -12,7 +12,7 @@ import { langName, langNative, regionName } from "@/lib/format";
 export const assetUrl = (p: string) => (/^https?:/.test(p) ? p : `${API_URL.replace(/\/$/, "")}${p}`);
 
 /** Drop the "(FICTIONAL …)" suffix inside frames where space is tight; the full title stays in text below/labels. */
-const frameTitle = (t: string) => t.replace(/\s*\((FICTIONAL[^)]*)\)\s*$/i, "");
+export const frameTitle = (t: string) => t.replace(/\s*\((FICTIONAL[^)]*)\)\s*$/i, "");
 const isFictional = (t: string) => /\(FICTIONAL/i.test(t);
 
 /** Accessible name for a card link: title, market, format, duration, language. */
@@ -26,8 +26,27 @@ export function cardLabel(card: CardItem, video?: CardVideo) {
   return parts.join(". ");
 }
 
+const QUIET = new Set(["about", "after", "again", "against", "amid", "before", "being", "could", "their", "there", "these", "those", "under", "until", "where", "which", "while", "would", "says", "said"]);
+
+/**
+ * Headline for a burned-in frame: the two longest content words
+ * are wrapped in <em>, which `.burn em` paints in the pop colour. Purely typographic; the title text is unchanged.
+ */
+export function burnTitle(title: string): ReactNode {
+  const words = title.split(/(\s+)/);
+  const scored = words
+    .map((w, i) => ({ i, len: w.replace(/[^\p{L}\p{N}]/gu, "").length, w }))
+    .filter((x) => x.len >= 5 && !QUIET.has(x.w.toLowerCase().replace(/[^\p{L}]/gu, "")))
+    .sort((a, b) => b.len - a.len || a.i - b.i)
+    .slice(0, 2)
+    .map((x) => x.i);
+  if (!scored.length) return title;
+  const lit = new Set(scored);
+  return words.map((w, i) => (lit.has(i) ? <em key={i}>{w}</em> : <Fragment key={i}>{w}</Fragment>));
+}
+
 /** Lens motif: an oversized ring with an accent aperture, cropped by the frame. Decorative. */
-function LensMotif({ dark }: { dark: boolean }) {
+export function LensMotif({ dark }: { dark: boolean }) {
   return (
     <svg aria-hidden viewBox="0 0 100 100" className="pointer-events-none absolute -right-[38%] -top-[16%] w-[118%] transition-transform duration-300 group-hover:scale-[1.03]">
       <circle cx="50" cy="50" r="38" fill="none" stroke={dark ? "rgb(255 255 255 / 0.07)" : "rgb(0 0 0 / 0.05)"} strokeWidth="14" />
@@ -89,7 +108,9 @@ export function PosterFrame({
           {market}
           {cat ? ` · ${cat.label}` : ""}
         </p>
-        <p className={`poster-title ${size === "hero" ? "poster-title-lg line-clamp-6" : "line-clamp-6"}`}>{frameTitle(card.title)}</p>
+        <p className={`poster-title ${size === "hero" ? "poster-title-lg line-clamp-6" : "line-clamp-6"} ${dark ? "burn" : ""}`}>
+          {dark ? burnTitle(frameTitle(card.title)) : frameTitle(card.title)}
+        </p>
         <div className={`flex items-center gap-2 ${size === "hero" ? "mt-2" : "mt-1"} ${dark && formatDuration(video?.durationSeconds) ? "pl-12" : ""}`}>
           <EvidenceBar evidence={card.evidence} className="min-w-0 flex-1 opacity-90" />
           <span
@@ -160,7 +181,7 @@ export function StoryCard({ card, edition = "APAC" }: { card: CardItem; edition?
       {headlineInside ? (
         <p className="mt-2 line-clamp-3 text-[13px] leading-[18px] text-ink-2">{card.summary}</p>
       ) : (
-        <h3 className="display mt-2 line-clamp-4 text-[15px] leading-[19px] text-ink decoration-2 underline-offset-2 group-hover:underline">
+        <h3 className="mt-2.5 line-clamp-3 font-display text-[15px] font-semibold leading-[19px] tracking-[-0.01em] text-ink decoration-2 underline-offset-2 group-hover:underline">
           {card.title}
         </h3>
       )}

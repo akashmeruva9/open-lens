@@ -6,7 +6,7 @@ import { Rail } from "@/components/reader/rail";
 import { StoryCard } from "@/components/reader/story-card";
 import { buttonClass } from "@/components/ui/button";
 import { AutoPublishedChip, ChecksFlaggedChip, EvidenceChip, LiveChip } from "@/components/ui/chips";
-import { IconBook, IconChevronLeft, IconPin, IconPlayFilled, IconSources } from "@/components/ui/icons";
+import { IconBook, IconChevronLeft, IconPlayFilled, IconSources } from "@/components/ui/icons";
 import { RelTime } from "@/components/ui/time";
 import { primaryCategory, type CardItem } from "@/lib/cards";
 import { useLiveBundle } from "@/lib/data/live";
@@ -90,7 +90,7 @@ export function StoryView({ initial, more, edition = "APAC" }: { initial: StoryB
       <article aria-labelledby="story-title" className="pb-28 lg:pb-0">
         <div className="page pt-0 sm:pt-6 lg:pt-8">
           <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] lg:gap-14">
-            <div id="watch" className="-mx-4 scroll-mt-24 sm:mx-0 lg:sticky lg:top-24">
+            <div id="watch" className="-mx-4 scroll-mt-24 sm:mx-0 lg:sticky lg:top-8">
               <MediaPanel assetUrl={assetUrl} />
             </div>
 
@@ -172,7 +172,7 @@ export function StoryView({ initial, more, edition = "APAC" }: { initial: StoryB
 
         {more && more.cards.length ? (
           <div className="mt-16">
-            <Rail title={more.title} href={more.href} icon={<IconPin size={18} />}
+            <Rail title={more.title} href={more.href}
               items={more.cards.map((c) => ({ key: c.id, node: <StoryCard card={c} edition={edition} /> }))} />
           </div>
         ) : null}

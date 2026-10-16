@@ -305,9 +305,16 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     }
 
     // 5) Promote / update, most widely covered events first, within budget.
-    const budget = await store.getState<{ day: string; runs: number }>("budget", { day: "", runs: 0 });
+    // `ids`: stories charged today. A story re-queued after a restart is not charged twice.
+    const budget = await store.getState<{ day: string; runs: number; ids?: string[] }>("budget", { day: "", runs: 0 });
     const today = now.toISOString().slice(0, 10);
-    if (budget.day !== today) Object.assign(budget, { day: today, runs: 0 });
+    if (budget.day !== today) Object.assign(budget, { day: today, runs: 0, ids: [] });
+    const charged = new Set(budget.ids ?? []);
+    const charge = (id: string) => {
+      if (charged.has(id)) return;
+      charged.add(id);
+      budget.runs++;
+    };
     // Widest-covered first; among equals, the newest event first.
     const ranked = [...active].sort((a, b) => b.domains.length - a.domains.length || b.updatedAt.localeCompare(a.updatedAt));
     const toRun: string[] = [];
@@ -363,7 +370,7 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
       c.processedLeadIds.push(...pending.map((l) => l.id));
       // The story now holds these sources; keep only metadata in wire state (Firestore doc size).
       for (const l of pending) l.source = { ...l.source!, text: "" };
-      budget.runs++;
+      charge(c.storyId!);
       toRun.push(c.storyId!);
     }
 
@@ -375,13 +382,14 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
       if (toRun.includes(st.id) || inFlight.has(st.id)) continue;
       // Stuck mid-run (restart), or stale (sources changed / format upgraded) and not yet re-run.
       const stuck = st.origin === "wire" && (st.status === "draft" || st.status === "researching" || st.status === "stale") && now.getTime() - Date.parse(st.updatedAt) > STUCK_MS;
-      if (stuck && budget.runs < cfg.dailyRunBudget) {
-        budget.runs++;
+      if (stuck && (charged.has(st.id) || budget.runs < cfg.dailyRunBudget)) {
+        charge(st.id);
         toRun.push(st.id);
       } else if (st.status === "in_review" && (cfg.autoPublish === "all" || st.origin === "wire")) {
         await autoPublishIfEligible(deps, cfg, st.id);
       }
     }
+    budget.ids = [...charged];
     await store.putState("budget", budget);
     // Backfill topics for live stories written before topics were assigned (cheap, bounded per cycle).
     if (fx.classify) {

@@ -211,3 +211,14 @@ test("live stories without topics get them backfilled", async () => {
   await ingestCycle(deps, cfg(), fx, new Date("2026-10-12T01:15:00Z"));
   assert.deepEqual((await store.get(rec.story.id))!.story.topics, ["transport", "economy"]);
 });
+
+test("a story re-queued after a restart is not charged to the daily budget twice", async () => {
+  const { store, deps } = await setup();
+  const first = await ingestCycle(deps, cfg(), effects([lead("l1", "a.jp", "Metro fare to rise 20%"), lead("l2", "b.jp", "Metro fare hike approved")], []), new Date("2026-10-12T01:00:00Z"));
+  const id = first.storiesCreated[0]!;
+  const rec = (await store.get(id))!;
+  await store.put({ ...rec, story: { ...rec.story, status: "researching", updatedAt: "2026-10-12T00:00:00Z" } });
+  await ingestCycle(deps, cfg(), effects([], []), new Date("2026-10-12T02:00:00Z"));
+  await ingestCycle(deps, cfg(), effects([], []), new Date("2026-10-12T03:00:00Z"));
+  assert.equal((await store.getState<{ runs: number }>("budget", { runs: 0 })).runs, 1);
+});

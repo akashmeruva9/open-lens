@@ -6,6 +6,12 @@ import { createApp } from "./app.js";
 import { defaultEffects, ingestCycle, ingestRunning, loadIngestConfig } from "./ingest.js";
 import { FileStore, FirestoreStore, type Store } from "./store.js";
 
+// A stray rejected promise (e.g. a timed-out Gemini fetch nobody awaited) must not kill the process:
+// that would drop every queued pipeline. Log it; the pipeline that owned it fails and is resumed later.
+process.on("unhandledRejection", (reason) => {
+  console.error("[unhandledRejection]", reason instanceof Error ? (reason.stack ?? reason.message) : reason);
+});
+
 const DATA_DIR = resolve(process.env.DATA_DIR ?? "../../.data");
 const WORK_DIR = resolve(process.env.WORK_DIR ?? `${DATA_DIR}/work`);
 

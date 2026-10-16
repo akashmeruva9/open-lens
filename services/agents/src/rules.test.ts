@@ -54,5 +54,5 @@ test("thread ends with link + AI disclosure and stays within 8 posts", () => {
   const t = _fitThread(Array.from({ length: 10 }, (_, i) => `post ${i}`), "https://openlens.app/story/x");
   assert.equal(t.length, 8);
   assert.match(t.at(-1)!, /openlens\.app\/story\/x/);
-  assert.match(t.at(-1)!, /AI-assisted/);
+  assert.match(t.at(-1)!, /AI-generated/);
 });

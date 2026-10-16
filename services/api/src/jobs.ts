@@ -111,6 +111,7 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
         presenterImagePath: deps.presenterImages?.[script.presenter],
         storyId,
         autoIllustrations: Number(process.env.AUTO_ILLUSTRATIONS ?? 0) || 0,
+        autoPhotos: Number(process.env.AUTO_PHOTOS ?? 0) || 0,
         sourceLabels,
         captionTracks,
         claims,

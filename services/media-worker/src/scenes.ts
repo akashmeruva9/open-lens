@@ -30,6 +30,8 @@ export interface Scene {
    *  "AI-generated illustration" label when `beat.kind === "illustration"`. `image` is loaded from `imagePath` by renderVideo. */
   imagePath?: string;
   image?: Image;
+  /** Credit line for a real file photo (e.g. "president.gov.ua, CC BY 4.0, Wikimedia Commons"). When set, the tag reads "File photo · credit" instead of the AI label. */
+  credit?: string;
 }
 
 export interface Branding {

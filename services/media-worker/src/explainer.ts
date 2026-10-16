@@ -390,18 +390,18 @@ function illustrationBackdrop(ctx: SKRSContext2D, scene: Scene, L: ExplainerLayo
   ctx.fillRect(0, 0, L.W, L.beat.y);
 }
 
-function illustrationTag(ctx: SKRSContext2D, brand: Branding, b: Box, vertical: boolean) {
+function illustrationTag(ctx: SKRSContext2D, brand: Branding, b: Box, vertical: boolean, credit?: string) {
   const ui = uiStrings(brand.lang ?? "en");
-  const size = vertical ? 28 : 26;
+  const size = credit ? (vertical ? 24 : 22) : vertical ? 28 : 26;
   ctx.font = `700 ${size}px ${brand.fontFamily}`;
-  const s = fitWidth(ctx, ui.aiIllustration, b.w - 40);
+  const s = fitWidth(ctx, credit ? `${ui.filePhoto} · ${credit}` : ui.aiIllustration, b.w - 40);
   const w = ctx.measureText(s).width + 32;
   const y = b.y + b.h - size - 30;
   ctx.fillStyle = "rgba(0,0,0,0.75)";
   roundRect(ctx, b.x, y, w, size + 22, 10);
   ctx.fill();
   ctx.fillStyle = C.text;
-  text(ctx, s, b.x + 16, y + size + 4, "illustration-label");
+  text(ctx, s, b.x + 16, y + size + 4, credit ? "photo-credit" : "illustration-label");
 }
 
 function endCard(ctx: SKRSContext2D, beat: Extract<Beat, { kind: "cta" }>, scene: Scene, brand: Branding, L: ExplainerLayout, vertical: boolean) {
@@ -478,7 +478,7 @@ export function renderExplainerFrame(scene: Scene, brand: Branding, index: numbe
     case "quote": quoteCard(ctx, beat, L.beat, brand, vertical); break;
     case "timeline": timelineCard(ctx, beat, L.beat, brand, vertical); break;
     case "sources": sourcesCard(ctx, beat, L.beat, brand, vertical); break;
-    case "illustration": if (scene.image) illustrationTag(ctx, brand, L.beat, vertical); else heroCard(ctx, scene, brand, L.beat, vertical, index); break;
+    case "illustration": if (scene.image) illustrationTag(ctx, brand, L.beat, vertical, scene.credit); else heroCard(ctx, scene, brand, L.beat, vertical, index); break;
     case "cta": endCard(ctx, beat, scene, brand, L, vertical); break;
     default: heroCard(ctx, scene, brand, L.beat, vertical, index);
   }

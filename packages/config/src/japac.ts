@@ -126,19 +126,19 @@ export const AI_DISCLOSURE: Record<string, string> = Object.fromEntries(
 );
 
 /** On-screen labels used in rendered video frames and carousel slides. */
-export const UI_STRINGS: Record<LangCode, { evidence: string; aiPresenter: string; openResearch: string; sources: string; aiIllustration: string }> = {
-  en: { evidence: "Evidence", aiPresenter: "AI presenter", openResearch: "open the research in the OpenLens app", sources: "sources", aiIllustration: "AI-generated illustration" },
-  hi: { evidence: "साक्ष्य", aiPresenter: "एआई प्रस्तुतकर्ता", openResearch: "OpenLens ऐप में पूरा शोध देखें", sources: "स्रोत", aiIllustration: "एआई-जनित चित्रण · AI-generated illustration" },
-  te: { evidence: "ఆధారాలు", aiPresenter: "AI ప్రెజెంటర్", openResearch: "OpenLens యాప్‌లో పూర్తి పరిశోధన చూడండి", sources: "మూలాలు", aiIllustration: "AI రూపొందించిన చిత్రం · AI-generated illustration" },
-  ta: { evidence: "ஆதாரம்", aiPresenter: "AI தொகுப்பாளர்", openResearch: "OpenLens செயலியில் முழு ஆய்வைப் பாருங்கள்", sources: "ஆதாரங்கள்", aiIllustration: "AI உருவாக்கிய படம் · AI-generated illustration" },
-  ja: { evidence: "根拠", aiPresenter: "AIキャスター", openResearch: "詳しい検証はOpenLensアプリで", sources: "情報源", aiIllustration: "AI生成イラスト · AI-generated illustration" },
-  ko: { evidence: "근거", aiPresenter: "AI 진행자", openResearch: "자세한 검증은 OpenLens 앱에서", sources: "출처", aiIllustration: "AI 생성 일러스트 · AI-generated illustration" },
-  "zh-Hant": { evidence: "依據", aiPresenter: "AI 主播", openResearch: "完整查證請見 OpenLens App", sources: "來源", aiIllustration: "AI 生成插圖 · AI-generated illustration" },
-  "zh-Hans": { evidence: "依据", aiPresenter: "AI 主播", openResearch: "完整核实请见 OpenLens App", sources: "来源", aiIllustration: "AI 生成插图 · AI-generated illustration" },
-  id: { evidence: "Bukti", aiPresenter: "Presenter AI", openResearch: "lihat riset lengkap di aplikasi OpenLens", sources: "sumber", aiIllustration: "Ilustrasi buatan AI · AI-generated illustration" },
-  ms: { evidence: "Bukti", aiPresenter: "Penyampai AI", openResearch: "lihat kajian penuh dalam aplikasi OpenLens", sources: "sumber", aiIllustration: "Ilustrasi janaan AI · AI-generated illustration" },
-  th: { evidence: "หลักฐาน", aiPresenter: "ผู้ประกาศ AI", openResearch: "ดูการตรวจสอบฉบับเต็มในแอป OpenLens", sources: "แหล่งข่าว", aiIllustration: "ภาพประกอบสร้างโดย AI · AI-generated illustration" },
-  vi: { evidence: "Bằng chứng", aiPresenter: "Người dẫn AI", openResearch: "xem kiểm chứng đầy đủ trên ứng dụng OpenLens", sources: "nguồn", aiIllustration: "Hình minh họa do AI tạo · AI-generated illustration" },
-  fil: { evidence: "Ebidensya", aiPresenter: "AI presenter", openResearch: "buksan ang buong pananaliksik sa OpenLens app", sources: "pinagmulan", aiIllustration: "AI-generated na ilustrasyon" },
+export const UI_STRINGS: Record<LangCode, { evidence: string; aiPresenter: string; openResearch: string; sources: string; aiIllustration: string; filePhoto: string }> = {
+  en: { evidence: "Evidence", aiPresenter: "AI presenter", openResearch: "open the research in the OpenLens app", sources: "sources", aiIllustration: "AI-generated illustration", filePhoto: "File photo" },
+  hi: { evidence: "साक्ष्य", aiPresenter: "एआई प्रस्तुतकर्ता", openResearch: "OpenLens ऐप में पूरा शोध देखें", sources: "स्रोत", aiIllustration: "एआई-जनित चित्रण · AI-generated illustration", filePhoto: "फ़ाइल फ़ोटो" },
+  te: { evidence: "ఆధారాలు", aiPresenter: "AI ప్రెజెంటర్", openResearch: "OpenLens యాప్‌లో పూర్తి పరిశోధన చూడండి", sources: "మూలాలు", aiIllustration: "AI రూపొందించిన చిత్రం · AI-generated illustration", filePhoto: "ఫైల్ ఫోటో" },
+  ta: { evidence: "ஆதாரம்", aiPresenter: "AI தொகுப்பாளர்", openResearch: "OpenLens செயலியில் முழு ஆய்வைப் பாருங்கள்", sources: "ஆதாரங்கள்", aiIllustration: "AI உருவாக்கிய படம் · AI-generated illustration", filePhoto: "கோப்புப் படம்" },
+  ja: { evidence: "根拠", aiPresenter: "AIキャスター", openResearch: "詳しい検証はOpenLensアプリで", sources: "情報源", aiIllustration: "AI生成イラスト · AI-generated illustration", filePhoto: "資料写真" },
+  ko: { evidence: "근거", aiPresenter: "AI 진행자", openResearch: "자세한 검증은 OpenLens 앱에서", sources: "출처", aiIllustration: "AI 생성 일러스트 · AI-generated illustration", filePhoto: "자료 사진" },
+  "zh-Hant": { evidence: "依據", aiPresenter: "AI 主播", openResearch: "完整查證請見 OpenLens App", sources: "來源", aiIllustration: "AI 生成插圖 · AI-generated illustration", filePhoto: "資料照片" },
+  "zh-Hans": { evidence: "依据", aiPresenter: "AI 主播", openResearch: "完整核实请见 OpenLens App", sources: "来源", aiIllustration: "AI 生成插图 · AI-generated illustration", filePhoto: "资料照片" },
+  id: { evidence: "Bukti", aiPresenter: "Presenter AI", openResearch: "lihat riset lengkap di aplikasi OpenLens", sources: "sumber", aiIllustration: "Ilustrasi buatan AI · AI-generated illustration", filePhoto: "Foto arsip" },
+  ms: { evidence: "Bukti", aiPresenter: "Penyampai AI", openResearch: "lihat kajian penuh dalam aplikasi OpenLens", sources: "sumber", aiIllustration: "Ilustrasi janaan AI · AI-generated illustration", filePhoto: "Foto fail" },
+  th: { evidence: "หลักฐาน", aiPresenter: "ผู้ประกาศ AI", openResearch: "ดูการตรวจสอบฉบับเต็มในแอป OpenLens", sources: "แหล่งข่าว", aiIllustration: "ภาพประกอบสร้างโดย AI · AI-generated illustration", filePhoto: "ภาพจากคลัง" },
+  vi: { evidence: "Bằng chứng", aiPresenter: "Người dẫn AI", openResearch: "xem kiểm chứng đầy đủ trên ứng dụng OpenLens", sources: "nguồn", aiIllustration: "Hình minh họa do AI tạo · AI-generated illustration", filePhoto: "Ảnh tư liệu" },
+  fil: { evidence: "Ebidensya", aiPresenter: "AI presenter", openResearch: "buksan ang buong pananaliksik sa OpenLens app", sources: "pinagmulan", aiIllustration: "AI-generated na ilustrasyon", filePhoto: "File photo" },
 };
 export const uiStrings = (lang: string) => (isLang(lang) ? UI_STRINGS[lang] : UI_STRINGS.en);

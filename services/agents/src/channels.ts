@@ -41,7 +41,7 @@ export interface ChannelPackage {
 /** X weighted length (URLs 23, CJK/Thai 2). */
 export const xLength = xWeightedLength;
 
-const X_DISCLOSURE = "AI-assisted summary, reviewed by OpenLens editors.";
+const X_DISCLOSURE = "AI-generated summary; every fact links to its source.";
 
 function fitThread(posts: string[], link: string): string[] {
   const max = CHANNEL_LIMITS.x.maxChars;

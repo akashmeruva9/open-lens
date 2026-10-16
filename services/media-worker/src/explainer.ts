@@ -447,7 +447,12 @@ function heroCard(ctx: SKRSContext2D, scene: Scene, brand: Branding, b: Box, ver
   const sub = index === 0 && scene.label ? brand.title : "";
   ctx.fillStyle = C.accent;
   ctx.fillRect(b.x, b.y + 30, 120, 14);
-  const fit = fitBlock(ctx, big, { weight: 900, family: ff, lang: brand.lang, max: vertical ? 130 : 120, min: 56, width: b.w - 20, height: b.h - 80 - (sub ? 140 : 0), maxLines: 3, lineHeight: 1.08 });
+  // The outlet chips drawn at the bottom (when there is no subtitle) need their own room, or a
+  // two-line title runs into them.
+  const outlets = [...new Set(scene.sources ?? [])].slice(0, 2);
+  const chipSize = vertical ? 32 : 30;
+  const chipsH = !sub && outlets.length ? outlets.length * (chipSize + 36) + 12 + chipSize + 10 : 0;
+  const fit = fitBlock(ctx, big, { weight: 900, family: ff, lang: brand.lang, max: vertical ? 130 : 120, min: 56, width: b.w - 20, height: b.h - 80 - (sub ? 140 : 0) - chipsH, maxLines: 3, lineHeight: 1.08 });
   ctx.fillStyle = C.text;
   fit.lines.forEach((l, i) => text(ctx, l, b.x, b.y + 80 + fit.size * 0.9 + i * fit.lh, "beat"));
   if (sub) {
@@ -457,10 +462,9 @@ function heroCard(ctx: SKRSContext2D, scene: Scene, brand: Branding, b: Box, ver
     s.lines.forEach((l, i) => text(ctx, l, b.x, top + s.size + i * s.lh, "beat"));
   }
   // Nothing numeric to show: fill the card with the outlets behind this line (from the ledger, never invented).
-  const outlets = [...new Set(scene.sources ?? [])].slice(0, 2);
   if (!sub && outlets.length) {
     const ui = uiStrings(brand.lang ?? "en");
-    const size = vertical ? 32 : 30;
+    const size = chipSize;
     let y = b.y + b.h - (outlets.length * (size + 36) + 12);
     ctx.font = `700 ${size - 6}px ${ff}`;
     ctx.fillStyle = C.dim;

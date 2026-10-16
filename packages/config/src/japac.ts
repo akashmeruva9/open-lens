@@ -104,19 +104,19 @@ export const CHANNEL_PLAN: Record<LangCode, { tier: Tier; channel: string; prese
 };
 
 const LOCAL_DISCLOSURE: Record<LangCode, string> = {
-  en: "AI-generated presenter and narration. Facts sourced and reviewed by OpenLens editors.",
-  hi: "एआई-जनित प्रस्तुतकर्ता और आवाज़। तथ्य OpenLens संपादकों द्वारा स्रोत-सत्यापित।",
-  te: "AI ద్వారా రూపొందించిన ప్రెజెంటర్ మరియు వ్యాఖ్యానం. వాస్తవాలను OpenLens ఎడిటర్లు పరిశీలించారు.",
-  ta: "AI உருவாக்கிய தொகுப்பாளர் மற்றும் குரல். உண்மைகளை OpenLens ஆசிரியர்கள் சரிபார்த்தனர்.",
-  ja: "AI生成のキャスターとナレーション。事実はOpenLens編集部が確認しています。",
-  ko: "AI가 생성한 진행자와 내레이션입니다. 사실은 OpenLens 편집진이 검토했습니다.",
-  "zh-Hant": "AI 生成的主播與旁白。事實經 OpenLens 編輯查證。",
-  "zh-Hans": "AI 生成的主播与旁白。事实经 OpenLens 编辑核实。",
-  id: "Presenter dan narasi dibuat oleh AI. Fakta diperiksa oleh editor OpenLens.",
-  ms: "Penyampai dan narasi dijana oleh AI. Fakta disemak oleh editor OpenLens.",
-  th: "ผู้ประกาศและเสียงบรรยายสร้างโดย AI ข้อเท็จจริงตรวจสอบโดยบรรณาธิการ OpenLens",
-  vi: "Người dẫn và lời thuyết minh do AI tạo ra. Dữ kiện được biên tập viên OpenLens kiểm chứng.",
-  fil: "AI-generated na presenter at narasyon. Sinuri ng mga editor ng OpenLens ang mga datos.",
+  en: "AI-generated presenter and narration. Every fact is linked to its source.",
+  hi: "एआई-जनित प्रस्तुतकर्ता और आवाज़। हर तथ्य उसके स्रोत से जुड़ा है।",
+  te: "AI ద్వారా రూపొందించిన ప్రెజెంటర్ మరియు వ్యాఖ్యానం. ప్రతి వాస్తవానికి దాని మూలం జతచేయబడింది.",
+  ta: "AI உருவாக்கிய தொகுப்பாளர் மற்றும் குரல். ஒவ்வொரு உண்மையும் அதன் ஆதாரத்துடன் இணைக்கப்பட்டுள்ளது.",
+  ja: "AI生成のキャスターとナレーション。すべての事実に情報源へのリンクがあります。",
+  ko: "AI가 생성한 진행자와 내레이션입니다. 모든 사실에 출처가 연결되어 있습니다.",
+  "zh-Hant": "AI 生成的主播與旁白。每項事實皆附有來源連結。",
+  "zh-Hans": "AI 生成的主播与旁白。每项事实均附有来源链接。",
+  id: "Presenter dan narasi dibuat oleh AI. Setiap fakta ditautkan ke sumbernya.",
+  ms: "Penyampai dan narasi dijana oleh AI. Setiap fakta dipautkan kepada sumbernya.",
+  th: "ผู้ประกาศและเสียงบรรยายสร้างโดย AI ข้อเท็จจริงทุกข้อมีลิงก์ไปยังแหล่งที่มา",
+  vi: "Người dẫn và lời thuyết minh do AI tạo ra. Mỗi dữ kiện đều có liên kết tới nguồn.",
+  fil: "AI-generated na presenter at narasyon. May link sa pinagmulan ang bawat datos.",
 };
 
 /** Local-language disclosure; non-English versions also carry "AI-generated" so platform checks and

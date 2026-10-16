@@ -42,4 +42,5 @@ export const TOPICS = [
 ] as const;
 export type Topic = (typeof TOPICS)[number];
 
-export const PUBLIC_WEB_URL = process.env.PUBLIC_WEB_URL ?? "https://openlens.app";
+/** Where story links in posts, captions and QR codes point. OPENLENS_PUBLIC_URL is what the deploy sets for the media worker. */
+export const PUBLIC_WEB_URL = (process.env.PUBLIC_WEB_URL || process.env.OPENLENS_PUBLIC_URL || "https://openlens.app").replace(/\/+$/, "");

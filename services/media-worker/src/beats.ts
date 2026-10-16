@@ -11,7 +11,7 @@
 import { numbersIn } from "@openlens/config";
 import type { ScriptLine } from "@openlens/schemas";
 
-export type BeatKind = "hero" | "number" | "figures" | "map" | "quote" | "timeline" | "sources" | "illustration" | "cta";
+export type BeatKind = "hero" | "number" | "figures" | "map" | "unknowns" | "quote" | "timeline" | "sources" | "illustration" | "cta";
 
 export type Beat =
   /** Headline card: first sentence of the line (empty for one-sentence lines: the renderer shows the label big). */
@@ -22,6 +22,8 @@ export type Beat =
   | { kind: "figures"; items: { value: string; unit?: string; qualifier?: string; label: string; claimId: string }[] }
   /** Locator map: a place named in the line, drawn as a country outline with a pin. Coordinates come from a place lookup. */
   | { kind: "map"; place: string; country?: string; lat: number; lon: number }
+  /** What is still unconfirmed: texts of contested / unverified claims in the ledger, shown as unknowns (never as facts). */
+  | { kind: "unknowns"; title: string; items: string[] }
   /** Attributed statement: the sentence that carries an attributed claim + the name as spoken in the line.
    *  Drawn WITHOUT quotation marks, because the sentence is the presenter's paraphrase, not a verbatim quote. */
   | { kind: "quote"; text: string; by: string; claimId: string }
@@ -60,6 +62,8 @@ export interface BeatContext {
   ctaUrl?: string;
   /** An illustration image was supplied for this line. */
   illustration?: boolean;
+  /** Texts of the story's contested / unverified claims (from the ledger). Enables the "still unconfirmed" panel on the "what we know" line. */
+  unknowns?: string[];
   /** A place named in this line, already geocoded (see mapplan.ts). Enables the locator-map beat. */
   map?: { place: string; country?: string; lat: number; lon: number };
 }
@@ -245,6 +249,9 @@ export function beatCandidates(line: ScriptLine, ctx: BeatContext): Beat[] {
   if (ctx.index === ctx.total - 1 && isCtaLine(line.text)) return [{ kind: "cta", text: line.text, url: ctx.ctaUrl }];
   const out: Beat[] = [];
   if (ctx.illustration) out.push({ kind: "illustration" });
+  // The "what we know" line shows what is still unconfirmed (English only; items are ledger claim texts, never invented).
+  if (ctx.unknowns?.length && ctx.lang === "en" && /know|unconfirmed|unclear|unknown/i.test(line.label) && ctx.index < ctx.total - 1)
+    out.push({ kind: "unknowns", title: "Still unconfirmed", items: ctx.unknowns.slice(0, 3) });
   // Where it happened comes first (once per video); then the figures, then the single most prominent number.
   if (ctx.map) out.push({ kind: "map", ...ctx.map });
   const fg = figuresBeat(line, ctx);
@@ -271,7 +278,7 @@ export function pickBeat(line: ScriptLine, ctx: BeatContext, hint?: BeatHint): B
     if (h) return h;
   }
   // The sources card (repeats the evidence chip) and the locator map are shown at most once per video.
-  const fresh = cands.filter((b) => !((b.kind === "sources" || b.kind === "map") && ctx.used?.includes(b.kind)));
+  const fresh = cands.filter((b) => !((b.kind === "sources" || b.kind === "map" || b.kind === "unknowns") && ctx.used?.includes(b.kind)));
   return fresh.find((b) => b.kind !== ctx.prev) ?? fresh[0] ?? cands[0]!;
 }
 

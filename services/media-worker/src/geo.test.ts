@@ -29,3 +29,19 @@ test("figuresBeat needs 2+ verified figures with labels and ignores dates and at
   assert.equal(figuresBeat({ label: "X", text: "33 children died and 5 classrooms were hit.", claimIds: ["c1", "c3"] }, ctx()), undefined); // attributed figure
   assert.equal(figuresBeat({ label: "X", text: "33 children died and 100 students were inside.", claimIds: ["c1", "c2"] }, ctx("hi")), undefined); // English only
 });
+
+import { beatCandidates } from "./beats.js";
+import { unknownsOf } from "./media.js";
+
+test("unknowns panel: ledger-only, English 'what we know' line, never the end card", () => {
+  const claims: any = { a: { text: "Exact casualty counts still vary across reports from different outlets.", state: "unverified" }, b: { text: "Officials say 12 were rescued.", state: "supported" }, c: { text: "Building permits for the school have not been confirmed by any official source.", state: "contested" } };
+  const unk = unknownsOf(claims);
+  assert.equal(unk.length, 2);
+  assert.ok(unk.every((t) => t.length <= 120 && !t.includes("12 were rescued")));
+  const base = { claims, lang: "en", index: 3, total: 6, unknowns: unk };
+  const yes = beatCandidates({ label: "WHAT WE KNOW", text: "Here is what we know.", claimIds: ["b"] }, base);
+  assert.equal(yes[0]!.kind, "unknowns");
+  assert.ok(!beatCandidates({ label: "WHAT HAPPENED", text: "Something happened.", claimIds: ["b"] }, base).some((b) => b.kind === "unknowns"));
+  assert.ok(!beatCandidates({ label: "WHAT WE KNOW", text: "Here is what we know.", claimIds: ["b"] }, { ...base, lang: "hi" }).some((b) => b.kind === "unknowns"));
+  assert.ok(!beatCandidates({ label: "WHAT WE KNOW", text: "x", claimIds: ["b"] }, { ...base, index: 5 }).some((b) => b.kind === "unknowns"));
+});

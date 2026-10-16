@@ -267,6 +267,19 @@ function tvScenes(job: MediaJob, timed: TimedLine[]): Scene[] {
 const END_CARD_SECONDS = 2;
 
 /** Social explainer: one deterministic beat per line (see beats.ts), plus an end card. */
+/** Contested / unverified claim texts from the ledger, shortened to one line each (cut at a word boundary, never rewritten). */
+export function unknownsOf(claims?: Record<string, BeatClaim>): string[] {
+  const out: string[] = [];
+  for (const c of Object.values(claims ?? {})) {
+    if (c.state !== "contested" && c.state !== "unverified") continue;
+    let t = c.text.trim().replace(/\s+/g, " ");
+    if (t.length > 120) t = t.slice(0, 117).replace(/\s+\S*$/, "") + "…";
+    if (t.length >= 20 && !out.includes(t)) out.push(t);
+    if (out.length === 3) break;
+  }
+  return out;
+}
+
 export function explainerScenes(job: MediaJob, timed: TimedLine[]): Scene[] {
   const ctaUrl = job.ctaUrl ?? (process.env.OPENLENS_PUBLIC_URL?.trim() || undefined);
   let prev: BeatKind | undefined;
@@ -277,7 +290,7 @@ export function explainerScenes(job: MediaJob, timed: TimedLine[]): Scene[] {
     const beat: Beat = pickBeat(
       { label: t.label, text: t.text, claimIds: t.claimIds },
       { claims: job.claims, sources, timeline: job.timeline, timelineLang: job.ledgerLang ?? "en", lang: job.lang,
-        index: i, total: timed.length, prev, used, ctaUrl, map: job.maps?.[i], illustration: Boolean(imagePath) },
+        index: i, total: timed.length, prev, used, ctaUrl, map: job.maps?.[i], unknowns: unknownsOf(job.claims), illustration: Boolean(imagePath) },
       job.beatHints?.[i],
     );
     prev = beat.kind;

@@ -76,7 +76,7 @@ test("disclosure on every explainer frame, every beat, both shapes, four scripts
   }
 });
 
-test("illustration frames carry the AI-generated illustration label", () => {
+test("illustration frames carry the AI image label", () => {
   const seen: TracedText[] = [];
   setTextTrace((t) => seen.push(t));
   try {
@@ -85,7 +85,7 @@ test("illustration frames carry the AI-generated illustration label", () => {
   } finally {
     setTextTrace(undefined);
   }
-  assert.ok(seen.some((t) => t.role === "illustration-label" && t.text.includes("AI-generated illustration")));
+  assert.ok(seen.some((t) => t.role === "illustration-label" && t.text.includes("AI image")));
 });
 
 test("older anchor/split layouts still render", () => {

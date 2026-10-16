@@ -346,6 +346,27 @@ function mapCard(ctx: SKRSContext2D, beat: Extract<Beat, { kind: "map" }>, b: Bo
   }
 }
 
+function unknownsCard(ctx: SKRSContext2D, beat: Extract<Beat, { kind: "unknowns" }>, b: Box, brand: Branding, vertical: boolean) {
+  card(ctx, b);
+  const ff = brand.fontFamily;
+  const head = vertical ? 38 : 34;
+  ctx.fillStyle = C.accent;
+  ctx.fillRect(b.x + 40, b.y + 40, 10, head + 6);
+  ctx.font = `900 ${head}px ${ff}`;
+  text(ctx, beat.title.toUpperCase(), b.x + 70, b.y + 40 + head, "beat");
+  const items = beat.items.slice(0, 3);
+  const top = b.y + 40 + head + 34;
+  const rowH = (b.y + b.h - 28 - top) / items.length;
+  items.forEach((it, i) => {
+    const y0 = top + i * rowH;
+    const fit = fitBlock(ctx, it, { weight: 700, family: ff, lang: brand.lang, max: vertical ? 40 : 38, min: 26, width: b.w - 130, height: rowH - 14, maxLines: 3 });
+    ctx.fillStyle = C.cyan;
+    ctx.beginPath(); ctx.arc(b.x + 55, y0 + fit.size * 0.62, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = C.text;
+    fit.lines.forEach((l, k) => text(ctx, l, b.x + 84, y0 + fit.size + k * fit.lh, "beat"));
+  });
+}
+
 function quoteCard(ctx: SKRSContext2D, beat: Extract<Beat, { kind: "quote" }>, b: Box, brand: Branding, vertical: boolean) {
   card(ctx, b);
   const ff = brand.fontFamily;
@@ -479,12 +500,12 @@ function illustrationBackdrop(ctx: SKRSContext2D, scene: Scene, L: ExplainerLayo
 
 function illustrationTag(ctx: SKRSContext2D, brand: Branding, b: Box, vertical: boolean, credit?: string) {
   const ui = uiStrings(brand.lang ?? "en");
-  const size = credit ? (vertical ? 24 : 22) : vertical ? 28 : 26;
+  const size = credit ? (vertical ? 24 : 22) : vertical ? 22 : 20;
   ctx.font = `700 ${size}px ${brand.fontFamily}`;
   const s = fitWidth(ctx, credit ? `${ui.filePhoto} · ${credit}` : ui.aiIllustration, b.w - 40);
   const w = ctx.measureText(s).width + 32;
   const y = b.y + b.h - size - 30;
-  ctx.fillStyle = "rgba(0,0,0,0.75)";
+  ctx.fillStyle = credit ? "rgba(0,0,0,0.75)" : "rgba(0,0,0,0.55)";
   roundRect(ctx, b.x, y, w, size + 22, 10);
   ctx.fill();
   ctx.fillStyle = C.text;
@@ -564,6 +585,7 @@ export function renderExplainerFrame(scene: Scene, brand: Branding, index: numbe
     case "number": numberCard(ctx, beat, L.beat, brand, vertical); break;
     case "figures": figuresCard(ctx, beat, L.beat, brand, vertical); break;
     case "map": mapCard(ctx, beat, L.beat, brand, vertical); break;
+    case "unknowns": unknownsCard(ctx, beat, L.beat, brand, vertical); break;
     case "quote": quoteCard(ctx, beat, L.beat, brand, vertical); break;
     case "timeline": timelineCard(ctx, beat, L.beat, brand, vertical); break;
     case "sources": sourcesCard(ctx, beat, L.beat, brand, vertical); break;

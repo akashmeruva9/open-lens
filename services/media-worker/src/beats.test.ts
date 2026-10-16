@@ -115,3 +115,11 @@ test("a figure from an attributed claim needs the attribution spoken in the line
   assert.equal((b as any)?.value, "600");
   assert.equal((b as any)?.by, "Daily riders");
 });
+
+test("a timeline whose events all share one date is not shown", () => {
+  const claims = { a: { text: "x", state: "supported" }, b: { text: "y", state: "supported" } };
+  const timeline = [{ date: "2026-10-15", text: "Students evacuated", claimIds: ["a"] }, { date: "2026-10-15", text: "Reunification site opened", claimIds: ["b"] }];
+  assert.equal(timelineBeat(line("Students were evacuated and a site opened.", ["a", "b"]), ctx({ claims, timeline })), undefined);
+  const spread = [{ date: "2026-10-14", text: "Tension rose", claimIds: ["a"] }, { date: "2026-10-15", text: "Students evacuated", claimIds: ["b"] }];
+  assert.equal(timelineBeat(line("Tension rose and students were evacuated.", ["a", "b"]), ctx({ claims, timeline: spread }))?.kind, "timeline");
+});

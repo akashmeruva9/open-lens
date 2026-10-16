@@ -231,6 +231,8 @@ export function timelineBeat(line: ScriptLine, ctx: BeatContext): Beat | undefin
     const on = active[start + i]!;
     return { date: formatEventDate(e.date, ctx.lang), text: on || plain(e) ? e.text : "", active: on };
   });
+  // A timeline of one repeated date ("Oct 15" four times) tells the viewer nothing: it needs at least two different dates.
+  if (new Set(events.map((e) => e.date)).size < 2) return undefined;
   return { kind: "timeline", events, showText: ctx.lang === (ctx.timelineLang ?? "en") };
 }
 

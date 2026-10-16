@@ -15,11 +15,22 @@ export const REVIEW_MODEL = process.env.MODEL_REVIEW ?? "gemini-3.8-flash";
 export async function askGeminiJson(parts: object[], what: string, usd = 0.01): Promise<unknown> {
   await assertBudget(usd, what);
   const ai = new GoogleGenAI({ vertexai: true, project: process.env.GOOGLE_CLOUD_PROJECT, location: process.env.REVIEW_LOCATION ?? "global" });
-  const r = await ai.models.generateContent({
-    model: REVIEW_MODEL,
-    contents: [{ role: "user", parts }] as never,
-    config: { responseMimeType: "application/json", temperature: 0.1 },
-  });
+  // Vertex answers 429 / 503 in short bursts: back off and retry a few times before giving up.
+  let r!: Awaited<ReturnType<typeof ai.models.generateContent>>;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      r = await ai.models.generateContent({
+        model: REVIEW_MODEL,
+        contents: [{ role: "user", parts }] as never,
+        config: { responseMimeType: "application/json", temperature: 0.1 },
+      });
+      break;
+    } catch (err) {
+      const status = (err as { status?: number }).status ?? Number(/"code":(\d+)/.exec(String((err as Error).message))?.[1]);
+      if ((status !== 429 && status !== 503) || attempt >= 4) throw err;
+      await new Promise((res) => setTimeout(res, 2000 * 2 ** attempt));
+    }
+  }
   const u = r.usageMetadata;
   await logSpend({ kind: "review", model: REVIEW_MODEL, usd, note: `${what} in=${u?.promptTokenCount} out=${u?.candidatesTokenCount}` });
   try {

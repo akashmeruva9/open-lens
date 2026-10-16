@@ -31,17 +31,21 @@ test("figuresBeat needs 2+ verified figures with labels and ignores dates and at
 });
 
 import { beatCandidates } from "./beats.js";
-import { unknownsOf } from "./media.js";
+import { unknownsFromAssessment } from "./media.js";
 
-test("unknowns panel: ledger-only, English 'what we know' line, never the end card", () => {
-  const claims: any = { a: { text: "Exact casualty counts still vary across reports from different outlets.", state: "unverified" }, b: { text: "Officials say 12 were rescued.", state: "supported" }, c: { text: "Building permits for the school have not been confirmed by any official source.", state: "contested" } };
-  const unk = unknownsOf(claims);
-  assert.equal(unk.length, 2);
-  assert.ok(unk.every((t) => t.length <= 120 && !t.includes("12 were rescued")));
+test("unknowns panel: assessment open questions only, English 'what we know' line, never the end card", () => {
+  const unk = unknownsFromAssessment([
+    { kind: "established", text: "Fires broke out in the city centre. More text." },
+    { kind: "unknown", text: "Official claims of outside political plots remain unproven. Reports conflict on timing." },
+    { kind: "contested", text: "Reports conflict on whether the rallies started days ago or have continued for four months." },
+  ]);
+  assert.deepEqual(unk, ["Official claims of outside political plots remain unproven.", "Reports conflict on whether the rallies started days ago or have continued for four months."]);
+  assert.deepEqual(unknownsFromAssessment(undefined), []);
+  const claims: any = { b: { text: "Officials say 12 were rescued.", state: "supported" } };
   const base = { claims, lang: "en", index: 3, total: 6, unknowns: unk };
-  const yes = beatCandidates({ label: "WHAT WE KNOW", text: "Here is what we know.", claimIds: ["b"] }, base);
-  assert.equal(yes[0]!.kind, "unknowns");
+  assert.equal(beatCandidates({ label: "WHAT WE KNOW", text: "Here is what we know.", claimIds: ["b"] }, base)[0]!.kind, "unknowns");
   assert.ok(!beatCandidates({ label: "WHAT HAPPENED", text: "Something happened.", claimIds: ["b"] }, base).some((b) => b.kind === "unknowns"));
   assert.ok(!beatCandidates({ label: "WHAT WE KNOW", text: "Here is what we know.", claimIds: ["b"] }, { ...base, lang: "hi" }).some((b) => b.kind === "unknowns"));
   assert.ok(!beatCandidates({ label: "WHAT WE KNOW", text: "x", claimIds: ["b"] }, { ...base, index: 5 }).some((b) => b.kind === "unknowns"));
+  assert.ok(!beatCandidates({ label: "WHAT WE KNOW", text: "x", claimIds: ["b"] }, { ...base, unknowns: [] }).some((b) => b.kind === "unknowns"));
 });

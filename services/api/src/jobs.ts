@@ -3,7 +3,7 @@ import {
   type PipelineState, type Stage,
 } from "@openlens/agents";
 import { CHANNEL_PLAN, isLang } from "@openlens/config";
-import { renderCarouselSlides, renderScriptMedia } from "@openlens/media-worker";
+import { renderCarouselSlides, renderScriptMedia, unknownsFromAssessment } from "@openlens/media-worker";
 import type { CarouselPayload, OutputRecord, ScriptPayload, Tier } from "@openlens/schemas";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
@@ -113,6 +113,7 @@ export async function renderMedia(deps: Deps, storyId: string, onlyScripts?: str
         autoIllustrations: Number(process.env.AUTO_ILLUSTRATIONS ?? 0) || 0,
         autoPhotos: Number(process.env.AUTO_PHOTOS ?? 0) || 0,
         autoMaps: process.env.AUTO_MAPS === "1",
+        unknowns: unknownsFromAssessment(rec.assessment?.sections),
         sourceLabels,
         captionTracks,
         claims,

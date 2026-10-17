@@ -1,5 +1,5 @@
-import { validateAssessment } from "@openlens/agents";
-import { languagesFor, marketOf, MAX_QUOTE_CHARS, PUBLIC_WEB_URL, QUOTE_ONLY_USAGE } from "@openlens/config";
+import { embedTexts, generateStructured, validateAssessment } from "@openlens/agents";
+import { languagesFor, marketOf, MAX_QUOTE_CHARS, MODELS, PUBLIC_WEB_URL, QUOTE_ONLY_USAGE } from "@openlens/config";
 import { SourceRecord, type FeedItem, type OutputRecord, type Story, type StoryBundle } from "@openlens/schemas";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
@@ -16,6 +16,7 @@ import { ingestCycle, ingestRunning, type IngestConfig, type IngestEffects } fro
 import { isRunning, regenerate, runStory, type Deps } from "./jobs.js";
 import { fallbackDryRun, publisher, type PublishContext } from "./publishing.js";
 import { emptyRecord, type StoryRecord } from "./store.js";
+import { claimDocsOf, enqueue, geminiJudge, Verifier, type ClaimDoc, type QueuedStatement } from "./verify.js";
 
 const PUBLIC_STATUSES = new Set(["published", "stale", "corrected"]);
 const READER_KINDS = new Set(["script", "video", "audio"]);
@@ -128,7 +129,7 @@ export interface WireOptions {
  */
 export const stripApiPrefix = (path: string) => (path === "/api" ? "/" : path.startsWith("/api/") ? path.slice(4) : path);
 
-export function createApp(deps: Deps, wire?: WireOptions) {
+export function createApp(deps: Deps, wire?: WireOptions, extras?: { verifier?: Verifier }) {
   const app = new Hono({ getPath: (req) => stripApiPrefix(getPath(req)) });
   const corsOrigins = (process.env.CORS_ORIGINS ?? "*").split(",");
   app.use("*", cors({ origin: corsOrigins.includes("*") ? "*" : corsOrigins, allowHeaders: ["authorization", "content-type", "x-dev-user"] }));
@@ -363,6 +364,54 @@ export function createApp(deps: Deps, wire?: WireOptions) {
     return c.json(["app", "youtube", "x", "instagram", "facebook", "whatsapp"].map((ch) => ({ channel: ch, live: ch === "app", reason: ch === "app" ? undefined : "publisher not installed" })));
   });
 
+  // ---------- Verify this ----------
+  // A viewer pastes a claim; the answer is built only from the published ledgers (see verify.ts). Public, so it is bounded:
+  // statement length, a per-visitor rate limit and a daily cap (each call is one embedding and one small model call).
+  const DOCS_TTL_MS = 60_000;
+  let docsCache: { at: number; docs: ClaimDoc[] } | undefined;
+  const verifyDocs = async () => {
+    if (docsCache && Date.now() - docsCache.at < DOCS_TTL_MS) return docsCache.docs;
+    const recs = await Promise.all((await deps.store.listStories()).filter((s) => PUBLIC_STATUSES.has(s.status)).map((s) => deps.store.get(s.id)));
+    const docs = claimDocsOf(recs.filter((r): r is StoryRecord => Boolean(r)).map(toReaderBundle));
+    docsCache = { at: Date.now(), docs };
+    return docs;
+  };
+  const verifier =
+    extras?.verifier ??
+    new Verifier({
+      docs: verifyDocs,
+      embed: (texts) => embedTexts(texts, MODELS.embed),
+      judge: geminiJudge((o) => generateStructured({ model: MODELS.fast, temperature: 0, ...o })),
+      // Claim vectors survive restarts: one state document per story.
+      cache: { get: (sid) => deps.store.getState<Record<string, number[]>>(`claimvec:${sid}`, {}), put: (sid, v) => deps.store.putState(`claimvec:${sid}`, v) },
+      minSimilarity: Number(process.env.VERIFY_MIN_SIMILARITY ?? 0.74),
+    });
+  const VerifyBody = z.object({ text: z.string().trim().min(8, "write a full sentence").max(600, "keep it under 600 characters") });
+  const perMinute = Number(process.env.VERIFY_PER_MINUTE ?? 12);
+  const dailyCap = Number(process.env.VERIFY_DAILY_CAP ?? 500);
+  const visits = new Map<string, { n: number; reset: number }>();
+  const today = { key: "", n: 0 };
+  app.post("/v1/verify", async (c) => {
+    const who = c.req.header("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+    const now = Date.now();
+    if (visits.size > 5000) visits.clear();
+    const v = visits.get(who);
+    if (!v || v.reset < now) visits.set(who, { n: 1, reset: now + 60_000 });
+    else if (++v.n > perMinute) throw httpError(429, "too many checks, try again in a minute");
+    const day = new Date().toISOString().slice(0, 10);
+    if (today.key !== day) Object.assign(today, { key: day, n: 0 });
+    if (++today.n > dailyCap) throw httpError(429, "today's limit for checks has been reached, try again tomorrow");
+    const { text } = VerifyBody.parse(await c.req.json().catch(() => ({})));
+    const result = await verifier.verify(text);
+    if (result.status === "not_covered") {
+      const queue = await deps.store.getState<QueuedStatement[]>("verify-queue", []);
+      await deps.store.putState("verify-queue", enqueue(queue, text));
+    }
+    c.header("cache-control", "no-store");
+    return c.json(result);
+  });
+  studio.get("/verify-queue", async (c) => c.json(await deps.store.getState<QueuedStatement[]>("verify-queue", [])));
+
   // ---------- Wire (automatic discovery) ----------
   app.post("/v1/internal/ingest", async (c) => {
     if (!wire) throw httpError(503, "wire not configured");
@@ -401,5 +450,5 @@ export function createApp(deps: Deps, wire?: WireOptions) {
   });
 
   app.route("/v1/studio", studio);
-  return app;
+  return Object.assign(app, { verifier });
 }

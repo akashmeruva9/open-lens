@@ -40,6 +40,10 @@ const deps = { store: await makeStore(), assets: makeAssets(), workDir: WORK_DIR
 const ingestConfig = await loadIngestConfig(resolve(process.env.SOURCES_ROOT ?? "../.."));
 const wire = { config: ingestConfig, effects: defaultEffects(deps, ingestConfig), token: process.env.INGEST_TOKEN };
 const app = createApp(deps, wire);
+// Claim vectors for "Verify this" are computed once and kept; do it now so the first visitor does not wait for it.
+if (process.env.VERIFY_WARM !== "0") {
+  void app.verifier.warm().then(() => console.log("[verify] claim vectors ready")).catch((e) => console.error("[verify] warm-up failed (checks fall back to keywords until it succeeds):", e instanceof Error ? e.message : e));
+}
 
 // Local scheduler (Cloud Run uses Cloud Scheduler -> POST /v1/internal/ingest instead).
 const every = Number(process.env.INGEST_INTERVAL_MIN ?? 0);

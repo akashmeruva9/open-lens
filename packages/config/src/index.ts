@@ -14,7 +14,7 @@ export const MODELS = {
 // Per-channel content limits used by validators
 export const CHANNEL_LIMITS = {
   x: { maxChars: 280, maxThreadPosts: 8 },
-  instagram: { captionMax: 2200, reelSeconds: [5, 90] },
+  instagram: { captionMax: 2200, reelSeconds: [5, 180] },
   facebook: { postMax: 63206 },
   whatsapp: { templateBodyMax: 1024 },
   youtube: { titleMax: 100, descriptionMax: 5000 },

@@ -10,6 +10,7 @@ const SECONDARY: { href: string; label: string; icon: ReactNode }[] = [
   { href: "/browse/videos", label: "Videos", icon: <IconFilm size={18} /> },
   { href: "/browse/explainers", label: "Explainers", icon: <IconArticle size={18} /> },
   { href: "/browse/corrected", label: "Corrections", icon: <IconShieldCheck size={18} /> },
+  { href: "/verify", label: "Verify this", icon: <IconShieldCheck size={18} /> },
   { href: "/browse/wire?focus=search", label: "Search", icon: <IconSearch size={18} /> },
 ];
 

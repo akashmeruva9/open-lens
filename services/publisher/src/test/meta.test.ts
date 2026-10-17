@@ -36,9 +36,9 @@ test("instagram dry_run: REELS container with public video_url and hashtags appe
 
 test("instagram validation: Reel aspect + duration, public URL, disclosure, carousel images", async () => {
   await withEnv({}, async () => {
-    const r = await ig.validate(reel({ caption: "no disclosure" }), ctx([video("video-en-916", { aspect: "16:9", durationSeconds: 120 })]));
+    const r = await ig.validate(reel({ caption: "no disclosure" }), ctx([video("video-en-916", { aspect: "16:9", durationSeconds: 200 })]));
     assert.ok(r.errors.some((e) => /9:16/.test(e)));
-    assert.ok(r.errors.some((e) => /outside 5-90s/.test(e)));
+    assert.ok(r.errors.some((e) => /outside 5-180s/.test(e)));
     assert.ok(r.errors.some((e) => /AI disclosure/.test(e)));
     const local = ctx(undefined, { resolveAsset: async () => "/tmp/video.mp4" });
     assert.ok((await ig.validate(reel(), local)).errors.some((e) => /public https URL/.test(e)));

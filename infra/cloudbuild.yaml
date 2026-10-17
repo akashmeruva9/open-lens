@@ -16,6 +16,8 @@ substitutions:
   _MAX_UPDATES: "4"
   _CONCURRENCY: "5"
   _AUTO_PUBLISH: all
+  # Languages the wire renders videos for automatically (comma-separated). Each extra language adds TTS + image cost per story.
+  _MEDIA_LANGS: en
   # Realistic AI backdrops per video (about US$0.035 each + one Gemini call). 0 = off. GENAI cap is per instance.
   _ILLUSTRATIONS: "0"
   # Real licensed file photos (Wikimedia Commons, Gemini-verified, credited) per video, tried before AI backdrops. 0 = off.
@@ -55,7 +57,7 @@ steps:
       - --max-instances=1
       - --concurrency=40
       - --allow-unauthenticated
-      - --set-env-vars=STORE=firestore,AUTH_MODE=firebase,GEMINI_BACKEND=vertex,GOOGLE_CLOUD_LOCATION=global,ASSETS_BUCKET=$PROJECT_ID-openlens-media,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,AUTO_PUBLISH=${_AUTO_PUBLISH},AUTO_MEDIA_LANGS=en,INGEST_DAILY_RUNS=${_DAILY_RUNS},INGEST_MAX_NEW=${_MAX_NEW},INGEST_MAX_UPDATES=${_MAX_UPDATES},INGEST_MAX_FETCH=60,INGEST_GDELT=0,INGEST_MAX_AGE_HOURS=24,INGEST_CONCURRENCY=${_CONCURRENCY},AUTO_ILLUSTRATIONS=${_ILLUSTRATIONS},AUTO_PHOTOS=${_PHOTOS},OPENLENS_PUBLIC_URL=${_PUBLIC_URL},AUTO_MAPS=${_MAPS},GENAI_SPEND_CAP_USD=${_GENAI_CAP},MEDIA_DATA_DIR=/tmp/openlens/genai
+      - --set-env-vars=^@^STORE=firestore@AUTH_MODE=firebase@GEMINI_BACKEND=vertex@GOOGLE_CLOUD_LOCATION=global@ASSETS_BUCKET=$PROJECT_ID-openlens-media@GOOGLE_CLOUD_PROJECT=$PROJECT_ID@AUTO_PUBLISH=${_AUTO_PUBLISH}@AUTO_MEDIA_LANGS=${_MEDIA_LANGS}@INGEST_DAILY_RUNS=${_DAILY_RUNS}@INGEST_MAX_NEW=${_MAX_NEW}@INGEST_MAX_UPDATES=${_MAX_UPDATES}@INGEST_MAX_FETCH=60@INGEST_GDELT=0@INGEST_MAX_AGE_HOURS=24@INGEST_CONCURRENCY=${_CONCURRENCY}@AUTO_ILLUSTRATIONS=${_ILLUSTRATIONS}@AUTO_PHOTOS=${_PHOTOS}@OPENLENS_PUBLIC_URL=${_PUBLIC_URL}@AUTO_MAPS=${_MAPS}@GENAI_SPEND_CAP_USD=${_GENAI_CAP}@MEDIA_DATA_DIR=/tmp/openlens/genai
       - --set-secrets=INGEST_TOKEN=ingest-token:latest
   # --- web (needs the api URL at build time) ---
   - id: api-url

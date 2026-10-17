@@ -47,7 +47,8 @@ export function refreshTokenEnvFor(tier: Tier | undefined, lang?: string): strin
 
 function status(tier?: Tier, lang?: string): Status {
   const m = missingEnv(["YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET"]);
-  const hasToken = tier || lang ? !!refreshTokenEnvFor(tier, lang) : ["YOUTUBE_REFRESH_TOKEN", ...Object.values(TIER_ENV)].some((n) => env(n));
+  const anyToken = ["YOUTUBE_REFRESH_TOKEN", ...Object.values(TIER_ENV)].some((n) => env(n)) || Object.keys(process.env).some((n) => /^YOUTUBE_REFRESH_TOKEN_[A-Z0-9_]+$/.test(n) && env(n));
+  const hasToken = tier || lang ? !!refreshTokenEnvFor(tier, lang) : anyToken;
   if (!hasToken) m.push(tier ? `YOUTUBE_REFRESH_TOKEN (or ${TIER_ENV[tier]})` : "YOUTUBE_REFRESH_TOKEN (or YOUTUBE_REFRESH_TOKEN_<TIER>)");
   return m.length ? { live: false, reason: `missing env: ${m.join(", ")}` } : { live: true };
 }

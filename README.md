@@ -45,6 +45,7 @@ npm run render -w @openlens/api -- --list
 npm run render -w @openlens/api -- <storyId> --langs en,hi,te --aspects 9:16,16:9
 ```
 Setup (Vertex AI via ADC, locations, voices, portraits, idle clips, costs, troubleshooting): [`docs/video-factory.md`](docs/video-factory.md).
+Publishing finished videos to the shared YouTube channels (dry run first, per-language channels, team rules): [`docs/team-publishing.md`](docs/team-publishing.md).
 
 Useful env (`.env.example` lists all): `GEMINI_CACHE_DIR` (cache model responses while iterating), `MEDIA_SILENT=1` (skip TTS), `RESEARCH_GROUNDING=0` (skip Search grounding), `MODEL_*` overrides.
 

@@ -2,6 +2,7 @@ import { validateAssessment } from "@openlens/agents";
 import { languagesFor, marketOf, MAX_QUOTE_CHARS, PUBLIC_WEB_URL, QUOTE_ONLY_USAGE } from "@openlens/config";
 import { SourceRecord, type FeedItem, type OutputRecord, type Story, type StoryBundle } from "@openlens/schemas";
 import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { streamSSE } from "hono/streaming";
@@ -319,7 +320,8 @@ export function createApp(deps: Deps, wire?: WireOptions) {
           if (/^https:/.test(p)) return p;
           throw httpError(409, "channel needs a public media URL; configure ASSETS_BUCKET");
         }
-        return deps.assets.localPath(p) ?? p;
+        const local = deps.assets.localPath(p);
+        return local && existsSync(local) ? local : p; // cache miss (another instance rendered it): publisher downloads the URL
       },
     };
     const pubMod = await publisher();

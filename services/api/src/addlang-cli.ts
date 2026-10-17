@@ -13,8 +13,8 @@ import { FileStore, FirestoreStore, type Store } from "./store.js";
 const DATA_DIR = resolve(process.env.DATA_DIR ?? `${resolve(import.meta.dirname, "../../..")}/.data`);
 const WORK_DIR = resolve(process.env.WORK_DIR ?? `${DATA_DIR}/work`);
 const [storyId, lang] = process.argv.slice(2);
-if (!storyId || !lang || !isLang(lang) || lang === "en") {
-  console.error("usage: add-lang <storyId> <lang (not en)> [--no-render]");
+if (!storyId || !lang || !isLang(lang) || (lang === "en" && !process.argv.includes("--render-only"))) {
+  console.error("usage: add-lang <storyId> <lang> [--no-render | --render-only]   (en only with --render-only: re-render an existing script)");
   process.exit(1);
 }
 

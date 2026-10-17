@@ -2,7 +2,7 @@
 // sources / section title / illustration / end card), large captions, the presenter as a small picture-in-picture,
 // and the AI disclosure on every frame. Text stays out of the bottom 20% and the right-hand action column that
 // Reels/Shorts overlay on vertical video.
-import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
+import { createCanvas, type Image, type SKRSContext2D } from "@napi-rs/canvas";
 import { uiStrings } from "@openlens/config";
 import type { Beat } from "./beats.js";
 import { drawCover, drawHighlighted, fitBlock, fitWidth, roundRect, scriptLeading, text, wrap } from "./draw.js";
@@ -483,9 +483,10 @@ function heroCard(ctx: SKRSContext2D, scene: Scene, brand: Branding, b: Box, ver
   }
 }
 
-function illustrationBackdrop(ctx: SKRSContext2D, scene: Scene, L: ExplainerLayout) {
-  if (!scene.image) return;
-  drawCover(ctx, scene.image, 0, 0, L.W, L.H, 0.4);
+/** Picture behind the card. `moving`: ffmpeg draws the (panning, zooming) picture itself under this transparent frame, so only the scrims are drawn here. */
+function illustrationBackdrop(ctx: SKRSContext2D, img: Image | undefined, L: ExplainerLayout, moving = false) {
+  if (!img) return;
+  if (!moving) drawCover(ctx, img, 0, 0, L.W, L.H, 0.4);
   // Dark scrim so every text layer stays readable; heavier towards the caption area.
   ctx.fillStyle = "rgba(0,0,0,0.35)";
   ctx.fillRect(0, 0, L.W, L.H);
@@ -577,9 +578,14 @@ export function renderExplainerFrame(scene: Scene, brand: Branding, index: numbe
   const ff = brand.fontFamily;
   const beat: Beat = scene.beat ?? { kind: "hero", headline: "" };
 
-  ctx.fillStyle = C.bg;
-  ctx.fillRect(0, 0, L.W, L.H);
-  if (beat.kind === "illustration") illustrationBackdrop(ctx, scene, L);
+  // A scene with a picture: in overlay mode the frame stays transparent so ffmpeg can move the picture underneath.
+  const bg = beat.kind === "illustration" ? scene.image : beat.kind === "cta" ? undefined : scene.bgImage;
+  const moving = overlay && (Boolean(bg) || Boolean(scene.ambient));
+  if (!moving) {
+    ctx.fillStyle = C.bg;
+    ctx.fillRect(0, 0, L.W, L.H);
+  }
+  illustrationBackdrop(ctx, bg, L, moving);
   progress(ctx, L, index, total);
   logo(ctx, L, ff);
   disclosure(ctx, L, brand);
@@ -597,6 +603,7 @@ export function renderExplainerFrame(scene: Scene, brand: Branding, index: numbe
     case "cta": endCard(ctx, beat, scene, brand, L, vertical); break;
     default: heroCard(ctx, scene, brand, L.beat, vertical, index);
   }
+  if (beat.kind !== "illustration" && beat.kind !== "cta" && scene.bgImage) illustrationTag(ctx, brand, L.beat, vertical, scene.backdropCredit); // a picture behind another card is labelled too
   if (beat.kind !== "cta") {
     sourceChip(ctx, L, scene, brand);
     caption(ctx, scene.text, L.caption, brand, vertical);

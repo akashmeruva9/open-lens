@@ -200,11 +200,13 @@ export async function renderScriptMedia(job: MediaJob): Promise<MediaResult> {
     const kinds = timed.map((t, i) => beatCandidates({ label: t.label, text: t.text, claimIds: t.claimIds },
       { claims: job.claims, sources: outletsFor(job, t.claimIds), timeline: job.timeline, timelineLang: job.ledgerLang ?? "en", lang: job.lang, index: i, total: timed.length, ctaUrl })[0]?.kind);
     const plain = pickIllustrationLines(kinds, timed.length); // every line that would otherwise get a plain card (never the end card)
+    // File photos can also sit behind number / quote / map cards, so any line but the end card is eligible for one.
+    const photoLines = kinds.map((k, i) => ({ k, i })).filter(({ k, i }) => k !== "cta" && i < kinds.length - 1).map(({ i }) => i);
     const illustrations: Record<number, string> = {};
     const credits: Record<number, string> = {};
     // 1) Real file photos for lines that name a subject (people, organisations, objects), with a visible credit.
-    if ((job.autoPhotos ?? 0) > 0 && plain.length) {
-      const photos = await planFilePhotos({ storyId: job.storyId, title: job.script.title, lines: plain.map((i) => ({ index: i, text: timed[i]!.text })), max: job.autoPhotos! });
+    if ((job.autoPhotos ?? 0) > 0 && photoLines.length) {
+      const photos = await planFilePhotos({ storyId: job.storyId, title: job.script.title, lines: photoLines.map((i) => ({ index: i, text: timed[i]!.text })), max: job.autoPhotos! });
       for (const [i, p] of Object.entries(photos)) { illustrations[Number(i)] = p.file; credits[Number(i)] = p.credit; }
     }
     // 2) AI backdrops (labelled) for remaining plain lines, up to the configured count.
@@ -284,6 +286,11 @@ export function explainerScenes(job: MediaJob, timed: TimedLine[]): Scene[] {
   const ctaUrl = job.ctaUrl ?? (process.env.OPENLENS_PUBLIC_URL?.trim() || undefined);
   let prev: BeatKind | undefined;
   const used: BeatKind[] = [];
+  const bank: { path: string; credit?: string }[] = [];
+  // Only people-free AI backdrops are reused behind other lines. A file photo (it may show a named person or organisation)
+  // stays on the line that names its subject, so a face never sits behind a line that is about something else.
+  for (const [idx, path] of Object.entries(job.illustrations ?? {})) if (!job.imageCredits?.[Number(idx)] && !bank.some((b) => b.path === path)) bank.push({ path });
+  let bankNext = 0;
   const scenes: Scene[] = timed.map((t, i) => {
     const sources = outletsFor(job, t.claimIds);
     const imagePath = job.illustrations?.[i];
@@ -295,8 +302,15 @@ export function explainerScenes(job: MediaJob, timed: TimedLine[]): Scene[] {
     );
     prev = beat.kind;
     used.push(beat.kind);
+    // The picture bank: every image this video has. A line whose card is not the picture itself gets one moving behind the card
+    // (its own photo if it has one, else the next in rotation), so no line is a frozen card.
+    let backdrop: { path: string; credit?: string } | undefined;
+    if (beat.kind !== "illustration" && beat.kind !== "cta" && bank.length) {
+      backdrop = imagePath ? { path: imagePath, credit: job.imageCredits?.[i] } : bank[bankNext++ % bank.length];
+    }
     return { label: t.label, text: t.text, claimIds: t.claimIds, seconds: t.seconds, sources, beat, layout: "beat",
-      ...(beat.kind === "illustration" ? { imagePath, credit: job.imageCredits?.[i] } : {}) };
+      ...(beat.kind === "illustration" ? { imagePath, credit: job.imageCredits?.[i] } : {}),
+      ...(backdrop ? { backdropPath: backdrop.path, backdropCredit: backdrop.credit } : {}) };
   });
   const last = scenes.at(-1)!;
   if (last.beat?.kind === "cta") last.seconds = Math.max(last.seconds, END_CARD_SECONDS);

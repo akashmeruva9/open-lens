@@ -32,6 +32,13 @@ export interface Scene {
   image?: Image;
   /** Credit line for a real file photo (e.g. "president.gov.ua, CC BY 4.0, Wikimedia Commons"). When set, the tag reads "File photo · credit" instead of the AI label. */
   credit?: string;
+  /** A picture that moves slowly (ffmpeg pan/zoom) behind this scene's card, so no line is a frozen card. Used for scenes whose
+   *  beat is not the picture itself; `backdropCredit` names a file photo's source (absent: it is labelled as an AI image). */
+  backdropPath?: string;
+  bgImage?: Image;
+  backdropCredit?: string;
+  /** No picture for this line: ffmpeg draws a slowly shifting abstract gradient under the (transparent) frame instead of a flat colour. */
+  ambient?: boolean;
 }
 
 export interface Branding {

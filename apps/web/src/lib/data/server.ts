@@ -1,11 +1,11 @@
 import { ApiError, createClient, type OpenLensClient } from "@openlens/client";
 import type { FeedItem, StoryBundle } from "@openlens/schemas";
 import { toCard, type CardItem } from "@/lib/cards";
-import { API_URL } from "@/lib/env";
+import { apiServerUrl } from "@/lib/env";
 
 /** Reader-side client for Server Components (public, unauthenticated). */
 export function getServerClient(): OpenLensClient {
-  return createClient({ baseUrl: API_URL });
+  return createClient({ baseUrl: apiServerUrl() });
 }
 
 export type Result<T> = { ok: true; data: T } | { ok: false; status: number; message: string };

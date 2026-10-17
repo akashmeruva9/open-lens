@@ -19,6 +19,14 @@ async function setup() {
   return { req, store, id: fixture.story.id };
 }
 
+test("routes answer with and without the /api prefix", async () => {
+  const { req, id } = await setup();
+  assert.equal((await req("GET", "/api/health")).status, 200);
+  assert.equal((await req("GET", `/api/v1/stories/${id}`)).status, 200);
+  assert.equal((await req("GET", "/v1/feed")).status, 200);
+  assert.equal((await req("GET", "/apiary")).status, 404);
+});
+
 test("reader feed + story hide drafts and ops data", async () => {
   const { req, id } = await setup();
   const feed = await (await req("GET", "/v1/feed")).json();

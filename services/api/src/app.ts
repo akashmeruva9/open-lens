@@ -6,6 +6,7 @@ import { existsSync } from "node:fs";
 import { Hono, type Context } from "hono";
 import { cors } from "hono/cors";
 import { streamSSE } from "hono/streaming";
+import { getPath } from "hono/utils/url";
 import { z } from "zod";
 import { requireEditor, authMode } from "./auth.js";
 import { emit, subscribe } from "./bus.js";
@@ -121,8 +122,14 @@ export interface WireOptions {
   token?: string;
 }
 
+/**
+ * On Vercel the api is public under /api (vercel.json) and receives the original path, e.g. /api/v1/feed.
+ * Routes stay unprefixed so Cloud Run, the mobile app and internal (binding) calls keep working.
+ */
+export const stripApiPrefix = (path: string) => (path === "/api" ? "/" : path.startsWith("/api/") ? path.slice(4) : path);
+
 export function createApp(deps: Deps, wire?: WireOptions) {
-  const app = new Hono();
+  const app = new Hono({ getPath: (req) => stripApiPrefix(getPath(req)) });
   const corsOrigins = (process.env.CORS_ORIGINS ?? "*").split(",");
   app.use("*", cors({ origin: corsOrigins.includes("*") ? "*" : corsOrigins, allowHeaders: ["authorization", "content-type", "x-dev-user"] }));
   app.onError((err, c) => {

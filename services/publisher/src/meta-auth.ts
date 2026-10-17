@@ -6,7 +6,7 @@
  *
  * Prompts (input hidden) for the app secret and the short-lived user token, exchanges it for a long-lived token,
  * lists the Pages you manage that have a linked Instagram professional account, and writes
- *   IG_USER_ID_<LANG> and META_PAGE_ACCESS_TOKEN_<LANG>
+ *   IG_USER_ID_<LANG>, FB_PAGE_ID_<LANG> and META_PAGE_ACCESS_TOKEN_<LANG>
  * into ~/.openlens/instagram.env (owner-only). A Page token obtained from a long-lived user token does not expire.
  * Nothing secret is printed.
  */
@@ -70,15 +70,16 @@ async function main() {
   const dir = join(homedir(), ".openlens");
   mkdirSync(dir, { recursive: true, mode: 0o700 });
   const file = join(dir, "instagram.env");
-  const keep = existsSync(file) ? readFileSync(file, "utf8").split("\n").filter((l) => l && !l.startsWith(`IG_USER_ID_${lang}=`) && !l.startsWith(`META_PAGE_ACCESS_TOKEN_${lang}=`)) : [];
-  keep.push(`IG_USER_ID_${lang}=${page.instagram_business_account.id}`, `META_PAGE_ACCESS_TOKEN_${lang}=${page.access_token}`);
+  const mine = [`IG_USER_ID_${lang}=`, `FB_PAGE_ID_${lang}=`, `META_PAGE_ACCESS_TOKEN_${lang}=`];
+  const keep = existsSync(file) ? readFileSync(file, "utf8").split("\n").filter((l) => l && !mine.some((m) => l.startsWith(m))) : [];
+  keep.push(`IG_USER_ID_${lang}=${page.instagram_business_account.id}`, `FB_PAGE_ID_${lang}=${page.id}`, `META_PAGE_ACCESS_TOKEN_${lang}=${page.access_token}`);
   writeFileSync(file, `${keep.join("\n")}\n`, { mode: 0o600 });
   chmodSync(file, 0o600);
 
   console.error(`\nsaved to ${file} (owner-only):`);
   console.error(`  Page:      ${page.name} (${page.id})`);
   console.error(`  Instagram: @${page.instagram_business_account.username} (${page.instagram_business_account.id})`);
-  console.error(`  keys:      IG_USER_ID_${lang}, META_PAGE_ACCESS_TOKEN_${lang}`);
+  console.error(`  keys:      IG_USER_ID_${lang}, FB_PAGE_ID_${lang}, META_PAGE_ACCESS_TOKEN_${lang}`);
 }
 
 main().catch((e) => {

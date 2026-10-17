@@ -11,7 +11,7 @@ export interface PublishContext {
 export interface ChannelPublisher {
   channel: Channel;
   status(): { live: boolean; reason?: string };
-  validate(o: OutputRecord, ctx: PublishContext): Promise<{ ok: boolean; errors: string[]; warnings: string[] }>;
+  validate(o: OutputRecord, ctx: PublishContext, opts?: { mode?: "live" | "dry_run"; scheduleAt?: string }): Promise<{ ok: boolean; errors: string[]; warnings: string[] }>;
   publish(o: OutputRecord, ctx: PublishContext, opts: { mode: "live" | "dry_run"; scheduleAt?: string; recipients?: string[] }): Promise<Publication>;
   update(p: Publication, o: OutputRecord, ctx: PublishContext): Promise<Publication>;
   retract(p: Publication, ctx: PublishContext): Promise<Publication>;

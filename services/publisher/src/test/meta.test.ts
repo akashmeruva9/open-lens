@@ -174,6 +174,35 @@ test("facebook live feed post, correction edit, retract delete", async () => {
   }
 });
 
+test("facebook: each language posts to its own Page (FB_PAGE_ID_<LANG> / META_PAGE_ACCESS_TOKEN_<LANG>), retract uses the same token", async () => {
+  const m = mockFetch((c) => {
+    if (c.method === "POST" && c.url.endsWith("/feed")) return { json: { id: "p_1" } };
+    if (c.method === "DELETE") return { json: { success: true } };
+    throw new Error(`unexpected ${c.method} ${c.url}`);
+  });
+  const LANGS = { FB_PAGE_ID_EN: "111", META_PAGE_ACCESS_TOKEN_EN: "tok-en", FB_PAGE_ID_JA: "222", META_PAGE_ACCESS_TOKEN_JA: "tok-ja" };
+  try {
+    await withEnv(LANGS, async () => {
+      assert.equal(fb.status().live, true);
+      const ja = await fb.publish({ ...post(), lang: "ja" }, ctx(), { mode: "live" });
+      assert.equal(ja.status, "published", ja.error ?? "");
+      assert.equal(m.calls[0]!.url, `${G}/222/feed`);
+      assert.equal(m.calls[0]!.headers.authorization, "Bearer tok-ja");
+      const ret = await fb.retract(ja, ctx());
+      assert.equal(ret.status, "retracted");
+      assert.equal(m.calls[1]!.headers.authorization, "Bearer tok-ja");
+      const en = await fb.publish({ ...post(), lang: "en" }, ctx(), { mode: "live" });
+      assert.equal(en.status, "published", en.error ?? "");
+      assert.equal(m.calls[2]!.url, `${G}/111/feed`);
+    });
+    await withEnv({ FB_PAGE_ID_EN: "111", META_PAGE_ACCESS_TOKEN_EN: "tok-en" }, async () => {
+      await assert.rejects(fb.publish({ ...post(), lang: "ja" }, ctx(), { mode: "live" }), /FB_PAGE_ID_JA|no Facebook Page/);
+    });
+  } finally {
+    m.restore();
+  }
+});
+
 test("facebook video goes to graph-video /videos with file_url; scheduling", async () => {
   const net = forbidNetwork();
   try {

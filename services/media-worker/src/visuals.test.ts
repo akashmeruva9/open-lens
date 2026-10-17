@@ -18,3 +18,17 @@ test("pickIllustrationLines uses only plain-card lines, never the end card, and 
   assert.ok(three.every((i) => ["hero", "sources"].includes(kinds[i]!) && i < kinds.length - 1));
   assert.equal(three[0], 0);
 });
+
+import { shotPlan } from "./render.js";
+
+test("shotPlan: shots add up to the scene, none under 2.5 s, and the first scene opens with a short shot", () => {
+  for (const secs of [3, 6, 9.4, 12, 27.3]) {
+    for (const first of [false, true]) {
+      const plan = shotPlan(secs, first);
+      assert.ok(Math.abs(plan.reduce((a, b) => a + b, 0) - secs) < 0.01, `${secs}/${first} sums`);
+      assert.ok(plan.every((d) => d >= 2.4), `${secs}/${first} min shot: ${plan.join(",")}`);
+    }
+  }
+  assert.equal(shotPlan(12, true)[0], 2.5);
+  assert.equal(shotPlan(3, true).length, 1); // too short to split
+});

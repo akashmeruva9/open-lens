@@ -103,6 +103,21 @@ export const CHANNEL_PLAN: Record<LangCode, { tier: Tier; channel: string; prese
   fil: { tier: "national", channel: "OpenLens Pilipinas", presenter: "marco-fil" },
 };
 
+/** The shared social accounts each language posts to (the credentials per language are YOUTUBE_REFRESH_TOKEN_<LANG>, IG_USER_ID_<LANG>,
+ *  FB_PAGE_ID_<LANG> and META_PAGE_ACCESS_TOKEN_<LANG>). `pending: true` = the account is not created yet, so posting there is skipped. */
+export const SOCIAL_ACCOUNTS: Partial<Record<LangCode, { youtube: { handle: string; url: string; pending?: boolean }; instagram: { handle: string; url: string; pending?: boolean }; facebook: { name: string; url: string; pending?: boolean } }>> = {
+  en: {
+    youtube: { handle: "@openlensglobal", url: "https://www.youtube.com/@openlensglobal" },
+    instagram: { handle: "@openlensglobal", url: "https://www.instagram.com/openlensglobal/" },
+    facebook: { name: "Open Lens Global", url: "https://www.facebook.com/profile.php?id=61595417253983" },
+  },
+  ja: {
+    youtube: { handle: "@openlensjapan", url: "https://www.youtube.com/@openlensjapan" },
+    instagram: { handle: "@openlensjapan", url: "https://www.instagram.com/openlensjapan/", pending: true },
+    facebook: { name: "Open Lens Japan", url: "https://www.facebook.com/", pending: true },
+  },
+};
+
 const LOCAL_DISCLOSURE: Record<LangCode, string> = {
   en: "AI-generated presenter and narration. Every fact is linked to its source.",
   hi: "एआई-जनित प्रस्तुतकर्ता और आवाज़। हर तथ्य उसके स्रोत से जुड़ा है।",

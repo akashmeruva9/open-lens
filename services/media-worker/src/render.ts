@@ -76,33 +76,67 @@ async function detectCrop(path: string): Promise<string | undefined> {
 
 const even = (n: number) => Math.round(n / 2) * 2;
 
-/** Abstract moving background for a line with no picture: a dark-blue gradient that drifts slowly (free, and says nothing about the story). */
-export function ambientSource(index: number, seconds: number, W: number, H: number): string {
+/** Abstract moving background for a line with no picture: dark-blue gradients that drift slowly (free, and say nothing about the story).
+ *  Cut into the same shots as a picture would be, each with its own palette and direction. Produces the filter-graph label [amb]. */
+export function ambientShots(sceneIndex: number, seconds: number, W: number, H: number): string {
   const palettes = [
     ["0x0b1220", "0x1b3a8c", "0x0d0e12"],
     ["0x0d0e12", "0x14507a", "0x0b1220"],
     ["0x0b1220", "0x2a2f7a", "0x10131a"],
+    ["0x10131a", "0x0f5a73", "0x0b1220"],
   ];
-  const [c0, c1, c2] = palettes[index % palettes.length]!;
-  const flip = index % 2 === 0;
-  return `gradients=s=${W}x${H}:c0=${c0}:c1=${c1}:c2=${c2}:x0=${flip ? 0 : W}:y0=0:x1=${flip ? W : 0}:y1=${H}:speed=0.03:d=${seconds}:r=30`;
+  const shots = shotPlan(seconds, sceneIndex === 0);
+  const parts = shots.map((d, k) => {
+    const n = sceneIndex * 3 + k;
+    const [c0, c1, c2] = palettes[n % palettes.length]!;
+    const [x0, y0, x1, y1] = [[0, 0, W, H], [W, 0, 0, H], [0, H, W, 0], [W, H, 0, 0]][n % 4]!;
+    return `gradients=s=${W}x${H}:c0=${c0}:c1=${c1}:c2=${c2}:x0=${x0}:y0=${y0}:x1=${x1}:y1=${y1}:speed=0.04:d=${d.toFixed(3)}:r=30,format=yuv420p[g${k}]`;
+  });
+  return `${parts.join(";")};${shots.map((_, k) => `[g${k}]`).join("")}concat=n=${shots.length}:v=1:a=0[amb]`;
 }
 
-/** Slow pan/zoom (Ken Burns) for a still behind a scene. Four moves in rotation so neighbouring scenes never move the same way.
- *  The picture is scaled to twice the frame first so the crop window moves in whole pixels without jitter. */
-export function motionFilter(index: number, seconds: number, W: number, H: number): string {
+/** Shot durations for a scene: about every 4 s a hard cut to a new framing of the same picture (a remainder under 2.5 s is merged
+ *  into the previous shot). The first scene opens with a short, punchy 2.5 s shot so the video starts moving at once. */
+export function shotPlan(seconds: number, first: boolean): number[] {
+  const out: number[] = [];
+  let left = seconds;
+  if (first && seconds > 5) { out.push(2.5); left -= 2.5; }
+  const n = Math.max(1, Math.round(left / 4));
+  const each = left / n;
+  for (let k = 0; k < n; k++) out.push(each);
+  return out;
+}
+
+/** The picture scaled to 1.5x the frame first, so the crop window can move in whole pixels without jitter. */
+const prescale = (W: number, H: number) => `scale=${even(W * 1.5)}:${even(H * 1.5)}:force_original_aspect_ratio=increase,crop=${even(W * 1.5)}:${even(H * 1.5)}`;
+
+/** One shot's slow pan/zoom (Ken Burns). Six framings in rotation, so consecutive shots never repeat; `punch` is a fast push-in for the opening shot. */
+export function zoomMove(index: number, seconds: number, W: number, H: number, punch = false): string {
   const frames = Math.max(1, Math.round(seconds * 30));
   const moves = [
-    // slow push in on the centre
-    `z='min(1.18,1+0.18*on/${frames})':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'`,
-    // pull out from a zoomed frame
-    `z='max(1,1.18-0.18*on/${frames})':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'`,
-    // drift right at a fixed zoom
-    `z='1.15':x='(iw-iw/zoom)*on/${frames}':y='ih/2-(ih/zoom/2)'`,
-    // drift left at a fixed zoom
-    `z='1.15':x='(iw-iw/zoom)*(1-on/${frames})':y='ih/2-(ih/zoom/2)'`,
+    `z='min(1.18,1+0.18*on/${frames})':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'`, // slow push in on the centre
+    `z='1.2':x='(iw-iw/zoom)*on/${frames}':y='(ih-ih/zoom)*0.25'`, // drift right, upper third
+    `z='max(1,1.18-0.18*on/${frames})':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'`, // pull out from a zoomed frame
+    `z='1.2':x='(iw-iw/zoom)*(1-on/${frames})':y='(ih-ih/zoom)*0.75'`, // drift left, lower third
+    `z='1.2':x='(iw-iw/zoom)*0.5':y='(ih-ih/zoom)*on/${frames}'`, // drift down
+    `z='1.2':x='(iw-iw/zoom)*0.5':y='(ih-ih/zoom)*(1-on/${frames})'`, // drift up
   ];
-  return `scale=${W * 2}:${H * 2}:force_original_aspect_ratio=increase,crop=${W * 2}:${H * 2},zoompan=${moves[index % moves.length]}:d=1:s=${W}x${H}:fps=30,setsar=1`;
+  const move = punch ? `z='min(1.32,1+0.32*on/${frames})':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'` : moves[index % moves.length]!;
+  return `zoompan=${move}:d=1:s=${W}x${H}:fps=30,setsar=1`;
+}
+
+/** Filter graph piece: input label -> [img]: the picture cut into shots (see shotPlan), each a different slow move. */
+export function pictureShots(inLabel: string, sceneIndex: number, seconds: number, W: number, H: number): string {
+  const shots = shotPlan(seconds, sceneIndex === 0);
+  const labels = shots.map((_, k) => `[m${k}]`);
+  let at = 0;
+  const parts = shots.map((d, k) => {
+    const part = `[s${k}]trim=start=${at.toFixed(3)}:duration=${d.toFixed(3)},setpts=PTS-STARTPTS,${zoomMove(sceneIndex * 3 + k, d, W, H, sceneIndex === 0 && k === 0)}${labels[k]}`;
+    at += d;
+    return part;
+  });
+  const split = shots.length > 1 ? `[ps]split=${shots.length}${shots.map((_, k) => `[s${k}]`).join("")}` : "[ps]null[s0]";
+  return `${inLabel}${prescale(W, H)}[ps];${split};${parts.join(";")};${labels.join("")}concat=n=${shots.length}:v=1:a=0[img]`;
 }
 
 export async function renderVideo(opts: RenderOptions): Promise<RenderResult> {
@@ -168,14 +202,16 @@ export async function renderVideo(opts: RenderOptions): Promise<RenderResult> {
         `[1:v]crop=iw:trunc(min(ih\\,iw*4/3)/2)*2:0:(ih-min(ih\\,iw*4/3))/2,scale=${bw}:${bh}:force_original_aspect_ratio=increase,crop=${bw}:${bh}:(iw-${bw})/2:(ih-${bh})*0.15,setsar=1,fps=30[v];`;
       await run("ffmpeg", [
         "-y",
-        "-f", "lavfi", "-i", sc.ambient ? ambientSource(i, sc.seconds, W, H) : `color=c=0x0b1220:s=${W}x${H}:r=30:d=${sc.seconds}`,
+        "-f", "lavfi", "-i", `color=c=0x0b1220:s=${W}x${H}:r=30:d=${sc.seconds}`,
         "-stream_loop", "-1", "-ss", offset, "-i", brand.presenterVideo,
         "-loop", "1", "-framerate", "30", "-t", String(sc.seconds), "-i", overlay,
         ...(pic ? ["-loop", "1", "-framerate", "30", "-t", String(sc.seconds), "-i", pic] : []),
         "-filter_complex",
         pic
-          ? `${presenter}[3:v]${motionFilter(i, sc.seconds, W, H)}[img];[0:v][img]overlay=0:0[bg];[bg][v]overlay=${box.x}:${box.y}[b];[b][2:v]overlay=0:0:format=auto,format=yuv420p[o]`
-          : `${presenter}[0:v][v]overlay=${box.x}:${box.y}[b];[b][2:v]overlay=0:0:format=auto,format=yuv420p[o]`,
+          ? `${presenter}${pictureShots("[3:v]", i, sc.seconds, W, H)};[0:v][img]overlay=0:0[bg];[bg][v]overlay=${box.x}:${box.y}[b];[b][2:v]overlay=0:0:format=auto,format=yuv420p[o]`
+          : sc.ambient
+            ? `${presenter}${ambientShots(i, sc.seconds, W, H)};[amb][v]overlay=${box.x}:${box.y}[b];[b][2:v]overlay=0:0:format=auto,format=yuv420p[o]`
+            : `${presenter}[0:v][v]overlay=${box.x}:${box.y}[b];[b][2:v]overlay=0:0:format=auto,format=yuv420p[o]`,
         "-map", "[o]", "-t", String(sc.seconds), "-an", ...encode, seg,
       ]);
       listLines.push(`file '${seg}'`);

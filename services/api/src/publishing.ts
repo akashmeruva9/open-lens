@@ -11,12 +11,15 @@ export interface PublishContext {
 export interface ChannelPublisher {
   channel: Channel;
   status(): { live: boolean; reason?: string };
-  validate(o: OutputRecord, ctx: PublishContext): Promise<{ ok: boolean; errors: string[]; warnings: string[] }>;
+  validate(o: OutputRecord, ctx: PublishContext, opts?: { mode?: "live" | "dry_run"; scheduleAt?: string }): Promise<{ ok: boolean; errors: string[]; warnings: string[] }>;
   publish(o: OutputRecord, ctx: PublishContext, opts: { mode: "live" | "dry_run"; scheduleAt?: string; recipients?: string[] }): Promise<Publication>;
   update(p: Publication, o: OutputRecord, ctx: PublishContext): Promise<Publication>;
   retract(p: Publication, ctx: PublishContext): Promise<Publication>;
 }
+export interface HashtagContext { topics: string[]; region?: string; siblings: OutputRecord[] }
 interface PublisherModule {
+  /** Adds reach hashtags to a post (see services/publisher/src/hashtags.ts). */
+  withHashtags?(o: OutputRecord, ctx: HashtagContext, opts?: { vertical?: boolean }): OutputRecord;
   getPublisher(c: Channel): ChannelPublisher;
   channelStatuses(): { channel: Channel; live: boolean; reason?: string }[];
   sendPush(o: { topic: string; title: string; body: string; data?: Record<string, string> }): Promise<{ sent: boolean; reason?: string }>;

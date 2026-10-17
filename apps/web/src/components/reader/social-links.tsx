@@ -11,8 +11,9 @@ export function SocialLinks({ heading = true, className = "" }: { heading?: bool
       <ul className="grid gap-1">
         {links.map((l) => (
           <li key={l.url}>
-            <a href={l.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[13px] font-semibold leading-6 text-ink-2 hover:text-ink">
-              {l.platform} · {l.language} <span className="font-normal text-ink-3">{l.handle}</span> <IconArrowUpRight size={12} />
+            <a href={l.url} target="_blank" rel="noopener noreferrer" className="group block py-0.5 text-[13px] font-semibold leading-5 text-ink-2 hover:text-ink">
+              <span className="inline-flex items-center gap-1">{l.platform} · {l.language} <IconArrowUpRight size={12} /></span>
+              <span className="block text-xs font-normal leading-4 text-ink-3 group-hover:text-ink-2">{l.handle}</span>
             </a>
           </li>
         ))}

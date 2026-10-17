@@ -36,6 +36,7 @@ export function VerifyBox({ initial }: { initial?: string }) {
   const check = useCallback(async (statement: string) => {
     const t = statement.trim();
     if (t.length < 8) return setError("Write a full sentence so we have something to check.");
+    if (/^https?:\/\/\S+$/i.test(t)) return setError("Paste the claim itself as a sentence for now (the line you want checked). Checking a whole article from its link is not available yet.");
     setBusy(true);
     setError(undefined);
     try {

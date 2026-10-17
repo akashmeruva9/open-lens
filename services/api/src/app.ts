@@ -402,6 +402,7 @@ export function createApp(deps: Deps, wire?: WireOptions, extras?: { verifier?: 
     if (today.key !== day) Object.assign(today, { key: day, n: 0 });
     if (++today.n > dailyCap) throw httpError(429, "today's limit for checks has been reached, try again tomorrow");
     const { text } = VerifyBody.parse(await c.req.json().catch(() => ({})));
+    if (/^https?:\/\/\S+$/i.test(text)) throw httpError(422, "Paste the claim as a sentence for now. Checking a whole article from its link is not available yet.");
     const result = await verifier.verify(text);
     if (result.status === "not_covered") {
       const queue = await deps.store.getState<QueuedStatement[]>("verify-queue", []);

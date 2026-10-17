@@ -164,6 +164,16 @@ test("POST /v1/verify: validates the statement and answers from the ledger; unan
   assert.match(queue[0].text, /Penguins/);
 });
 
+test("POST /v1/verify: a bare link is refused with a clear message and never queued", async () => {
+  const v = new Verifier({ docs: async () => [], embed });
+  const { app, post } = await appWith(v);
+  const r = await post("https://mining.com.au/defence-metals-the-new-geopolitical-asset-class/");
+  assert.equal(r.status, 422);
+  assert.match((await r.json()).error, /Paste the claim as a sentence/);
+  assert.deepEqual(await (await app.request("/v1/studio/verify-queue", { headers: { "x-dev-user": "editor@test" } })).json(), []);
+  assert.equal((await post("Defence metals are becoming a geopolitical asset class, see https://mining.com.au/x")).status, 200, "a sentence that contains a link is fine");
+});
+
 test("POST /v1/verify: rate limit per visitor", async () => {
   const v = new Verifier({ docs: async () => [], embed });
   const { post } = await appWith(v, { VERIFY_PER_MINUTE: "2" });

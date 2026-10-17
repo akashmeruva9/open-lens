@@ -61,7 +61,7 @@ export interface Subject { name: string; query: string; kind: "person" | "organi
 /** Subjects that the spoken lines actually name. People only when they are public officials/figures named in the line. */
 export async function findSubjects(title: string, lines: { index: number; text: string }[]): Promise<Subject[]> {
   const prompt = `You are a newsroom picture editor. For the news video "${title}", list up to 4 subjects worth a file photo.
-A subject must be NAMED in the text of the line you attach it to (use that line's number). Allowed: public officials or well-known public figures who are named in the line, organisations, specific objects/equipment, well-known places.
+A subject must be NAMED in the text of the line you attach it to (use that line's number). Allowed: organisations, (public figures are filtered out afterwards), specific objects/equipment, well-known places.
 Not allowed: private individuals, victims, suspects, children, anyone not named in the line.
 For each give "name" (as spoken), "query" (a Wikimedia Commons search query, e.g. "Volodymyr Zelensky", "Starlink satellite dish"), "kind" (person|organisation|object|place), "lineIndex".
 Return JSON only: {"subjects":[...]}.
@@ -75,7 +75,11 @@ ${lines.map((l) => `${l.index}: ${l.text}`).join("\n")}`;
     // The name (or its last word, e.g. a surname) must literally be spoken in the line.
     const words = s.name.split(/\s+/).filter((w) => w.length > 2);
     return norm(line.text).includes(norm(s.name)) || words.some((w) => norm(line.text).includes(norm(w)));
-  }).slice(0, 4);
+  })
+    // No photos of people: checking a face against a name means asking a model to identify a real person, which we do not do.
+    // (Organisations, objects and places only. IMAGEDESK_PEOPLE=1 restores it for a deployment that has cleared this with its provider.)
+    .filter((s) => s.kind !== "person" || process.env.IMAGEDESK_PEOPLE === "1")
+    .slice(0, 4);
 }
 
 export interface Verdict { depicts_subject?: boolean; is_illustration_or_cartoon?: boolean; readable_text_or_logos?: boolean; other_identifiable_people?: boolean; quality?: number }

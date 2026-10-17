@@ -118,6 +118,22 @@ export const SOCIAL_ACCOUNTS: Partial<Record<LangCode, { youtube: { handle: stri
   },
 };
 
+export interface SocialLink { platform: "YouTube" | "Instagram" | "Facebook"; lang: LangCode; language: string; handle: string; url: string }
+
+/** The public links to show in the apps: every account that exists (not `pending`), grouped by platform, then language. */
+export function socialLinks(): SocialLink[] {
+  const out: SocialLink[] = [];
+  const entries = Object.entries(SOCIAL_ACCOUNTS) as [LangCode, NonNullable<(typeof SOCIAL_ACCOUNTS)[LangCode]>][];
+  for (const platform of ["YouTube", "Instagram", "Facebook"] as const) {
+    for (const [lang, a] of entries) {
+      const acct = platform === "YouTube" ? a.youtube : platform === "Instagram" ? a.instagram : a.facebook;
+      if (acct.pending) continue;
+      out.push({ platform, lang, language: LANGUAGES[lang].native, handle: "handle" in acct ? acct.handle : acct.name, url: acct.url });
+    }
+  }
+  return out;
+}
+
 const LOCAL_DISCLOSURE: Record<LangCode, string> = {
   en: "AI-generated presenter and narration. Every fact is linked to its source.",
   hi: "एआई-जनित प्रस्तुतकर्ता और आवाज़। हर तथ्य उसके स्रोत से जुड़ा है।",

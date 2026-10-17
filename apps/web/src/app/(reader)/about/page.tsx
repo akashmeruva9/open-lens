@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SocialLinks } from "@/components/reader/social-links";
 
 export const metadata: Metadata = { title: "About OpenLens" };
 
@@ -67,6 +68,11 @@ export default function AboutPage() {
             ))}
           </section>
         ))}
+        <section id="follow" aria-labelledby="follow-h" className="mt-12 scroll-mt-28">
+          <h2 id="follow-h" className="display text-[24px] leading-[28px]">Follow OpenLens</h2>
+          <p className="mt-3 text-base leading-6 text-ink-2">The same stories, as short videos with disclosed AI presenters, one account per language.</p>
+          <SocialLinks heading={false} className="mt-3" />
+        </section>
       </div>
     </div>
   );

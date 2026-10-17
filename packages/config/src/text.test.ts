@@ -40,3 +40,14 @@ test("markets map to languages; every language has a channel, presenter and disc
     assert.match(AI_DISCLOSURE[l]!, /AI/);
   }
 });
+
+import { socialLinks, SOCIAL_ACCOUNTS } from "./japac.js";
+
+test("socialLinks lists only accounts that exist, grouped by platform", () => {
+  const links = socialLinks();
+  assert.ok(links.length >= 4);
+  assert.deepEqual([...new Set(links.map((l) => l.platform))], ["YouTube", "Instagram", "Facebook"].filter((p) => links.some((l) => l.platform === p)));
+  assert.ok(links.every((l) => /^https:\/\//.test(l.url)));
+  const pending = Object.values(SOCIAL_ACCOUNTS).flatMap((a) => [a!.youtube, a!.instagram, a!.facebook]).filter((x) => x.pending).map((x) => x.url);
+  assert.ok(links.every((l) => !pending.includes(l.url)), "pending accounts are not shown");
+});

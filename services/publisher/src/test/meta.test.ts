@@ -36,9 +36,9 @@ test("instagram dry_run: REELS container with public video_url and hashtags appe
 
 test("instagram validation: Reel aspect + duration, public URL, disclosure, carousel images", async () => {
   await withEnv({}, async () => {
-    const r = await ig.validate(reel({ caption: "no disclosure" }), ctx([video("video-en-916", { aspect: "16:9", durationSeconds: 120 })]));
+    const r = await ig.validate(reel({ caption: "no disclosure" }), ctx([video("video-en-916", { aspect: "16:9", durationSeconds: 200 })]));
     assert.ok(r.errors.some((e) => /9:16/.test(e)));
-    assert.ok(r.errors.some((e) => /outside 5-90s/.test(e)));
+    assert.ok(r.errors.some((e) => /outside 5-180s/.test(e)));
     assert.ok(r.errors.some((e) => /AI disclosure/.test(e)));
     const local = ctx(undefined, { resolveAsset: async () => "/tmp/video.mp4" });
     assert.ok((await ig.validate(reel(), local)).errors.some((e) => /public https URL/.test(e)));
@@ -80,6 +80,35 @@ test("instagram live: create container, poll until FINISHED, media_publish, perm
       const ret = await ig.retract(corr, ctx());
       assert.equal(ret.status, "needs_correction");
       assert.match(ret.error!, /cannot delete/);
+    });
+  } finally {
+    m.restore();
+  }
+});
+
+test("instagram: each language posts to its own account (IG_USER_ID_<LANG> / META_PAGE_ACCESS_TOKEN_<LANG>)", async () => {
+  const m = mockFetch((c) => {
+    if (c.method === "POST" && c.url.endsWith("/media")) return { json: { id: "cont1" } };
+    if (c.url.startsWith(`${G}/cont1?fields=status_code`)) return { json: { status_code: "FINISHED" } };
+    if (c.url.endsWith("/media_publish")) return { json: { id: "media9" } };
+    if (c.url.startsWith(`${G}/media9?fields=permalink`)) return { json: { permalink: "https://www.instagram.com/reel/abc/" } };
+    throw new Error(`unexpected ${c.method} ${c.url}`);
+  });
+  const LANGS = { IG_USER_ID_EN: "111", META_PAGE_ACCESS_TOKEN_EN: "tok-en", IG_USER_ID_JA: "222", META_PAGE_ACCESS_TOKEN_JA: "tok-ja" };
+  try {
+    await withEnv(LANGS, async () => {
+      assert.equal(ig.status().live, true);
+      const ja = await ig.publish({ ...reel(), lang: "ja" }, ctx(), { mode: "live" });
+      assert.equal(ja.status, "published", ja.error ?? "");
+      assert.equal(m.calls[0]!.url, `${G}/222/media`);
+      assert.equal(m.calls[0]!.headers.authorization, "Bearer tok-ja");
+      const en = await ig.publish({ ...reel(), lang: "en" }, ctx(), { mode: "live" });
+      assert.equal(en.status, "published", en.error ?? "");
+      assert.ok(m.calls.some((c) => c.url === `${G}/111/media` && c.headers.authorization === "Bearer tok-en"));
+    });
+    // a language with no account and no default is refused for live publishing
+    await withEnv({ IG_USER_ID_EN: "111", META_PAGE_ACCESS_TOKEN_EN: "tok-en" }, async () => {
+      await assert.rejects(ig.publish({ ...reel(), lang: "ja" }, ctx(), { mode: "live" }), /IG_USER_ID_JA|no Instagram account/);
     });
   } finally {
     m.restore();

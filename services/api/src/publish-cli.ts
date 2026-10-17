@@ -1,5 +1,5 @@
 // Publish one stored output to a channel (dry-run by default):
-//   npm run publish -w @openlens/api -- <storyId> --lang ja [--channel youtube] [--live] [--approve]
+//   npm run publish -w @openlens/api -- <storyId> --lang ja [--channel youtube] [--kind ig_reel] [--live] [--approve]
 //
 // Dry-run never writes anything: the output is treated as approved in memory only and the publisher prints the
 // requests it would send. --live uploads for real and needs --approve (or an already approved output) so a
@@ -26,7 +26,7 @@ const lang = opt("lang");
 const channel = (opt("channel") ?? "youtube") as Channel;
 const live = flag("live");
 if (!storyId || storyId.startsWith("--") || !lang) {
-  console.error("usage: publish <storyId> --lang <lang> [--channel youtube] [--live] [--approve]");
+  console.error("usage: publish <storyId> --lang <lang> [--channel youtube|instagram|x] [--kind <output kind>] [--live] [--approve]");
   process.exit(1);
 }
 
@@ -46,7 +46,8 @@ const assets: AssetStore = process.env.ASSETS_BUCKET ? new GcsAssets(process.env
 const store = await makeStore();
 const rec = await store.get(storyId);
 if (!rec) throw new Error(`story not found: ${storyId}`);
-const candidates = rec.outputs.filter((o) => o.channel === channel && o.lang === lang && o.kind !== "video");
+const kind = opt("kind"); // e.g. ig_reel or carousel, when a channel has several post types
+const candidates = rec.outputs.filter((o) => o.channel === channel && o.lang === lang && o.kind !== "video" && (!kind || o.kind === kind));
 if (!candidates.length) throw new Error(`no ${channel} output for ${storyId} in "${lang}" (found: ${[...new Set(rec.outputs.map((o) => `${o.channel}/${o.lang}`))].join(", ")})`);
 if (candidates.length > 1) throw new Error(`several ${channel}/${lang} outputs: ${candidates.map((o) => o.id).join(", ")}`);
 let output: OutputRecord = candidates[0]!;

@@ -15,7 +15,8 @@
     "build": "tsc -p .",
     "typecheck": "tsc -p . --noEmit",
     "test": "node --import tsx --test \"src/**/*.test.ts\"",
-    "youtube-auth": "tsx src/youtube-auth.ts"
+    "youtube-auth": "tsx src/youtube-auth.ts",
+    "meta-auth": "tsx src/meta-auth.ts"
   },
   "dependencies": {
     "@openlens/config": "*",

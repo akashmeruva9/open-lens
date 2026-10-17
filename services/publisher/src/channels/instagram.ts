@@ -9,9 +9,25 @@ import { graph } from "./meta.js";
 
 const L = CHANNEL_LIMITS.instagram;
 const REQUIRED = ["IG_USER_ID", "META_PAGE_ACCESS_TOKEN"];
-const TOKEN = "META_PAGE_ACCESS_TOKEN";
-const status = () => statusFromMissing(REQUIRED);
-const igUser = () => env("IG_USER_ID") ?? "{IG_USER_ID}";
+
+// ---------- credentials ----------
+// One Instagram account per language: IG_USER_ID_<LANG> + META_PAGE_ACCESS_TOKEN_<LANG> (e.g. _EN, _JA, _ZH_HANT) win over
+// the plain IG_USER_ID / META_PAGE_ACCESS_TOKEN, which stay the default account.
+const langSuffix = (lang?: string) => (lang ? `_${lang.toUpperCase().replace(/-/g, "_")}` : "");
+export const igUserEnvFor = (lang?: string) => (lang && env(`IG_USER_ID${langSuffix(lang)}`) ? `IG_USER_ID${langSuffix(lang)}` : "IG_USER_ID");
+export const igTokenEnvFor = (lang?: string) => (lang && env(`META_PAGE_ACCESS_TOKEN${langSuffix(lang)}`) ? `META_PAGE_ACCESS_TOKEN${langSuffix(lang)}` : "META_PAGE_ACCESS_TOKEN");
+const igUser = (lang?: string) => env(igUserEnvFor(lang)) ?? `{${igUserEnvFor(lang)}}`;
+const hasCreds = (lang?: string) => Boolean(env(igUserEnvFor(lang)) && env(igTokenEnvFor(lang)));
+
+function status() {
+  const base = statusFromMissing(REQUIRED);
+  if (base.live) return base;
+  const anyLang = Object.keys(process.env).some((n) => {
+    const m = /^IG_USER_ID_([A-Z0-9_]+)$/.exec(n);
+    return m && env(n) && env(`META_PAGE_ACCESS_TOKEN_${m[1]}`);
+  });
+  return anyLang ? { live: true } : base;
+}
 
 function composeCaption(caption: string, hashtags: string[]): string {
   const missing = hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)).filter((h) => !caption.includes(h));
@@ -29,6 +45,7 @@ function slideImages(output: OutputRecord): (string | undefined)[] {
 }
 
 interface IgState {
+  lang: string;
   kind: "reel" | "carousel";
   caption: string;
   videoUrl?: string;
@@ -52,6 +69,7 @@ export const instagramPublisher = definePublisher<IgState>({
     const errors: string[] = [];
     const warnings: string[] = [];
     if (opts?.scheduleAt) errors.push("Instagram has no native scheduling via API; schedule the publish job instead");
+    if (opts?.mode === "live" && !hasCreds(output.lang)) errors.push(`no Instagram account configured for "${output.lang}" (set ${igUserEnvFor(output.lang)} and ${igTokenEnvFor(output.lang)})`);
     if (output.kind === "ig_reel") {
       const p = IgReelPayload.safeParse(output.payload);
       if (!p.success) return { errors: [`invalid ig_reel payload: ${zodMessage(p.error)}`], warnings };
@@ -85,7 +103,8 @@ export const instagramPublisher = definePublisher<IgState>({
   },
 
   async prepare(output, ctx) {
-    const auth = `Bearer ${TOKEN}`;
+    const lang = output.lang;
+    const auth = `Bearer ${igTokenEnvFor(lang)}`;
     const requests: RequestSpec[] = [];
     let state: IgState;
     if (output.kind === "ig_reel") {
@@ -93,39 +112,40 @@ export const instagramPublisher = definePublisher<IgState>({
       const v = await resolveVideo(output, ctx, p.videoOutputId);
       if ("error" in v) throw new PublishError("validation_failed", v.error);
       const videoUrl = await ctx.resolveAsset(v.video.mp4Url, { public: true });
-      state = { kind: "reel", caption: composeCaption(p.caption, p.hashtags), videoUrl };
+      state = { lang, kind: "reel", caption: composeCaption(p.caption, p.hashtags), videoUrl };
       requests.push({
         step: "media (REELS container)",
         method: "POST",
-        url: `/${igUser()}/media`,
+        url: `/${igUser(lang)}/media`,
         auth,
         body: { media_type: "REELS", video_url: videoUrl, caption: state.caption, share_to_feed: true },
       });
     } else {
       const p = CarouselPayload.parse(output.payload);
       const imageUrls = await Promise.all(slideImages(output).map((u) => ctx.resolveAsset(u!, { public: true })));
-      state = { kind: "carousel", caption: p.caption, imageUrls };
+      state = { lang, kind: "carousel", caption: p.caption, imageUrls };
       imageUrls.forEach((u, i) =>
-        requests.push({ step: `media (carousel item ${i + 1})`, method: "POST", url: `/${igUser()}/media`, auth, body: { image_url: u, is_carousel_item: true } }),
+        requests.push({ step: `media (carousel item ${i + 1})`, method: "POST", url: `/${igUser(lang)}/media`, auth, body: { image_url: u, is_carousel_item: true } }),
       );
       requests.push({
         step: "media (CAROUSEL container)",
         method: "POST",
-        url: `/${igUser()}/media`,
+        url: `/${igUser(lang)}/media`,
         auth,
         body: { media_type: "CAROUSEL", children: imageUrls.map((_, i) => `{{item_${i + 1}_id}}`).join(","), caption: state.caption },
       });
     }
     requests.push(
       { step: "poll container status_code until FINISHED", method: "GET", url: "/{{container_id}}?fields=status_code,status", auth },
-      { step: "media_publish", method: "POST", url: `/${igUser()}/media_publish`, auth, body: { creation_id: "{{container_id}}" } },
+      { step: "media_publish", method: "POST", url: `/${igUser(lang)}/media_publish`, auth, body: { creation_id: "{{container_id}}" } },
     );
     return { requests: requests.map((r) => ({ ...r, url: r.url.startsWith("/") ? `graph.facebook.com${r.url}` : r.url })), state };
   },
 
   async execute(prep) {
     const s = prep.state;
-    const ig = env("IG_USER_ID")!;
+    const ig = env(igUserEnvFor(s.lang))!;
+    const TOKEN = igTokenEnvFor(s.lang);
     let containerId: string;
     if (s.kind === "reel") {
       const c = await graph(TOKEN, "POST", `/${ig}/media`, "instagram.media.reel", {
@@ -171,6 +191,7 @@ export const instagramPublisher = definePublisher<IgState>({
   async update(pub: Publication, output: OutputRecord, ctx: PublishContext) {
     const body = { message: correctionNote(ctx) };
     const path = `/${pub.externalId}/comments`;
+    const TOKEN = igTokenEnvFor(output.lang);
     return runFollowUp({
       pub,
       action: "update",

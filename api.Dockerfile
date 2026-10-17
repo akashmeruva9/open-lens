@@ -1,5 +1,6 @@
 # OpenLens api: REST/SSE + agent pipeline + media rendering (Cloud Run).
-# Build from the repo root:  docker build -f services/api/Dockerfile .
+# Lives at the repo root so the build context is the root (Vercel builds from the Dockerfile's folder).
+# Build:  docker build -f api.Dockerfile .
 FROM node:24-bookworm-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json tsconfig.base.json ./

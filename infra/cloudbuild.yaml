@@ -33,7 +33,7 @@ steps:
   # --- api ---
   - id: api-build
     name: gcr.io/cloud-builders/docker
-    args: ["build", "-f", "services/api/Dockerfile", "-t", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:${_TAG}", "."]
+    args: ["build", "-f", "api.Dockerfile", "-t", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:${_TAG}", "."]
   - id: api-push
     name: gcr.io/cloud-builders/docker
     args: ["push", "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:${_TAG}"]

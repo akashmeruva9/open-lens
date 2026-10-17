@@ -76,6 +76,35 @@ async function detectCrop(path: string): Promise<string | undefined> {
 
 const even = (n: number) => Math.round(n / 2) * 2;
 
+/** Abstract moving background for a line with no picture: a dark-blue gradient that drifts slowly (free, and says nothing about the story). */
+export function ambientSource(index: number, seconds: number, W: number, H: number): string {
+  const palettes = [
+    ["0x0b1220", "0x1b3a8c", "0x0d0e12"],
+    ["0x0d0e12", "0x14507a", "0x0b1220"],
+    ["0x0b1220", "0x2a2f7a", "0x10131a"],
+  ];
+  const [c0, c1, c2] = palettes[index % palettes.length]!;
+  const flip = index % 2 === 0;
+  return `gradients=s=${W}x${H}:c0=${c0}:c1=${c1}:c2=${c2}:x0=${flip ? 0 : W}:y0=0:x1=${flip ? W : 0}:y1=${H}:speed=0.03:d=${seconds}:r=30`;
+}
+
+/** Slow pan/zoom (Ken Burns) for a still behind a scene. Four moves in rotation so neighbouring scenes never move the same way.
+ *  The picture is scaled to twice the frame first so the crop window moves in whole pixels without jitter. */
+export function motionFilter(index: number, seconds: number, W: number, H: number): string {
+  const frames = Math.max(1, Math.round(seconds * 30));
+  const moves = [
+    // slow push in on the centre
+    `z='min(1.18,1+0.18*on/${frames})':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'`,
+    // pull out from a zoomed frame
+    `z='max(1,1.18-0.18*on/${frames})':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'`,
+    // drift right at a fixed zoom
+    `z='1.15':x='(iw-iw/zoom)*on/${frames}':y='ih/2-(ih/zoom/2)'`,
+    // drift left at a fixed zoom
+    `z='1.15':x='(iw-iw/zoom)*(1-on/${frames})':y='ih/2-(ih/zoom/2)'`,
+  ];
+  return `scale=${W * 2}:${H * 2}:force_original_aspect_ratio=increase,crop=${W * 2}:${H * 2},zoompan=${moves[index % moves.length]}:d=1:s=${W}x${H}:fps=30,setsar=1`;
+}
+
 export async function renderVideo(opts: RenderOptions): Promise<RenderResult> {
   const { outDir, name, scenes, brand } = opts;
   if (scenes.length === 0) throw new Error("No scenes to render");
@@ -91,6 +120,7 @@ export async function renderVideo(opts: RenderOptions): Promise<RenderResult> {
   // Supplied illustrations are loaded once here so frame drawing stays synchronous.
   for (const sc of scenes) {
     if (sc.imagePath && !sc.image) sc.image = await loadImage(sc.imagePath).catch(() => undefined);
+    if (sc.backdropPath && !sc.bgImage) sc.bgImage = await loadImage(sc.backdropPath).catch(() => undefined);
   }
 
   // Segment mode (one mp4 per scene, concatenated by stream copy) whenever something moves: the presenter idle clip
@@ -125,19 +155,27 @@ export async function renderVideo(opts: RenderOptions): Promise<RenderResult> {
     const tag = String(i).padStart(3, "0");
     if (brand.presenterVideo) {
       const overlay = join(work, `overlay-${tag}.png`);
+      // No picture for this line (and not the end card): a slowly shifting abstract gradient moves under the frame.
+      if (sc.beat && sc.beat.kind !== "cta" && sc.beat.kind !== "illustration" && !sc.bgImage) sc.ambient = true;
       await writeFile(overlay, renderSceneFrame(sc, brand, i, scenes.length, aspect, true));
       const box = portraitBox(sceneLayout(sc), aspect);
       const bw = even(box.w), bh = even(box.h);
       const seg = join(work, `seg-${tag}.mp4`);
       const offset = ((i * 2.7) % 6).toFixed(2); // stagger so consecutive scenes don't show the same blink
+      // A scene with a picture (its own illustration, or a backdrop behind another card): ffmpeg moves it under the transparent overlay.
+      const pic = sc.beat?.kind === "illustration" ? (sc.image ? sc.imagePath : undefined) : sc.bgImage ? sc.backdropPath : undefined;
+      const presenter =
+        `[1:v]crop=iw:trunc(min(ih\\,iw*4/3)/2)*2:0:(ih-min(ih\\,iw*4/3))/2,scale=${bw}:${bh}:force_original_aspect_ratio=increase,crop=${bw}:${bh}:(iw-${bw})/2:(ih-${bh})*0.15,setsar=1,fps=30[v];`;
       await run("ffmpeg", [
         "-y",
-        "-f", "lavfi", "-i", `color=c=0x0b1220:s=${W}x${H}:r=30:d=${sc.seconds}`,
+        "-f", "lavfi", "-i", sc.ambient ? ambientSource(i, sc.seconds, W, H) : `color=c=0x0b1220:s=${W}x${H}:r=30:d=${sc.seconds}`,
         "-stream_loop", "-1", "-ss", offset, "-i", brand.presenterVideo,
         "-loop", "1", "-framerate", "30", "-t", String(sc.seconds), "-i", overlay,
+        ...(pic ? ["-loop", "1", "-framerate", "30", "-t", String(sc.seconds), "-i", pic] : []),
         "-filter_complex",
-        `[1:v]crop=iw:trunc(min(ih\\,iw*4/3)/2)*2:0:(ih-min(ih\\,iw*4/3))/2,scale=${bw}:${bh}:force_original_aspect_ratio=increase,crop=${bw}:${bh}:(iw-${bw})/2:(ih-${bh})*0.15,setsar=1,fps=30[v];` +
-          `[0:v][v]overlay=${box.x}:${box.y}[b];[b][2:v]overlay=0:0:format=auto,format=yuv420p[o]`,
+        pic
+          ? `${presenter}[3:v]${motionFilter(i, sc.seconds, W, H)}[img];[0:v][img]overlay=0:0[bg];[bg][v]overlay=${box.x}:${box.y}[b];[b][2:v]overlay=0:0:format=auto,format=yuv420p[o]`
+          : `${presenter}[0:v][v]overlay=${box.x}:${box.y}[b];[b][2:v]overlay=0:0:format=auto,format=yuv420p[o]`,
         "-map", "[o]", "-t", String(sc.seconds), "-an", ...encode, seg,
       ]);
       listLines.push(`file '${seg}'`);

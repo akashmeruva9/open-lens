@@ -75,6 +75,10 @@ ASSETS_BUCKET=open-lens-511319-openlens-media
 ```
 Your own tokens (YouTube, Meta) stay on your machine; only the posting record is shared. If you run your own separate deployment instead, you lose this protection, so agree who posts first.
 
+**Hashtags are added automatically** at publish time (`services/publisher/src/hashtags.ts`, no model call): the story's own tags first, then topic tags in the post's language, the market (for example `#Japan`), a couple of broad news tags and `#OpenLens`. Instagram gets up to 10, YouTube gets a line at the end of the description (YouTube shows the first three above the title; `#Shorts` is added for vertical video), Facebook gets 4. A tag already in the text is never repeated.
+
+**Which account is which** is listed in `SOCIAL_ACCOUNTS` (`packages/config/src/japac.ts`). An account marked `pending: true` is skipped when posting. Remove that flag when the account exists and its credentials are saved.
+
 ### Instagram and Facebook credentials (once per account)
 1. In your Meta app (Development mode) add the permissions `instagram_basic`, `instagram_content_publish`, `pages_show_list`, `pages_read_engagement`, `pages_manage_posts` and `business_management` (Use cases, Permissions and features).
 2. Generate a user token with those permissions in the Graph API Explorer, selecting the Page and the Instagram account.

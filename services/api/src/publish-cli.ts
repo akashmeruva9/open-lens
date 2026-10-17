@@ -13,7 +13,8 @@
 // Credentials come from the environment (~/.openlens/youtube.env, ~/.openlens/instagram.env).
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { PUBLIC_WEB_URL } from "@openlens/config";
+import { PUBLIC_WEB_URL, SOCIAL_ACCOUNTS } from "@openlens/config";
+import type { LangCode } from "@openlens/config";
 import type { Channel, OutputRecord, Publication } from "@openlens/schemas";
 import { GcsAssets, LocalAssets, type AssetStore } from "./assets.js";
 import { FileStore, FirestoreStore, type Store, type StoryRecord } from "./store.js";
@@ -106,10 +107,12 @@ async function publishOne(outputId: string): Promise<Row> {
         rec.outputs = rec.outputs.map((o) => (o.id === output.id ? output : o));
         await store.put(rec);
       }
-    } else if (output.status !== "approved" && output.status !== "published") {
+    } else if (output.status !== "approved" && (republish || output.status !== "published")) {
       output = { ...output, status: "approved" }; // in memory only
     }
 
+    // Reach hashtags for this channel (our videos are all vertical).
+    output = pub!.withHashtags?.(output, { topics: rec.story.topics, region: rec.story.region, siblings: rec.outputs }, { vertical: true }) ?? output;
     const ctx = contextFor(rec);
     const p = pub!.getPublisher(output.channel);
     const mode = live ? "live" : "dry_run";
@@ -164,7 +167,8 @@ if (!all) {
       }
       const r = await publishOne(out.id);
       rows.push(r);
-      console.error(`${r.channel.padEnd(10)} ${r.lang.padEnd(4)} ${r.outcome.padEnd(11)} ${r.detail}`);
+      const acct = SOCIAL_ACCOUNTS[lang as LangCode]?.[r.channel as "youtube" | "instagram" | "facebook"] as { handle?: string; name?: string; pending?: boolean } | undefined;
+      console.error(`${r.channel.padEnd(10)} ${r.lang.padEnd(4)} ${(acct?.handle ?? acct?.name ?? "").padEnd(18)} ${r.outcome.padEnd(11)} ${r.detail}${acct?.pending ? "  (account not created yet)" : ""}`);
     }
   }
   const n = (o: Row["outcome"]) => rows.filter((r) => r.outcome === o).length;

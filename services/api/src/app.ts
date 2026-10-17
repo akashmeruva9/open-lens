@@ -327,13 +327,15 @@ export function createApp(deps: Deps, wire?: WireOptions) {
     const pubMod = await publisher();
     let publication;
     if (pubMod) {
+      // Reach hashtags for this channel (our videos are all vertical).
+      const post = pubMod.withHashtags?.(output, { topics: rec.story.topics, region: rec.story.region, siblings: rec.outputs }, { vertical: true }) ?? output;
       const p = pubMod.getPublisher(output.channel);
-      const v = await p.validate(output, ctx);
+      const v = await p.validate(post, ctx);
       if (!v.ok) return c.json({ error: "validation failed", ...v }, 422);
       const recipients = output.channel === "whatsapp"
         ? (await deps.store.listSubscribers()).filter((s) => s.lang === output.lang).map((s) => s.phone)
         : undefined;
-      publication = await p.publish(output, ctx, { mode, recipients });
+      publication = await p.publish(post, ctx, { mode, recipients });
     } else {
       if (mode === "live") throw httpError(503, "publisher package not installed");
       publication = fallbackDryRun(output, by);

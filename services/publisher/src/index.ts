@@ -13,6 +13,7 @@ export { sendPush, setPushTokenProvider } from "./push.js";
 export { verifyWhatsAppWebhook, verifyMetaSignature } from "./channels/whatsapp.js";
 export { HttpError, redact } from "./http.js";
 export { hasAiDisclosure, xWeightedLength } from "./util.js";
+export { withHashtags, hashtagsFor, cleanTag } from "./hashtags.js";
 
 const PUBLISHERS: Record<Channel, ChannelPublisher> = {
   app: appPublisher,

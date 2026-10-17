@@ -11,7 +11,7 @@
     "start": "node dist/server.js",
     "render": "node --env-file-if-exists=../../.env --import tsx src/render.ts",
     "story": "node --env-file-if-exists=../../.env --import tsx src/story.ts",
-    "publish": "node --env-file-if-exists=../../.env --env-file-if-exists=$HOME/.openlens/youtube.env --import tsx src/publish-cli.ts",
+    "publish": "node --env-file-if-exists=../../.env --env-file-if-exists=$HOME/.openlens/youtube.env --env-file-if-exists=$HOME/.openlens/instagram.env --import tsx src/publish-cli.ts",
     "relink": "node --env-file-if-exists=../../.env --import tsx src/relink-cli.ts",
     "add-lang":"node --env-file-if-exists=../../.env --import tsx src/addlang-cli.ts",
     "handoff":"node --env-file-if-exists=../../.env --import tsx src/handoff-cli.ts",

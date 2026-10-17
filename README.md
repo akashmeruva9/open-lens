@@ -83,6 +83,9 @@ gcloud builds submit --config infra/cloudbuild.yaml .
 ```
 The api runs on Cloud Run with `STORE=firestore`, `ASSETS_BUCKET` (public media for Instagram/Facebook), and `AUTH_MODE=firebase` (studio editors need the `role: editor` custom claim or an address in `EDITOR_EMAILS`).
 
+### Web on Vercel
+`vercel.json` deploys only the web app (`apps/web`); the api stays on Cloud Run, which has the Firestore and Vertex credentials. In the Vercel project, set **`NEXT_PUBLIC_API_URL=https://openlens-api-42lefjl5bq-uc.a.run.app`** (Settings → Environment Variables, all environments) and redeploy: it is read at build time, so changing it needs a new deployment.
+
 ### Redeploying an existing project, and the optional image features
 Run this in a terminal **from the repo root** (the folder that contains `infra/` and `services/`), logged in with `gcloud auth login` as someone who can deploy to the project. It is the same command as above, plus options:
 

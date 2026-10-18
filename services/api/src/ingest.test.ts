@@ -252,3 +252,18 @@ test("resumeInterrupted re-runs only quiet wire stories still 'researching', new
   assert.deepEqual(ran, ["a", "e"]);
   assert.deepEqual(await resumeInterrupted(deps, {} as never, { run: async () => undefined, max: 1 }), ["a"]);
 });
+
+import { missingVideoScripts } from "./ingest.js";
+
+test("missingVideoScripts lists scripts, in the auto-render languages, that have no video of the same language and tier", () => {
+  const outputs = [
+    { id: "script-international-en", kind: "script", lang: "en", tier: "international" },
+    { id: "script-national-ja", kind: "script", lang: "ja", tier: "national" },
+    { id: "script-national-vi", kind: "script", lang: "vi", tier: "national" },
+    { id: "video-international-en-916", kind: "video", lang: "en", tier: "international" },
+    { id: "yt-international-en", kind: "yt_meta", lang: "en", tier: "international" },
+  ];
+  assert.deepEqual(missingVideoScripts({ outputs }, ["en", "ja"]), ["script-national-ja"], "en has its video, vi is not auto-rendered");
+  assert.deepEqual(missingVideoScripts({ outputs }, ["en"]), []);
+  assert.deepEqual(missingVideoScripts({ outputs: [] }, ["en"]), []);
+});

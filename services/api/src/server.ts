@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { GcsAssets, LocalAssets, type AssetStore } from "./assets.js";
 import { createApp } from "./app.js";
-import { defaultEffects, ingestCycle, ingestRunning, loadIngestConfig } from "./ingest.js";
+import { defaultEffects, ingestCycle, ingestRunning, loadIngestConfig, resumeInterrupted } from "./ingest.js";
 import { FileStore, FirestoreStore, type Store } from "./store.js";
 
 // A stray rejected promise (e.g. a timed-out Gemini fetch nobody awaited) must not kill the process:
@@ -49,6 +49,9 @@ const deps = { store: await makeStore(), assets: makeAssets(), workDir: WORK_DIR
 const ingestConfig = await loadIngestConfig(resolve(process.env.SOURCES_ROOT ?? "../.."));
 const wire = { config: ingestConfig, effects: defaultEffects(deps, ingestConfig), token: process.env.INGEST_TOKEN };
 const app = createApp(deps, wire);
+// Stories the last instance was still writing when it stopped (a deploy, a restart) are finished now, a few minutes after boot.
+setTimeout(() => void resumeInterrupted(deps, ingestConfig).then((ids) => ids.length && console.log(`[wire] resumed ${ids.length} interrupted stories`)).catch((e) => console.error("[wire] resume failed:", e)), 6 * 60_000).unref();
+
 // Claim vectors for "Verify this" are computed once and kept; do it now so the first visitor does not wait for it.
 if (process.env.VERIFY_WARM !== "0") {
   void app.verifier.warm().then(() => console.log("[verify] claim vectors ready")).catch((e) => console.error("[verify] warm-up failed (checks fall back to keywords until it succeeds):", e instanceof Error ? e.message : e));

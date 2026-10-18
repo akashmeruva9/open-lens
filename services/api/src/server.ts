@@ -1,5 +1,6 @@
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { GcsAssets, LocalAssets, type AssetStore } from "./assets.js";
 import { createApp } from "./app.js";
@@ -11,6 +12,14 @@ import { FileStore, FirestoreStore, type Store } from "./store.js";
 process.on("unhandledRejection", (reason) => {
   console.error("[unhandledRejection]", reason instanceof Error ? (reason.stack ?? reason.message) : reason);
 });
+
+// Social credentials (YouTube / Meta tokens) arrive as one secret mounted as a KEY=VALUE file on Cloud Run; load it before anything posts.
+if (process.env.SOCIAL_ENV_FILE && existsSync(process.env.SOCIAL_ENV_FILE)) {
+  for (const line of readFileSync(process.env.SOCIAL_ENV_FILE, "utf8").split("\n")) {
+    const m = /^([A-Z0-9_]+)=(.*)$/.exec(line.trim());
+    if (m && process.env[m[1]!] === undefined) process.env[m[1]!] = m[2]!;
+  }
+}
 
 const DATA_DIR = resolve(process.env.DATA_DIR ?? "../../.data");
 const WORK_DIR = resolve(process.env.WORK_DIR ?? `${DATA_DIR}/work`);

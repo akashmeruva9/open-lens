@@ -9,6 +9,7 @@ import type { SourceRecord } from "@openlens/schemas";
 import { readFile } from "node:fs/promises";
 import { emit } from "./bus.js";
 import { renderMedia, runStory, type Deps } from "./jobs.js";
+import { autoSocial } from "./social.js";
 import { emptyRecord } from "./store.js";
 
 export interface IngestConfig {
@@ -147,7 +148,10 @@ export async function processStory(deps: Deps, cfg: IngestConfig, storyId: strin
   if (!rec) return;
   const scripts = rec.outputs.filter((o) => o.kind === "script" && cfg.autoMediaLangs.includes(o.lang)).map((o) => o.id);
   if (scripts.length) await renderMedia(deps, storyId, scripts).catch((e) => console.error(`media ${storyId}:`, e));
-  await autoPublishIfEligible(deps, cfg, storyId);
+  const live = await autoPublishIfEligible(deps, cfg, storyId);
+  // A story that just went live is also posted to the social channels (AUTO_SOCIAL; no-op unless switched on). Not awaited:
+  // uploads take minutes and must not hold up the next story.
+  if (live) void autoSocial(deps, storyId).catch((e) => console.error(`social ${storyId}:`, e instanceof Error ? e.message : e));
 }
 
 /**

@@ -186,6 +186,17 @@ test("POST /v1/verify with a link: reads the article, checks each claim, queues 
   assert.equal((await post("Defence metals are becoming a geopolitical asset class, see https://mining.com.au/x")).status, 200, "a sentence that contains a link is still a sentence");
 });
 
+test("POST /v1/verify with a link: when the AI service is down the visitor gets a plain message, not an error page", async () => {
+  const v = new Verifier({ docs: async () => [], embed });
+  const { post } = await appWith(v, {}, {
+    fetchPage: async (u) => ({ finalUrl: u, body: `<article><p>${"Fares will rise by 20 percent from January, the authority said on Tuesday. ".repeat(5)}</p></article>` }),
+    extract: async () => { throw new Error('{"error":{"code":403,"status":"PERMISSION_DENIED"}}'); },
+  });
+  const r = await post("https://news.example.com/a-story");
+  assert.equal(r.status, 503);
+  assert.match((await r.json()).error, /AI service is not available right now.*single sentence/);
+});
+
 test("POST /v1/verify with a link: private addresses and bad schemes are refused with a clear message", async () => {
   const v = new Verifier({ docs: async () => [], embed });
   const { post } = await appWith(v);

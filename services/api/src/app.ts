@@ -421,7 +421,9 @@ export function createApp(deps: Deps, wire?: WireOptions, extras?: { verifier?: 
         );
       } catch (e) {
         if (e instanceof LinkError) throw httpError(e.status, e.message);
-        throw e;
+        // The AI service refused or is down: say so plainly instead of an error page. Pasting one sentence still works.
+        console.error("[verify] article check failed:", e instanceof Error ? e.message.slice(0, 200) : e);
+        throw httpError(503, "Our AI service is not available right now, so we cannot read articles at the moment. Paste a single sentence to check it instead.");
       }
       const unanswered = report.claims.filter((r) => r.status === "not_covered").map((r) => r.query);
       if (unanswered.length) {

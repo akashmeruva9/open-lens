@@ -135,12 +135,12 @@ test("enqueue: deduplicated by wording, counted, newest first, capped", () => {
   assert.equal(enqueue(q, "third", "2026-10-18T13:00:00Z", 2).length, 2);
 });
 
-async function appWith(verifier: Verifier, env: Record<string, string> = {}) {
+async function appWith(verifier: Verifier, env: Record<string, string> = {}, link?: { fetchPage?: (u: string) => Promise<{ finalUrl: string; body: string }>; extract?: (t: string, x: string) => Promise<string[]> }) {
   const saved = Object.fromEntries(Object.keys(env).map((k) => [k, process.env[k]]));
   Object.assign(process.env, env);
   const dir = await mkdtemp(join(tmpdir(), "ol-verify-"));
   const store = new FileStore(dir);
-  const app = createApp({ store, assets: new LocalAssets(join(dir, "assets")), workDir: join(dir, "work") }, undefined, { verifier });
+  const app = createApp({ store, assets: new LocalAssets(join(dir, "assets")), workDir: join(dir, "work") }, undefined, { verifier, link });
   for (const [k, v] of Object.entries(saved)) v === undefined ? delete process.env[k] : (process.env[k] = v);
   const post = (text: unknown, ip = "1.1.1.1") => app.request("/v1/verify", { method: "POST", headers: { "content-type": "application/json", "x-forwarded-for": ip }, body: JSON.stringify({ text }) });
   return { app, post };
@@ -164,14 +164,36 @@ test("POST /v1/verify: validates the statement and answers from the ledger; unan
   assert.match(queue[0].text, /Penguins/);
 });
 
-test("POST /v1/verify: a bare link is refused with a clear message and never queued", async () => {
+test("POST /v1/verify with a link: reads the article, checks each claim, queues what is not covered, never queues the link", async () => {
+  const article = `<html><head><title>Metro fares to rise</title></head><body><article><p>Metro fares will rise by 20 percent from 1 January, the Metro Authority said on Tuesday after a board vote.</p><p>Penguins migrate across the frozen southern ocean every winter, according to a researcher quoted in the same piece.</p><p>${"The report continues with more background about the transport network and its riders. ".repeat(4)}</p></article></body></html>`;
+  const v = new Verifier({ docs: async () => claimDocsOf([await fixture()]), embed, judge: async (st): Promise<Record<string, Relation>> => (/metro/i.test(st) ? { c1: "supports" } : {}), minSimilarity: 0.5 });
+  const { app, post } = await appWith(v, {}, {
+    fetchPage: async (u) => ({ finalUrl: u, body: article }),
+    extract: async () => ["Metro fares will rise by 20 percent from 1 January.", "Penguins migrate across the frozen southern ocean every winter.", "The Moon is made entirely of green cheese and always was."],
+  });
+  const r = await post("https://news.example.com/metro-fares");
+  assert.equal(r.status, 200);
+  const body = await r.json();
+  assert.equal(body.kind, "article");
+  assert.equal(body.title, "Metro fares to rise");
+  assert.equal(body.claims.length, 2, "the made-up claim that is not in the article is dropped");
+  assert.equal(body.summary.checked, 2);
+  assert.ok(body.claims.some((c: { status: string }) => c.status !== "not_covered"));
+  const queue = await (await app.request("/v1/studio/verify-queue", { headers: { "x-dev-user": "editor@test" } })).json();
+  assert.equal(queue.length, 1);
+  assert.match(queue[0].text, /Penguins/);
+  assert.ok(!queue.some((q: { text: string }) => /^https?:/.test(q.text)));
+  assert.equal((await post("Defence metals are becoming a geopolitical asset class, see https://mining.com.au/x")).status, 200, "a sentence that contains a link is still a sentence");
+});
+
+test("POST /v1/verify with a link: private addresses and bad schemes are refused with a clear message", async () => {
   const v = new Verifier({ docs: async () => [], embed });
-  const { app, post } = await appWith(v);
-  const r = await post("https://mining.com.au/defence-metals-the-new-geopolitical-asset-class/");
-  assert.equal(r.status, 422);
-  assert.match((await r.json()).error, /Paste the claim as a sentence/);
-  assert.deepEqual(await (await app.request("/v1/studio/verify-queue", { headers: { "x-dev-user": "editor@test" } })).json(), []);
-  assert.equal((await post("Defence metals are becoming a geopolitical asset class, see https://mining.com.au/x")).status, 200, "a sentence that contains a link is fine");
+  const { post } = await appWith(v);
+  for (const bad of ["http://localhost/admin", "http://169.254.169.254/computeMetadata/v1/", "http://10.0.0.5/x", "http://127.0.0.1:8080/", "https://example.com:8443/x"]) {
+    const r = await post(bad);
+    assert.equal(r.status, 422, `${bad} -> ${r.status}`);
+    assert.match((await r.json()).error, /public website|unusual port|could not find/);
+  }
 });
 
 test("POST /v1/verify: rate limit per visitor", async () => {

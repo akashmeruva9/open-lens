@@ -4,7 +4,7 @@ import { IconShieldCheck } from "@/components/ui/icons";
 
 export const metadata: Metadata = {
   title: "Verify this",
-  description: "Paste a claim and see what the OpenLens evidence ledgers say about it: supported, contradicted, disputed or not yet confirmed, with the sources.",
+  description: "Paste a claim or an article link and see what the OpenLens evidence ledgers say about it: supported, contradicted, disputed or not yet confirmed, with the sources.",
 };
 
 export default async function VerifyPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -18,7 +18,7 @@ export default async function VerifyPage({ searchParams }: { searchParams: Promi
           <div>
             <h1 className="display text-[32px] leading-[36px] sm:text-[48px] sm:leading-[50px]">Verify this</h1>
             <p className="mt-1 max-w-2xl text-[15px] leading-[22px] text-ink-2">
-              Seen a claim online? Paste it. We compare it with the claims in our evidence ledgers and show what is supported, what is disputed and what nobody has confirmed, with the sources.
+              Seen a claim online, or a news article? Paste the claim, or the article link. We compare it with the claims in our evidence ledgers and show what is supported, what is disputed and what nobody has confirmed, with the sources.
             </p>
           </div>
         </div>

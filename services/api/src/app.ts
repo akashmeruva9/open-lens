@@ -16,6 +16,7 @@ import { ingestCycle, ingestRunning, type IngestConfig, type IngestEffects } fro
 import { isRunning, regenerate, runStory, type Deps } from "./jobs.js";
 import { fallbackDryRun, publisher, type PublishContext } from "./publishing.js";
 import { emptyRecord, type StoryRecord } from "./store.js";
+import { checkLink, ClaimList, EXTRACT_SYSTEM, extractPrompt, LinkError, safeFetchPage, type LinkCheckerOptions } from "./linkcheck.js";
 import { claimDocsOf, enqueue, geminiJudge, Verifier, type ClaimDoc, type QueuedStatement } from "./verify.js";
 
 const PUBLIC_STATUSES = new Set(["published", "stale", "corrected"]);
@@ -129,7 +130,7 @@ export interface WireOptions {
  */
 export const stripApiPrefix = (path: string) => (path === "/api" ? "/" : path.startsWith("/api/") ? path.slice(4) : path);
 
-export function createApp(deps: Deps, wire?: WireOptions, extras?: { verifier?: Verifier }) {
+export function createApp(deps: Deps, wire?: WireOptions, extras?: { verifier?: Verifier; link?: Partial<Pick<LinkCheckerOptions, "fetchPage" | "extract">> }) {
   const app = new Hono({ getPath: (req) => stripApiPrefix(getPath(req)) });
   const corsOrigins = (process.env.CORS_ORIGINS ?? "*").split(",");
   app.use("*", cors({ origin: corsOrigins.includes("*") ? "*" : corsOrigins, allowHeaders: ["authorization", "content-type", "x-dev-user"] }));
@@ -391,6 +392,8 @@ export function createApp(deps: Deps, wire?: WireOptions, extras?: { verifier?: 
   const dailyCap = Number(process.env.VERIFY_DAILY_CAP ?? 500);
   const visits = new Map<string, { n: number; reset: number }>();
   const today = { key: "", n: 0 };
+  const linkCap = Number(process.env.VERIFY_LINKS_PER_DAY ?? 60);
+  const linksToday = { key: "", n: 0 };
   app.post("/v1/verify", async (c) => {
     const who = c.req.header("x-forwarded-for")?.split(",")[0]?.trim() || "local";
     const now = Date.now();
@@ -402,7 +405,33 @@ export function createApp(deps: Deps, wire?: WireOptions, extras?: { verifier?: 
     if (today.key !== day) Object.assign(today, { key: day, n: 0 });
     if (++today.n > dailyCap) throw httpError(429, "today's limit for checks has been reached, try again tomorrow");
     const { text } = VerifyBody.parse(await c.req.json().catch(() => ({})));
-    if (/^https?:\/\/\S+$/i.test(text)) throw httpError(422, "Paste the claim as a sentence for now. Checking a whole article from its link is not available yet.");
+    if (/^https?:\/\/\S+$/i.test(text)) {
+      // A pasted article link: read it safely, list its claims, check each (see linkcheck.ts). Tighter daily cap: it costs several model calls.
+      if (linksToday.key !== day) Object.assign(linksToday, { key: day, n: 0 });
+      if (++linksToday.n > linkCap) throw httpError(429, "today's limit for article checks has been reached, try again tomorrow");
+      let report;
+      try {
+        report = await checkLink(
+          {
+            fetchPage: extras?.link?.fetchPage ?? ((u) => safeFetchPage(u)),
+            extract: extras?.link?.extract ?? (async (title, body) => (await generateStructured({ model: MODELS.fast, system: EXTRACT_SYSTEM, prompt: extractPrompt(title, body), schema: ClaimList, temperature: 0 })).data.claims),
+            verify: (claim) => verifier.verify(claim),
+          },
+          text,
+        );
+      } catch (e) {
+        if (e instanceof LinkError) throw httpError(e.status, e.message);
+        throw e;
+      }
+      const unanswered = report.claims.filter((r) => r.status === "not_covered").map((r) => r.query);
+      if (unanswered.length) {
+        let queue = await deps.store.getState<QueuedStatement[]>("verify-queue", []);
+        for (const q of unanswered) queue = enqueue(queue, q);
+        await deps.store.putState("verify-queue", queue);
+      }
+      c.header("cache-control", "no-store");
+      return c.json(report);
+    }
     const result = await verifier.verify(text);
     if (result.status === "not_covered") {
       const queue = await deps.store.getState<QueuedStatement[]>("verify-queue", []);

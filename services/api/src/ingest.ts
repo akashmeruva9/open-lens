@@ -139,6 +139,13 @@ export function defaultEffects(deps: Deps, cfg: IngestConfig): IngestEffects {
           const rec = await deps.store.get(id);
           const scripts = rec ? missingVideoScripts(rec, cfg.autoMediaLangs) : [];
           if (scripts.length) await renderMedia(deps, id, scripts).catch((e) => console.error(`media ${id}:`, e instanceof Error ? e.message : e));
+          // A try only counts when the render ran and still left videos missing (a restart that cut it short is not a failure).
+          const after = await deps.store.get(id);
+          if (after && missingVideoScripts(after, cfg.autoMediaLangs).length) {
+            const t = await deps.store.getState<Record<string, number>>("media-tries", {});
+            t[id] = (t[id] ?? 0) + 1;
+            await deps.store.putState("media-tries", t);
+          }
           if (await autoPublishIfEligible(deps, cfg, id)) void autoSocial(deps, id).catch((e) => console.error(`social ${id}:`, e instanceof Error ? e.message : e));
         });
       } finally {
@@ -451,10 +458,7 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
         const rec = fx.render ? await store.get(st.id) : undefined;
         const tries = (mediaTries[st.id] ?? 0);
         if (fx.render && rec && missingVideoScripts(rec, cfg.autoMediaLangs).length && tries < 2) {
-          if (toRender.length < 2) {
-            mediaTries[st.id] = tries + 1;
-            toRender.push(st.id);
-          }
+          if (toRender.length < 2) toRender.push(st.id);
           continue;
         }
         await autoPublishIfEligible(deps, cfg, st.id);
@@ -481,7 +485,6 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     }
     // 6) Pipelines run in the background (bounded concurrency); the cycle returns now.
     for (const id of toRun) fx.process(id).catch((e) => console.error(`wire pipeline ${id}:`, e));
-    if (toRender.length) await store.putState("media-tries", mediaTries);
     for (const id of toRender) fx.render!(id).catch((e) => console.error(`wire render ${id}:`, e));
     return report;
   } finally {

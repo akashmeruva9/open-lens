@@ -78,6 +78,19 @@ ${lines.map((l) => `${l.index}: ${l.text}`).join("\n")}`;
   }).slice(0, 4);
 }
 
+/** Words of a name that a file title must contain (surname and first name), letters only, accents folded. */
+const nameWords = (name: string) => name.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length > 2);
+
+/**
+ * A photo of a PERSON is accepted only when Wikimedia's own file title names them (every word of the name). No model ever looks at a
+ * face to say who it is: that is both the stricter newsroom rule (the file's caption is the identification) and the safer one.
+ */
+export function titleNamesPerson(title: string, name: string): boolean {
+  const t = title.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
+  const words = nameWords(name);
+  return words.length > 0 && words.every((w) => t.includes(w));
+}
+
 export interface Verdict { depicts_subject?: boolean; is_illustration_or_cartoon?: boolean; readable_text_or_logos?: boolean; other_identifiable_people?: boolean; quality?: number }
 
 /** Accept only a clear, real photo of the subject. */
@@ -122,13 +135,15 @@ export async function planFilePhotos(o: { storyId: string; title: string; lines:
       const cands = (await searchCommons(s.query, 8)).slice(0, 5);
       for (const c of cands) {
         const img = await download(c.imageUrl);
-        if (!verdictOk(await looksRight(img, s), s.kind)) continue;
+        if (s.kind === "person") {
+          if (!titleNamesPerson(c.title, s.name)) continue; // identified by the file's own title, never by looking at the face
+        } else if (!verdictOk(await looksRight(img, s), s.kind)) continue;
         await mkdir(dir, { recursive: true });
         const file = resolve(dir, `line${s.lineIndex}-${sha(c.imageUrl).slice(0, 10)}.jpg`);
         if (!(await exists(file))) await writeFile(file, img);
         const credit = creditLine(c);
         await writeFile(file.replace(/\.jpg$/, ".json"), JSON.stringify({ subject: s, source: c.pageUrl, credit, license: c.license, title: c.title }, null, 2));
-        await logSpend({ kind: "file-photo", model: "commons+gemini-check", usd: 0, note: `${o.storyId}/line${s.lineIndex} ${s.name}: ${c.title}` });
+        await logSpend({ kind: "file-photo", model: s.kind === "person" ? "commons-title" : "commons+gemini-check", usd: 0, note: `${o.storyId}/line${s.lineIndex} ${s.name}: ${c.title}` });
         out[s.lineIndex] = { file, credit, source: c.pageUrl, subject: s.name };
         break;
       }

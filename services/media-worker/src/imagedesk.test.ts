@@ -22,3 +22,13 @@ test("verdictOk accepts only a clear real photo of the subject", () => {
   assert.equal(verdictOk({ ...good, other_identifiable_people: true }, "object"), false);
   assert.equal(verdictOk({ ...good, readable_text_or_logos: true }, "object"), false);
 });
+
+import { titleNamesPerson } from "./imagedesk.js";
+
+test("a person's photo is accepted only if the file title names every word of the name (no face checking)", () => {
+  assert.equal(titleNamesPerson("File:Volodymyr Zelenskyy in 2024.jpg", "Volodymyr Zelenskyy"), true);
+  assert.equal(titleNamesPerson("File:Zelensky_and_Biden.jpg", "Volodymyr Zelensky"), false, "first name missing");
+  assert.equal(titleNamesPerson("File:Elon Musk Royal Society (crop).jpg", "Elon Musk"), true);
+  assert.equal(titleNamesPerson("File:Kyiv skyline.jpg", "Elon Musk"), false);
+  assert.equal(titleNamesPerson("File:Anything.jpg", "  "), false);
+});

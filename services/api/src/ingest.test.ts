@@ -222,3 +222,33 @@ test("a story re-queued after a restart is not charged to the daily budget twice
   await ingestCycle(deps, cfg(), effects([], []), new Date("2026-10-12T03:00:00Z"));
   assert.equal((await store.getState<{ runs: number }>("budget", { runs: 0 })).runs, 1);
 });
+
+import { categoriesOf, categoryCounts, diversityBonus } from "./diversity.js";
+import { resumeInterrupted } from "./ingest.js";
+
+test("diversity: an empty section is favoured over a full one, tech and sport over politics, and counts ignore drafts", () => {
+  assert.deepEqual(categoriesOf(["technology", "science", "conflict"]).sort(), ["politics", "tech"]);
+  const counts = categoryCounts([
+    { topics: ["conflict"], status: "published" }, { topics: ["politics"], status: "published" }, { topics: ["diplomacy"], status: "in_review" },
+    { topics: ["sport"], status: "draft" },
+  ]);
+  assert.equal(counts.politics, 3);
+  assert.equal(counts.sport, 0, "a draft does not count");
+  assert.ok(diversityBonus(["technology"], counts) > diversityBonus(["conflict"], counts), "empty tech beats a full politics");
+  assert.ok(diversityBonus(["sport"], counts) > diversityBonus(["technology", "politics"].slice(1), counts));
+  assert.equal(diversityBonus(["conflict"], counts), 0);
+  assert.equal(diversityBonus([], counts), 0);
+});
+
+test("resumeInterrupted re-runs only quiet wire stories still 'researching', newest first, at most the limit", async () => {
+  const old = new Date(Date.now() - 20 * 60_000).toISOString();
+  const recent = new Date().toISOString();
+  const mk = (id: string, status: string, updatedAt: string, origin = "wire") => ({ id, status, updatedAt, origin });
+  const stories = [mk("a", "researching", old), mk("b", "researching", recent), mk("c", "published", old), mk("d", "researching", old, "manual"), mk("e", "researching", new Date(Date.now() - 30 * 60_000).toISOString())];
+  const ran: string[] = [];
+  const deps = { store: { listStories: async () => stories } } as never;
+  const ids = await resumeInterrupted(deps, {} as never, { run: async (id) => void ran.push(id), max: 5 });
+  assert.deepEqual(ids, ["a", "e"]);
+  assert.deepEqual(ran, ["a", "e"]);
+  assert.deepEqual(await resumeInterrupted(deps, {} as never, { run: async () => undefined, max: 1 }), ["a"]);
+});

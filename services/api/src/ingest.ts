@@ -9,6 +9,8 @@ import type { SourceRecord } from "@openlens/schemas";
 import { readFile } from "node:fs/promises";
 import { emit } from "./bus.js";
 import { renderMedia, runStory, type Deps } from "./jobs.js";
+import { categoryCounts, diversityBonus } from "./diversity.js";
+import { autoSocial } from "./social.js";
 import { emptyRecord } from "./store.js";
 
 export interface IngestConfig {
@@ -147,7 +149,10 @@ export async function processStory(deps: Deps, cfg: IngestConfig, storyId: strin
   if (!rec) return;
   const scripts = rec.outputs.filter((o) => o.kind === "script" && cfg.autoMediaLangs.includes(o.lang)).map((o) => o.id);
   if (scripts.length) await renderMedia(deps, storyId, scripts).catch((e) => console.error(`media ${storyId}:`, e));
-  await autoPublishIfEligible(deps, cfg, storyId);
+  const live = await autoPublishIfEligible(deps, cfg, storyId);
+  // A story that just went live is also posted to the social channels (AUTO_SOCIAL; no-op unless switched on). Not awaited:
+  // uploads take minutes and must not hold up the next story.
+  if (live) void autoSocial(deps, storyId).catch((e) => console.error(`social ${storyId}:`, e instanceof Error ? e.message : e));
 }
 
 /**
@@ -195,6 +200,25 @@ export function pickSources(candidates: SourceRecord[], max = MAX_SOURCES_PER_ST
 
 const slug = (s: string) =>
   s.toLowerCase().normalize("NFKD").replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 40) || "story";
+
+/** Topics already worked out for a candidate event (the same events come round every cycle). */
+const topicMemo = new Map<string, string[]>();
+
+/**
+ * After a restart, stories the previous instance was still writing are left half done ("researching"). Run them again so a deploy does
+ * not waste them. Only wire stories untouched for `quietMs` count, so one another instance is still writing is left alone.
+ */
+export async function resumeInterrupted(deps: Deps, cfg: IngestConfig, o: { quietMs?: number; max?: number; run?: (id: string) => Promise<void> } = {}): Promise<string[]> {
+  const quietMs = o.quietMs ?? 4 * 60_000;
+  const run = o.run ?? ((id: string) => processStory(deps, cfg, id));
+  const stuck = (await deps.store.listStories())
+    .filter((s) => s.status === "researching" && s.origin === "wire" && Date.now() - Date.parse(s.updatedAt) > quietMs)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+    .slice(0, o.max ?? 3)
+    .map((s) => s.id);
+  for (const id of stuck) await run(id).catch((e) => console.error(`resume ${id}:`, e instanceof Error ? e.message : e));
+  return stuck;
+}
 
 let running = false;
 export const ingestRunning = () => running;
@@ -316,7 +340,17 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
       budget.runs++;
     };
     // Widest-covered first; among equals, the newest event first.
-    const ranked = [...active].sort((a, b) => b.domains.length - a.domains.length || b.updatedAt.localeCompare(a.updatedAt));
+    const byCoverage = [...active].sort((a, b) => b.domains.length - a.domains.length || b.updatedAt.localeCompare(a.updatedAt));
+    // Variety: a new event that fills a section the site has no story in yet (tech, sport, health...) goes first; otherwise coverage decides.
+    const counts = categoryCounts(await store.listStories());
+    const newEvents = byCoverage.filter((c) => !c.storyId).slice(0, 15);
+    if (fx.classify) {
+      await Promise.all(newEvents.filter((c) => !topicMemo.has(c.id)).map(async (c) => {
+        try { topicMemo.set(c.id, await fx.classify!(c.title, "")); } catch { /* no bonus for this one */ }
+      }));
+    }
+    const bonus = (c: (typeof byCoverage)[number]) => (c.storyId ? 0 : diversityBonus(topicMemo.get(c.id) ?? [], counts));
+    const ranked = byCoverage.map((c, i) => ({ c, i })).sort((a, b) => bonus(b.c) - bonus(a.c) || a.i - b.i).map((x) => x.c);
     const toRun: string[] = [];
     let created = 0, updated = 0;
     for (const c of ranked) {

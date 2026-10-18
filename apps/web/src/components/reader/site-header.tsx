@@ -7,6 +7,7 @@ import { readEdition } from "@/lib/edition-server";
 import { CategoryNav } from "./category-nav";
 import { NAV_ITEMS } from "./category-icons";
 import { EditionSwitcher } from "./edition-switcher";
+import { SocialLinks } from "./social-links";
 
 /** Desktop: fixed left sidebar with wordmark, sections, about links and the edition switcher pinned to the foot. */
 export async function SiteSidebar() {
@@ -28,6 +29,7 @@ export async function SiteSidebar() {
             </li>
           ))}
         </ul>
+        <SocialLinks className="px-2.5 pb-4" />
       </div>
       <div className="flex items-center gap-1 border-t border-line px-2.5 py-2.5">
         <div className="min-w-0 flex-1">

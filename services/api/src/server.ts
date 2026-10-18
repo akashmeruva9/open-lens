@@ -1,9 +1,10 @@
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { GcsAssets, LocalAssets, type AssetStore } from "./assets.js";
 import { createApp } from "./app.js";
-import { defaultEffects, ingestCycle, ingestRunning, loadIngestConfig } from "./ingest.js";
+import { defaultEffects, ingestCycle, ingestRunning, loadIngestConfig, resumeInterrupted } from "./ingest.js";
 import { FileStore, FirestoreStore, type Store } from "./store.js";
 
 // A stray rejected promise (e.g. a timed-out Gemini fetch nobody awaited) must not kill the process:
@@ -11,6 +12,14 @@ import { FileStore, FirestoreStore, type Store } from "./store.js";
 process.on("unhandledRejection", (reason) => {
   console.error("[unhandledRejection]", reason instanceof Error ? (reason.stack ?? reason.message) : reason);
 });
+
+// Social credentials (YouTube / Meta tokens) arrive as one secret mounted as a KEY=VALUE file on Cloud Run; load it before anything posts.
+if (process.env.SOCIAL_ENV_FILE && existsSync(process.env.SOCIAL_ENV_FILE)) {
+  for (const line of readFileSync(process.env.SOCIAL_ENV_FILE, "utf8").split("\n")) {
+    const m = /^([A-Z0-9_]+)=(.*)$/.exec(line.trim());
+    if (m && process.env[m[1]!] === undefined) process.env[m[1]!] = m[2]!;
+  }
+}
 
 const DATA_DIR = resolve(process.env.DATA_DIR ?? "../../.data");
 const WORK_DIR = resolve(process.env.WORK_DIR ?? `${DATA_DIR}/work`);
@@ -40,6 +49,9 @@ const deps = { store: await makeStore(), assets: makeAssets(), workDir: WORK_DIR
 const ingestConfig = await loadIngestConfig(resolve(process.env.SOURCES_ROOT ?? "../.."));
 const wire = { config: ingestConfig, effects: defaultEffects(deps, ingestConfig), token: process.env.INGEST_TOKEN };
 const app = createApp(deps, wire);
+// Stories the last instance was still writing when it stopped (a deploy, a restart) are finished now, a few minutes after boot.
+setTimeout(() => void resumeInterrupted(deps, ingestConfig).then((ids) => ids.length && console.log(`[wire] resumed ${ids.length} interrupted stories`)).catch((e) => console.error("[wire] resume failed:", e)), 6 * 60_000).unref();
+
 // Claim vectors for "Verify this" are computed once and kept; do it now so the first visitor does not wait for it.
 if (process.env.VERIFY_WARM !== "0") {
   void app.verifier.warm().then(() => console.log("[verify] claim vectors ready")).catch((e) => console.error("[verify] warm-up failed (checks fall back to keywords until it succeeds):", e instanceof Error ? e.message : e));

@@ -20,6 +20,11 @@ substitutions:
   _MEDIA_LANGS: en
   # Minutes between wire cycles on the api instance (each can add up to _MAX_NEW stories). 0 = off (run it by hand). 240 = at most 6 a day.
   _INTERVAL: "0"
+  # Automatic posting of new low-risk stories to YouTube / Instagram / Facebook: 0 = off, dry = log what it would post, 1 = post.
+  _AUTO_SOCIAL: "0"
+  # Mounts the secret that holds the YouTube / Meta tokens (KEY=VALUE lines) at /secrets/social.env. Leave empty where there is none.
+  # e.g. ",/secrets/social.env=openlens-social-env:latest"
+  _SOCIAL_MOUNT: ""
   # Realistic AI backdrops per video (about US$0.035 each + one Gemini call). 0 = off. GENAI cap is per instance.
   _ILLUSTRATIONS: "0"
   # Real licensed file photos (Wikimedia Commons, Gemini-verified, credited) per video, tried before AI backdrops. 0 = off.
@@ -54,13 +59,12 @@ steps:
       - --memory=${_MEMORY}
       - --timeout=3600
       - --no-cpu-throttling
-      - --min-instances=0
       # One instance: the wire lock and in-flight pipeline set live in memory.
       - --max-instances=1
       - --concurrency=40
       - --allow-unauthenticated
-      - --set-env-vars=^@^STORE=firestore@AUTH_MODE=firebase@GEMINI_BACKEND=vertex@GOOGLE_CLOUD_LOCATION=global@ASSETS_BUCKET=$PROJECT_ID-openlens-media@GOOGLE_CLOUD_PROJECT=$PROJECT_ID@AUTO_PUBLISH=${_AUTO_PUBLISH}@AUTO_MEDIA_LANGS=${_MEDIA_LANGS}@INGEST_DAILY_RUNS=${_DAILY_RUNS}@INGEST_INTERVAL_MIN=${_INTERVAL}@INGEST_MAX_NEW=${_MAX_NEW}@INGEST_MAX_UPDATES=${_MAX_UPDATES}@INGEST_MAX_FETCH=60@INGEST_GDELT=0@INGEST_MAX_AGE_HOURS=24@INGEST_CONCURRENCY=${_CONCURRENCY}@AUTO_ILLUSTRATIONS=${_ILLUSTRATIONS}@AUTO_PHOTOS=${_PHOTOS}@OPENLENS_PUBLIC_URL=${_PUBLIC_URL}@AUTO_MAPS=${_MAPS}@GENAI_SPEND_CAP_USD=${_GENAI_CAP}@MEDIA_DATA_DIR=/tmp/openlens/genai
-      - --set-secrets=INGEST_TOKEN=ingest-token:latest
+      - --set-env-vars=^@^STORE=firestore@AUTH_MODE=firebase@GEMINI_BACKEND=vertex@GOOGLE_CLOUD_LOCATION=global@ASSETS_BUCKET=$PROJECT_ID-openlens-media@GOOGLE_CLOUD_PROJECT=$PROJECT_ID@AUTO_PUBLISH=${_AUTO_PUBLISH}@AUTO_MEDIA_LANGS=${_MEDIA_LANGS}@INGEST_DAILY_RUNS=${_DAILY_RUNS}@INGEST_INTERVAL_MIN=${_INTERVAL}@AUTO_SOCIAL=${_AUTO_SOCIAL}@SOCIAL_ENV_FILE=/secrets/social.env@INGEST_MAX_NEW=${_MAX_NEW}@INGEST_MAX_UPDATES=${_MAX_UPDATES}@INGEST_MAX_FETCH=60@INGEST_GDELT=0@INGEST_MAX_AGE_HOURS=24@INGEST_CONCURRENCY=${_CONCURRENCY}@AUTO_ILLUSTRATIONS=${_ILLUSTRATIONS}@AUTO_PHOTOS=${_PHOTOS}@OPENLENS_PUBLIC_URL=${_PUBLIC_URL}@AUTO_MAPS=${_MAPS}@GENAI_SPEND_CAP_USD=${_GENAI_CAP}@MEDIA_DATA_DIR=/tmp/openlens/genai
+      - --set-secrets=INGEST_TOKEN=ingest-token:latest${_SOCIAL_MOUNT}
   # --- web (needs the api URL at build time) ---
   - id: api-url
     name: gcr.io/google.com/cloudsdktool/cloud-sdk
@@ -84,8 +88,8 @@ steps:
       - --region=${_REGION}
       - --cpu=1
       - --memory=1Gi
-      - --min-instances=0
       - --max-instances=3
+      - --min-instances=1
       - --allow-unauthenticated
 images:
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:${_TAG}

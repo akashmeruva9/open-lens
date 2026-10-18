@@ -1,6 +1,7 @@
+import { socialLinks } from '@openlens/config';
 import Constants from 'expo-constants';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Banner, Button, Card, Chip, SectionHeader, T } from '@/components/ui';
@@ -123,6 +124,21 @@ export default function SettingsScreen() {
         </Section>
 
         <WhatsAppDigest />
+
+        <Section title="Follow OpenLens" subtitle="The same stories as short videos, one account per language">
+          <Card style={{ gap: space.xs }}>
+            {socialLinks().map((l) => (
+              <Pressable key={l.url} accessibilityRole="link" accessibilityLabel={`${l.platform}, ${l.language}, ${l.handle}`} onPress={() => void Linking.openURL(l.url)} style={{ paddingVertical: space.xs }}>
+                <T variant="body">
+                  {l.platform} · {l.language}
+                </T>
+                <T variant="caption" tone="muted">
+                  {l.handle}
+                </T>
+              </Pressable>
+            ))}
+          </Card>
+        </Section>
 
         <Section title="About">
           <Card style={{ gap: space.xs }}>

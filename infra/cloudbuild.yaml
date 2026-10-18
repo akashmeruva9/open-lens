@@ -54,7 +54,6 @@ steps:
       - --memory=${_MEMORY}
       - --timeout=3600
       - --no-cpu-throttling
-      - --min-instances=0
       # One instance: the wire lock and in-flight pipeline set live in memory.
       - --max-instances=1
       - --concurrency=40
@@ -84,8 +83,8 @@ steps:
       - --region=${_REGION}
       - --cpu=1
       - --memory=1Gi
-      - --min-instances=0
       - --max-instances=3
+      - --min-instances=1
       - --allow-unauthenticated
 images:
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/api:${_TAG}

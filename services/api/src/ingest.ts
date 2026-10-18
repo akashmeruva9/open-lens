@@ -91,6 +91,8 @@ export interface IngestEffects {
   sleep(ms: number): Promise<void>;
   /** Topics for a story that has none (backfill); optional so tests can omit it. */
   classify?(title: string, summary: string): Promise<string[]>;
+  /** Renders the videos a finished story is missing, then applies the publish policy. */
+  render?(id: string): Promise<void>;
 }
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -125,6 +127,20 @@ export function defaultEffects(deps: Deps, cfg: IngestConfig): IngestEffects {
       inFlight.add(id);
       try {
         await limited(cfg.maxConcurrentRuns, () => processStory(deps, cfg, id));
+      } finally {
+        inFlight.delete(id);
+      }
+    },
+    render: async (id) => {
+      if (inFlight.has(id)) return;
+      inFlight.add(id);
+      try {
+        await limited(cfg.maxConcurrentRuns, async () => {
+          const rec = await deps.store.get(id);
+          const scripts = rec ? missingVideoScripts(rec, cfg.autoMediaLangs) : [];
+          if (scripts.length) await renderMedia(deps, id, scripts).catch((e) => console.error(`media ${id}:`, e instanceof Error ? e.message : e));
+          if (await autoPublishIfEligible(deps, cfg, id)) void autoSocial(deps, id).catch((e) => console.error(`social ${id}:`, e instanceof Error ? e.message : e));
+        });
       } finally {
         inFlight.delete(id);
       }
@@ -200,6 +216,14 @@ export function pickSources(candidates: SourceRecord[], max = MAX_SOURCES_PER_ST
 
 const slug = (s: string) =>
   s.toLowerCase().normalize("NFKD").replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 40) || "story";
+
+/** Script ids (in the languages we auto-render) that have no video yet: the render was interrupted or never ran. */
+export function missingVideoScripts(rec: { outputs: { id: string; kind: string; lang: string; tier?: string }[] }, langs: string[]): string[] {
+  return rec.outputs
+    .filter((o) => o.kind === "script" && langs.includes(o.lang))
+    .filter((s) => !rec.outputs.some((o) => o.kind === "video" && o.lang === s.lang && o.tier === s.tier))
+    .map((s) => s.id);
+}
 
 /** Topics already worked out for a candidate event (the same events come round every cycle). */
 const topicMemo = new Map<string, string[]>();
@@ -412,6 +436,8 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     await store.putState("candidates", candidates);
     // Catch-up: resume wire stories whose pipeline was interrupted (restart), and apply the
     // auto-publish policy to ones that finished while it was off.
+    const mediaTries = await store.getState<Record<string, number>>("media-tries", {});
+    const toRender: string[] = [];
     for (const st of await store.listStories()) {
       if (toRun.includes(st.id) || inFlight.has(st.id)) continue;
       // Stuck mid-run (restart), or stale (sources changed / format upgraded) and not yet re-run.
@@ -420,7 +446,19 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
         charge(st.id);
         toRun.push(st.id);
       } else if (st.status === "in_review" && (cfg.autoPublish === "all" || st.origin === "wire")) {
+        // A finished story whose videos were never made (a restart cut the render): make them first, then publish. At most two a cycle,
+        // and after two failed tries it publishes without video so one broken story cannot loop forever.
+        const rec = fx.render ? await store.get(st.id) : undefined;
+        const tries = (mediaTries[st.id] ?? 0);
+        if (fx.render && rec && missingVideoScripts(rec, cfg.autoMediaLangs).length && tries < 2) {
+          if (toRender.length < 2) {
+            mediaTries[st.id] = tries + 1;
+            toRender.push(st.id);
+          }
+          continue;
+        }
         await autoPublishIfEligible(deps, cfg, st.id);
+        void autoSocial(deps, st.id).catch((e) => console.error(`social ${st.id}:`, e instanceof Error ? e.message : e));
       }
     }
     budget.ids = [...charged];
@@ -443,6 +481,8 @@ export async function ingestCycle(deps: Deps, cfg: IngestConfig, fx: IngestEffec
     }
     // 6) Pipelines run in the background (bounded concurrency); the cycle returns now.
     for (const id of toRun) fx.process(id).catch((e) => console.error(`wire pipeline ${id}:`, e));
+    if (toRender.length) await store.putState("media-tries", mediaTries);
+    for (const id of toRender) fx.render!(id).catch((e) => console.error(`wire render ${id}:`, e));
     return report;
   } finally {
     report.finishedAt = new Date().toISOString();

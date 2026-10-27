@@ -32,7 +32,7 @@ npm run dev -w @openlens/web    # http://localhost:3000  (NEXT_PUBLIC_API_URL in
 ```
 There is no sample data: every story comes from the wire (verified official sources) or from a source pack you build with `npm run intake` (below). The web and mobile apps only read the API.
 
-**Deployed:** web https://openlens-web-42lefjl5bq-uc.a.run.app · api https://openlens-api-42lefjl5bq-uc.a.run.app (project `openlens-511713`, Gemini via Vertex AI). Point local apps at the cloud API by setting `NEXT_PUBLIC_API_URL` / `EXPO_PUBLIC_API_URL` to the api URL.
+**Deployed:** web [https://openlens-web-42lefjl5bq-uc.a.run.app](https://openlens-web-948923830185.us-central1.run.app/) · (project `openlens-511713`, Gemini via Vertex AI). Point local apps at the cloud API by setting `NEXT_PUBLIC_API_URL` / `EXPO_PUBLIC_API_URL` to the api URL.
 
 ### Video factory
 Links in, videos out, in one command (sources must be on the allowlist):

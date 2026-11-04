@@ -6,7 +6,13 @@ One story → one reviewed **Claim & Evidence Ledger** → our own web + mobile 
 
 https://github.com/user-attachments/assets/fe9a072d-8976-49c6-aa7f-83941a26c0e6
 
-> 🔗 **Direct Links:** [Google Drive Mirror](https://drive.google.com/file/d/1ieTQUYxL5JFkO9oQh3_xmPvbID1A4tJ3/view?usp=sharing) · [Direct Stream (MP4)](https://storage.googleapis.com/openlens-511713-openlens-media/demo/OpenLens-TeamRitorno.mp4) · 📊 **Slides:** [Google Slides Presentation](https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/edit?usp=sharing)
+> 🔗 **Demo Mirrors:** [Google Drive](https://drive.google.com/file/d/1ieTQUYxL5JFkO9oQh3_xmPvbID1A4tJ3/view?usp=sharing) · [Direct MP4 Stream](https://storage.googleapis.com/openlens-511713-openlens-media/demo/OpenLens-TeamRitorno.mp4)
+
+## 📊 Presentation Deck & Architecture Slides
+
+[![OpenLens Pitch Deck Presentation](https://storage.googleapis.com/openlens-511713-openlens-media/deck/openlens-deck-preview.gif)](https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/present)
+
+> 💡 *Click the animated preview above to view full-screen in **[Present Mode](https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/present)** · [Clean Reader View](https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/preview) · [Download PDF](https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/export/pdf)*
 
 ## Repo
 

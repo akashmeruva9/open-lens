@@ -8,8 +8,8 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://openlens-api-42lefjl5bq-uc.a.run.app",
-        "EXPO_PUBLIC_WEB_URL": "https://openlens-web-42lefjl5bq-uc.a.run.app"
+        "EXPO_PUBLIC_API_URL": "https://openlens-api-948923830185.us-central1.run.app",
+        "EXPO_PUBLIC_WEB_URL": "https://openlens-web-948923830185.us-central1.run.app"
       }
     },
     "preview": {
@@ -18,15 +18,15 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://openlens-api-42lefjl5bq-uc.a.run.app",
-        "EXPO_PUBLIC_WEB_URL": "https://openlens-web-42lefjl5bq-uc.a.run.app"
+        "EXPO_PUBLIC_API_URL": "https://openlens-api-948923830185.us-central1.run.app",
+        "EXPO_PUBLIC_WEB_URL": "https://openlens-web-948923830185.us-central1.run.app"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://openlens-api-42lefjl5bq-uc.a.run.app",
-        "EXPO_PUBLIC_WEB_URL": "https://openlens-web-42lefjl5bq-uc.a.run.app"
+        "EXPO_PUBLIC_API_URL": "https://openlens-api-948923830185.us-central1.run.app",
+        "EXPO_PUBLIC_WEB_URL": "https://openlens-web-948923830185.us-central1.run.app"
       }
     }
   },

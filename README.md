@@ -2,6 +2,9 @@
 
 One story → one reviewed **Claim & Evidence Ledger** → our own web + mobile apps, narrated regional/national/international videos, and channel-ready posts for YouTube, X, Instagram, Facebook and WhatsApp. Built on Gemini + Google Cloud for AI Builder Cup 2026. Full spec: [`plan.md`](plan.md).
 
+- 🎬 **Demo:** [Google Drive Video](https://drive.google.com/file/d/1ieTQUYxL5JFkO9oQh3_xmPvbID1A4tJ3/view?usp=sharing)
+- 📊 **Slides:** [Google Slides Presentation](https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/edit?usp=sharing)
+
 ## Repo
 
 | Path | What |
@@ -32,7 +35,7 @@ npm run dev -w @openlens/web    # http://localhost:3000  (NEXT_PUBLIC_API_URL in
 ```
 There is no sample data: every story comes from the wire (verified official sources) or from a source pack you build with `npm run intake` (below). The web and mobile apps only read the API.
 
-**Deployed:** web [https://openlens-web-42lefjl5bq-uc.a.run.app](https://openlens-web-948923830185.us-central1.run.app/) · (project `openlens-511713`, Gemini via Vertex AI). Point local apps at the cloud API by setting `NEXT_PUBLIC_API_URL` / `EXPO_PUBLIC_API_URL` to the api URL.
+**Deployed:** web https://openlens-web-948923830185.us-central1.run.app · api https://openlens-api-948923830185.us-central1.run.app (Gemini via Vertex AI). Point local apps at the cloud API by setting `NEXT_PUBLIC_API_URL` / `EXPO_PUBLIC_API_URL` to the api URL.
 
 ### Video factory
 Links in, videos out, in one command (sources must be on the allowlist):
@@ -84,7 +87,7 @@ gcloud builds submit --config infra/cloudbuild.yaml .
 The api runs on Cloud Run with `STORE=firestore`, `ASSETS_BUCKET` (public media for Instagram/Facebook), and `AUTH_MODE=firebase` (studio editors need the `role: editor` custom claim or an address in `EDITOR_EMAILS`).
 
 ### Web on Vercel
-`vercel.json` deploys only the web app (`apps/web`); the api stays on Cloud Run, which has the Firestore and Vertex credentials. In the Vercel project, set **`NEXT_PUBLIC_API_URL=https://openlens-api-42lefjl5bq-uc.a.run.app`** (Settings → Environment Variables, all environments) and redeploy: it is read at build time, so changing it needs a new deployment.
+`vercel.json` deploys only the web app (`apps/web`); the api stays on Cloud Run, which has the Firestore and Vertex credentials. In the Vercel project, set **`NEXT_PUBLIC_API_URL=https://openlens-api-948923830185.us-central1.run.app`** (Settings → Environment Variables, all environments) and redeploy: it is read at build time, so changing it needs a new deployment.
 
 ### Redeploying an existing project, and the optional image features
 Run this in a terminal **from the repo root** (the folder that contains `infra/` and `services/`), logged in with `gcloud auth login` as someone who can deploy to the project. It is the same command as above, plus options:

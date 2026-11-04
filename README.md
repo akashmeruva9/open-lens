@@ -2,8 +2,11 @@
 
 One story → one reviewed **Claim & Evidence Ledger** → our own web + mobile apps, narrated regional/national/international videos, and channel-ready posts for YouTube, X, Instagram, Facebook and WhatsApp. Built on Gemini + Google Cloud for AI Builder Cup 2026. Full spec: [`plan.md`](plan.md).
 
-- 🎬 **Demo:** [Google Drive Video](https://drive.google.com/file/d/1ieTQUYxL5JFkO9oQh3_xmPvbID1A4tJ3/view?usp=sharing)
-- 📊 **Slides:** [Google Slides Presentation](https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/edit?usp=sharing)
+## 🎬 Project Demo
+
+https://github.com/user-attachments/assets/fe9a072d-8976-49c6-aa7f-83941a26c0e6
+
+> 🔗 **Direct Links:** [Google Drive Mirror](https://drive.google.com/file/d/1ieTQUYxL5JFkO9oQh3_xmPvbID1A4tJ3/view?usp=sharing) · [Direct Stream (MP4)](https://storage.googleapis.com/openlens-511713-openlens-media/demo/OpenLens-TeamRitorno.mp4) · 📊 **Slides:** [Google Slides Presentation](https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/edit?usp=sharing)
 
 ## Repo
 

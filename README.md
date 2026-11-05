@@ -6,7 +6,7 @@ One story → one reviewed **Claim & Evidence Ledger** → our own web + mobile 
 
 ### 🚀 **<a href="https://openlens-web-948923830185.us-central1.run.app/" target="_blank" rel="noopener noreferrer">https://openlens-web-948923830185.us-central1.run.app/ ↗</a>**
 
-<a href="https://openlens-web-948923830185.us-central1.run.app/" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/🚀_LAUNCH_LIVE_APPLICATION-0284c7?style=for-the-badge&logo=googlecloud&logoColor=white" alt="OpenLens Live Website" /></a>
+<a href="https://openlens-web-948923830185.us-central1.run.app/" target="_blank" rel="noopener noreferrer"><a>
 
 
 ## 🎬 Project Demo

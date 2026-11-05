@@ -1,23 +1,23 @@
 # OpenLens — the AI media house that shows its work
 
-One story → one reviewed **Claim & Evidence Ledger** → our own web + mobile apps, narrated regional/national/international videos, and channel-ready posts for YouTube, X, Instagram, Facebook and WhatsApp. Built on Gemini + Google Cloud for AI Builder Cup 2026. Full spec: [`plan.md`](plan.md).
+One story → one reviewed **Claim & Evidence Ledger** → our own web + mobile apps, narrated regional/national/international videos, and channel-ready posts for YouTube, X, Instagram, Facebook and WhatsApp. Built on Gemini + Google Cloud for AI Builder Cup 2026. Full spec: <a href="plan.md" target="_blank" rel="noopener noreferrer"><code>plan.md</code></a>.
 
-## Live Website 
+## 🌐 Live Website 
 
-https://openlens-web-948923830185.us-central1.run.app/
+<a href="https://openlens-web-948923830185.us-central1.run.app/" target="_blank" rel="noopener noreferrer">https://openlens-web-948923830185.us-central1.run.app/</a>
 
 
 ## 🎬 Project Demo
 
 https://github.com/user-attachments/assets/fe9a072d-8976-49c6-aa7f-83941a26c0e6
 
-> 🔗 **Demo Mirrors:** [Google Drive](https://drive.google.com/file/d/1ieTQUYxL5JFkO9oQh3_xmPvbID1A4tJ3/view?usp=sharing) · [Direct MP4 Stream](https://storage.googleapis.com/openlens-511713-openlens-media/demo/OpenLens-TeamRitorno.mp4)
+> 🔗 **Demo Mirrors:** <a href="https://drive.google.com/file/d/1ieTQUYxL5JFkO9oQh3_xmPvbID1A4tJ3/view?usp=sharing" target="_blank" rel="noopener noreferrer">Google Drive</a> · <a href="https://storage.googleapis.com/openlens-511713-openlens-media/demo/OpenLens-TeamRitorno.mp4" target="_blank" rel="noopener noreferrer">Direct MP4 Stream</a>
 
 ## 📊 Presentation Deck & Architecture Slides
 
-[![OpenLens Pitch Deck Presentation](https://storage.googleapis.com/openlens-511713-openlens-media/deck/openlens-deck-preview.gif)](https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/present)
+<a href="https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/present" target="_blank" rel="noopener noreferrer"><img src="https://storage.googleapis.com/openlens-511713-openlens-media/deck/openlens-deck-preview.gif" alt="OpenLens Pitch Deck Presentation" /></a>
 
-> 💡 *Click the animated preview above to view full-screen in **[Present Mode](https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/present)** · [Clean Reader View](https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/preview) · [Download PDF](https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/export/pdf)*
+> 💡 *Click the animated preview above to view full-screen in **<a href="https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/present" target="_blank" rel="noopener noreferrer">Present Mode</a>** · <a href="https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/preview" target="_blank" rel="noopener noreferrer">Clean Reader View</a> · <a href="https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/export/pdf" target="_blank" rel="noopener noreferrer">Download PDF</a>*
 
 ## Repo
 
@@ -27,7 +27,7 @@ https://github.com/user-attachments/assets/fe9a072d-8976-49c6-aa7f-83941a26c0e6
 | `packages/config` | Model registry, languages, presenters (fictional, disclosed), YouTube tiers, channel limits |
 | `packages/client` | Typed REST client shared by web + mobile |
 | `services/agents` | Gemini agent pipeline: claims → corroborate → lenses → research → synthesize → QA → scripts (+localize, back-translation) → channel packages |
-| `services/media-worker` | The video factory: Gemini TTS narration → news-style scenes (anchor / split-screen, headline bar) → Veo idle-motion presenter → FFmpeg 9:16 / 16:9 + HLS + WebVTT. See [`docs/video-factory.md`](docs/video-factory.md) |
+| `services/media-worker` | The video factory: Gemini TTS narration → news-style scenes (anchor / split-screen, headline bar) → Veo idle-motion presenter → FFmpeg 9:16 / 16:9 + HLS + WebVTT. See <a href="docs/video-factory.md" target="_blank" rel="noopener noreferrer"><code>docs/video-factory.md</code></a> |
 | `services/api` | Hono REST/SSE: reader feed, studio, approvals, correction propagation, publishing, evals |
 | `services/publisher` | Channel adapters (YouTube, X, Instagram, Facebook, WhatsApp, FCM) with dry-run mode |
 | `apps/web` | Next.js reader + newsroom studio (PWA) |
@@ -49,7 +49,7 @@ npm run dev -w @openlens/web    # http://localhost:3000  (NEXT_PUBLIC_API_URL in
 ```
 There is no sample data: every story comes from the wire (verified official sources) or from a source pack you build with `npm run intake` (below). The web and mobile apps only read the API.
 
-**Deployed:** web https://openlens-web-948923830185.us-central1.run.app · api https://openlens-api-948923830185.us-central1.run.app (Gemini via Vertex AI). Point local apps at the cloud API by setting `NEXT_PUBLIC_API_URL` / `EXPO_PUBLIC_API_URL` to the api URL.
+**Deployed:** web <a href="https://openlens-web-948923830185.us-central1.run.app" target="_blank" rel="noopener noreferrer">https://openlens-web-948923830185.us-central1.run.app</a> · api <a href="https://openlens-api-948923830185.us-central1.run.app" target="_blank" rel="noopener noreferrer">https://openlens-api-948923830185.us-central1.run.app</a> (Gemini via Vertex AI). Point local apps at the cloud API by setting `NEXT_PUBLIC_API_URL` / `EXPO_PUBLIC_API_URL` to the api URL.
 
 ### Video factory
 Links in, videos out, in one command (sources must be on the allowlist):
@@ -61,8 +61,8 @@ Render narrated videos for any stored story, any languages, both shapes (narrati
 npm run render -w @openlens/api -- --list
 npm run render -w @openlens/api -- <storyId> --langs en,hi,te --aspects 9:16,16:9
 ```
-Setup (Vertex AI via ADC, locations, voices, portraits, idle clips, costs, troubleshooting): [`docs/video-factory.md`](docs/video-factory.md).
-Publishing finished videos to the shared YouTube channels (dry run first, per-language channels, team rules): [`docs/team-publishing.md`](docs/team-publishing.md).
+Setup (Vertex AI via ADC, locations, voices, portraits, idle clips, costs, troubleshooting): <a href="docs/video-factory.md" target="_blank" rel="noopener noreferrer"><code>docs/video-factory.md</code></a>.
+Publishing finished videos to the shared YouTube channels (dry run first, per-language channels, team rules): <a href="docs/team-publishing.md" target="_blank" rel="noopener noreferrer"><code>docs/team-publishing.md</code></a>.
 
 Useful env (`.env.example` lists all): `GEMINI_CACHE_DIR` (cache model responses while iterating), `MEDIA_SILENT=1` (skip TTS), `RESEARCH_GROUNDING=0` (skip Search grounding), `MODEL_*` overrides.
 
@@ -72,19 +72,19 @@ Add the outlets to `data/sources/allowlist.json` (rights + documented lens-ratin
 npm run intake -w @openlens/agents -- jp-fare-2026 JP "Tokyo Metro fare revision" <url1> <url2> <primary-doc-url>
 npm run seed -w @openlens/api -- data/seed/jp-fare-2026
 ```
-Story languages default to the market's languages + English (`APAC` = all 13). See plan.md §1b.
+Story languages default to the market's languages + English (`APAC` = all 13). See <a href="plan.md#1b-japac-scope-updated-12-oct" target="_blank" rel="noopener noreferrer">plan.md §1b</a>.
 
 ### The wire (automatic discovery every 5–10 min)
 The api can run discovery on a schedule: RSS/Atom feeds (`data/sources/feeds.json`) plus optional GDELT headline signals → dedupe → multilingual clustering → full text **only from verified allowlisted outlets** → create/update stories → pipeline (budgeted) → optional low-risk auto-publish.
 
-1. Review `docs/sources-research.md` and the terms URL of each outlet in `data/sources/allowlist.json`; set `verified: true` only where reuse is confirmed.
+1. Review <a href="docs/sources-research.md" target="_blank" rel="noopener noreferrer"><code>docs/sources-research.md</code></a> and the terms URL of each outlet in `data/sources/allowlist.json`; set `verified: true` only where reuse is confirmed.
 2. Set in `.env`: `INGEST_INTERVAL_MIN=10` (and optionally `AUTO_PUBLISH=low_risk`, `INGEST_MARKETS=JP,KR,…`).
 3. `npm run dev -w @openlens/api` — progress shows in Studio → "The wire" (or click **Run now**).
 
 On Cloud Run, `infra/setup.sh` creates a Cloud Scheduler job hitting `POST /v1/internal/ingest` every 15 minutes (`WIRE_EVERY_MIN`). Budgets: `INGEST_MAX_NEW`, `INGEST_MAX_UPDATES`, `INGEST_DAILY_RUNS`, `INGEST_MAX_FETCH` (see `.env.example`).
 
 ### Adding a story by hand
-Create `data/seed/<story>/sources.json` (array of `SourceRecord`, see `packages/schemas/src/ledger.ts`) using only permitted/public sources, set each outlet's `lens.rating` + `ratingBasis` from a documented rating table, and mark primary documents `sourceType: "primary"`. Optional `story.json` sets title/region/topics/languages.
+Create `data/seed/<story>/sources.json` (array of `SourceRecord`, see <a href="packages/schemas/src/ledger.ts" target="_blank" rel="noopener noreferrer"><code>packages/schemas/src/ledger.ts</code></a>) using only permitted/public sources, set each outlet's `lens.rating` + `ratingBasis` from a documented rating table, and mark primary documents `sourceType: "primary"`. Optional `story.json` sets title/region/topics/languages.
 
 ## Tests
 ```bash

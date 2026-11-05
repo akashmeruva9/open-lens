@@ -11,13 +11,13 @@ One story → one reviewed **Claim & Evidence Ledger** → our own web + mobile 
 
 https://github.com/user-attachments/assets/fe9a072d-8976-49c6-aa7f-83941a26c0e6
 
-> 🔗 **Demo Mirrors:** <a href="https://drive.google.com/file/d/1ieTQUYxL5JFkO9oQh3_xmPvbID1A4tJ3/view?usp=sharing" target="_blank" rel="noopener noreferrer">Google Drive</a> · <a href="https://storage.googleapis.com/openlens-511713-openlens-media/demo/OpenLens-TeamRitorno.mp4" target="_blank" rel="noopener noreferrer">Direct MP4 Stream</a>
+> 🔗 **Demo Mirrors:** <a href="https://drive.google.com/file/d/1ieTQUYxL5JFkO9oQh3_xmPvbID1A4tJ3/view?usp=sharing" target="_blank" rel="noopener noreferrer">Google Drive</a> 
 
 ## 📊 Presentation Deck & Architecture Slides
 
 <a href="https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/present" target="_blank" rel="noopener noreferrer"><img src="https://storage.googleapis.com/openlens-511713-openlens-media/deck/openlens-deck-preview.gif" alt="OpenLens Pitch Deck Presentation" /></a>
 
-> 💡 *Click the animated preview above to view full-screen in **<a href="https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/present" target="_blank" rel="noopener noreferrer">Present Mode</a>** · <a href="https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/preview" target="_blank" rel="noopener noreferrer">Clean Reader View</a> · <a href="https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/export/pdf" target="_blank" rel="noopener noreferrer">Download PDF</a>*
+> 💡 *Click the animated preview above to view full-screen in **<a href="https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/present" target="_blank" rel="noopener noreferrer">Present Mode</a>** . <a href="https://docs.google.com/presentation/d/1CWEvUV5etD0vUurRqAF8pXJdB2fQTV9HKRLMbLWrGSc/export/pdf" target="_blank" rel="noopener noreferrer">Download PDF</a>*
 
 ## Repo
 

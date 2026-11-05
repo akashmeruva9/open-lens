@@ -2,6 +2,11 @@
 
 One story → one reviewed **Claim & Evidence Ledger** → our own web + mobile apps, narrated regional/national/international videos, and channel-ready posts for YouTube, X, Instagram, Facebook and WhatsApp. Built on Gemini + Google Cloud for AI Builder Cup 2026. Full spec: [`plan.md`](plan.md).
 
+## Live Website 
+
+https://openlens-web-948923830185.us-central1.run.app/
+
+
 ## 🎬 Project Demo
 
 https://github.com/user-attachments/assets/fe9a072d-8976-49c6-aa7f-83941a26c0e6
